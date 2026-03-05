@@ -84,12 +84,18 @@ const ProductAPI = {
 };
 
 const CategoryAPI = {
+  _icons: {
+    '의류':'👗','신발':'👟','뷰티':'💄','생활':'🏠',
+    '전자':'📱','식품':'🍕','스포츠':'🏃','도서':'📚',
+    '가방':'👜','액세서리':'💍','반려동물':'🐾','유아':'🍼',
+    '가전':'🖥️','주방':'🍳','침구':'🛏️','욕실':'🚿',
+  },
   async getAll() {
     const rows = await SheetAPI.fetchCached(CONFIG.SHEETS.카테고리);
     return rows.map(row => ({
       id: row['번호'] || '',
       name: row['카테고리명'] || '',
-      icon: row['아이콘'] || '📦',
+      icon: this._icons[row['카테고리명']] || '📦',
       parentId: row['상위카테고리'] || '',
       order: parseInt(row['순서']) || 0,
     })).sort((a, b) => a.order - b.order);
