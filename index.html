@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title id="page-title">본사 종합쇼핑몰</title>
+  <meta name="description" content="다양한 상품을 한 곳에서">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<!-- ============================================================
+     HEADER
+     ============================================================ -->
+<header class="header">
+  <!-- 상단 공지 -->
+  <div class="header-notice" id="header-notice">
+    🎉 지금 가입하면 3,000원 적립금 즉시 지급! &nbsp;|&nbsp; 5만원 이상 구매 시 무료배송
+  </div>
+
+  <!-- 메인 헤더 -->
+  <div class="header-main">
+    <!-- 로고 -->
+    <a href="index.html" class="header-logo" id="header-logo">
+      <span>🛍️</span>
+      <span id="store-name">마이샵</span>
+    </a>
+
+    <!-- 검색바 -->
+    <div class="header-search">
+      <div class="search-bar" onclick="Search.open()">
+        <input type="text" placeholder="상품을 검색하세요" readonly>
+        <button>🔍</button>
+      </div>
+    </div>
+
+    <!-- 아이콘 -->
+    <div class="header-icons">
+      <a href="mypage.html" class="header-icon">
+        <span class="icon-emoji">👤</span>
+        <span>로그인</span>
+      </a>
+      <button class="header-icon" onclick="toggleWishlist()">
+        <span class="icon-emoji">❤️</span>
+        <span>찜목록</span>
+      </button>
+      <a href="cart.html" class="header-icon">
+        <span class="icon-emoji">🛒</span>
+        <span>장바구니</span>
+        <span class="cart-badge">0</span>
+      </a>
+    </div>
+  </div>
+
+  <!-- 카테고리 네비 -->
+  <nav class="header-nav">
+    <div class="nav-inner" id="main-nav">
+      <button class="nav-item active" onclick="filterCategory('all', this)">🏠 전체</button>
+      <!-- 카테고리는 Google Sheets에서 동적 로드 -->
+    </div>
+  </nav>
+</header>
+
+<!-- ============================================================
+     검색 모달
+     ============================================================ -->
+<div class="search-modal" id="search-modal">
+  <div class="search-modal-box">
+    <div class="search-modal-header">
+      <span>🔍</span>
+      <input type="text" class="search-modal-input" id="search-input"
+        placeholder="어떤 상품을 찾으시나요?"
+        oninput="Search.run(this.value)"
+        onkeydown="if(event.key==='Escape') Search.close()">
+      <button class="search-modal-close" onclick="Search.close()">✕</button>
+    </div>
+    <div id="search-results">
+      <p class="search-empty">검색어를 입력하세요</p>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     MAIN
+     ============================================================ -->
+<main>
+  <div class="main-wrap">
+
+    <!-- 배너 슬라이더 -->
+    <section class="banner-wrap" id="banner-section">
+      <div class="banner-slider" id="banner-slider">
+        <!-- 기본 배너 (Google Sheets 로드 전) -->
+        <div class="banner-slide" style="background: linear-gradient(135deg, #FF5733, #FF8C00);">
+          <div class="banner-content">
+            <h2>지금 시작하는<br>특별한 쇼핑</h2>
+            <p>다양한 상품을 한 곳에서 만나보세요</p>
+            <a href="products.html" class="banner-btn">쇼핑 시작하기</a>
+          </div>
+        </div>
+        <div class="banner-slide" style="background: linear-gradient(135deg, #2D3561, #C05C7E);">
+          <div class="banner-content">
+            <h2>오늘의 특가<br>최대 50% 할인</h2>
+            <p>매일 새로운 특가 상품을 만나보세요</p>
+            <a href="products.html?filter=sale" class="banner-btn">특가 보기</a>
+          </div>
+        </div>
+        <div class="banner-slide" style="background: linear-gradient(135deg, #0A7E8C, #15B8A6);">
+          <div class="banner-content">
+            <h2>가맹점 모집 중<br>지금 바로 신청</h2>
+            <p>함께 성장하는 파트너를 찾습니다</p>
+            <a href="franchise.html" class="banner-btn">가맹 문의</a>
+          </div>
+        </div>
+      </div>
+      <button class="banner-arrow banner-prev" onclick="Banner.prev()">‹</button>
+      <button class="banner-arrow banner-next" onclick="Banner.next()">›</button>
+      <div class="banner-dots" id="banner-dots"></div>
+    </section>
+
+    <!-- 카테고리 -->
+    <section class="section">
+      <div class="section-header">
+        <h2 class="section-title">🗂️ 카테고리</h2>
+        <button class="section-more" onclick="location.href='products.html'">전체보기</button>
+      </div>
+      <div class="category-grid" id="category-grid">
+        <!-- 로딩 스켈레톤 -->
+        <div class="skeleton" style="height:90px;border-radius:10px"></div>
+        <div class="skeleton" style="height:90px;border-radius:10px"></div>
+        <div class="skeleton" style="height:90px;border-radius:10px"></div>
+        <div class="skeleton" style="height:90px;border-radius:10px"></div>
+        <div class="skeleton" style="height:90px;border-radius:10px"></div>
+        <div class="skeleton" style="height:90px;border-radius:10px"></div>
+      </div>
+    </section>
+
+    <!-- 추천 상품 (BEST) -->
+    <section class="section">
+      <div class="section-header">
+        <h2 class="section-title">🏆 베스트 상품</h2>
+        <button class="section-more" onclick="location.href='products.html?filter=best'">더보기</button>
+      </div>
+      <div class="product-grid" id="best-products">
+        <div class="skeleton skeleton-card"></div>
+        <div class="skeleton skeleton-card"></div>
+        <div class="skeleton skeleton-card"></div>
+        <div class="skeleton skeleton-card"></div>
+      </div>
+    </section>
+
+    <!-- 신상품 (NEW) -->
+    <section class="section">
+      <div class="section-header">
+        <h2 class="section-title">✨ 신상품</h2>
+        <button class="section-more" onclick="location.href='products.html?filter=new'">더보기</button>
+      </div>
+      <div class="product-grid" id="new-products">
+        <div class="skeleton skeleton-card"></div>
+        <div class="skeleton skeleton-card"></div>
+        <div class="skeleton skeleton-card"></div>
+        <div class="skeleton skeleton-card"></div>
+      </div>
+    </section>
+
+    <!-- 특가 상품 (SALE) -->
+    <section class="section">
+      <div class="section-header">
+        <h2 class="section-title">🔥 오늘의 특가</h2>
+        <button class="section-more" onclick="location.href='products.html?filter=sale'">더보기</button>
+      </div>
+      <div class="product-grid" id="sale-products">
+        <div class="skeleton skeleton-card"></div>
+        <div class="skeleton skeleton-card"></div>
+        <div class="skeleton skeleton-card"></div>
+        <div class="skeleton skeleton-card"></div>
+      </div>
+    </section>
+
+  </div>
+</main>
+
+<!-- ============================================================
+     FOOTER
+     ============================================================ -->
+<footer class="footer">
+  <div class="footer-inner">
+    <div>
+      <h4 id="footer-store-name">🛍️ 마이샵</h4>
+      <p style="font-size:12px; line-height:1.8; margin-top:8px;">
+        다양한 상품을 합리적인 가격에<br>
+        고객님께 전달합니다.
+      </p>
+    </div>
+    <div>
+      <h4>고객센터</h4>
+      <ul>
+        <li><a href="#" id="footer-phone">📞 1588-0000</a></li>
+        <li><a href="#">평일 9:00 ~ 18:00</a></li>
+        <li><a href="#">점심 12:00 ~ 13:00</a></li>
+        <li><a href="#" id="footer-email">📧 help@myshop.co.kr</a></li>
+      </ul>
+    </div>
+    <div>
+      <h4>바로가기</h4>
+      <ul>
+        <li><a href="products.html">상품 목록</a></li>
+        <li><a href="cart.html">장바구니</a></li>
+        <li><a href="mypage.html">마이페이지</a></li>
+        <li><a href="franchise.html">가맹 문의</a></li>
+      </ul>
+    </div>
+    <div>
+      <h4>SNS</h4>
+      <ul>
+        <li><a href="#" id="sns-instagram">📸 인스타그램</a></li>
+        <li><a href="#" id="sns-kakao">💛 카카오채널</a></li>
+        <li><a href="#" id="sns-youtube">▶️ 유튜브</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p id="footer-info">상호: 마이샵 | 사업자번호: 000-00-00000 | 통신판매업신고: 제0000-서울강남-0000호</p>
+    <p style="margin-top:6px;">주소: <span id="footer-address">서울시 강남구 테헤란로 123</span> | © 2025 마이샵. All rights reserved.</p>
+  </div>
+</footer>
+
+<!-- ============================================================
+     스크립트
+     ============================================================ -->
+<script src="js/config.js"></script>
+<script src="js/sheets.js"></script>
+<script src="js/app.js"></script>
+<script>
+// ============================================================
+// 배너 슬라이더
+// ============================================================
+const Banner = {
+  current: 0,
+  total: 0,
+  timer: null,
+
+  init(count) {
+    this.total = count;
+    const dotsEl = document.getElementById('banner-dots');
+    dotsEl.innerHTML = '';
+    for (let i = 0; i < count; i++) {
+      const dot = document.createElement('button');
+      dot.className = 'banner-dot' + (i === 0 ? ' active' : '');
+      dot.onclick = () => this.goTo(i);
+      dotsEl.appendChild(dot);
+    }
+    this.startAuto();
+  },
+
+  goTo(idx) {
+    this.current = (idx + this.total) % this.total;
+    document.getElementById('banner-slider').style.transform = `translateX(-${this.current * 100}%)`;
+    document.querySelectorAll('.banner-dot').forEach((d, i) => d.classList.toggle('active', i === this.current));
+  },
+
+  prev() { this.goTo(this.current - 1); this.resetAuto(); },
+  next() { this.goTo(this.current + 1); this.resetAuto(); },
+
+  startAuto() { this.timer = setInterval(() => this.next(), 5000); },
+  resetAuto() { clearInterval(this.timer); this.startAuto(); }
+};
+
+// ============================================================
+// 상품 카드 HTML 생성
+// ============================================================
+function createProductCard(p) {
+  const price = p.salePrice || p.price;
+  const discount = p.salePrice ? Math.round((1 - p.salePrice / p.price) * 100) : 0;
+  const productJson = JSON.stringify(p).replace(/"/g, '&quot;');
+
+  return `
+    <div class="product-card" onclick="Popup.showProduct(${productJson})">
+      <div class="product-img-wrap">
+        <img src="${p.image}" alt="${p.name}" loading="lazy"
+          onerror="this.src='https://via.placeholder.com/400x400?text=${encodeURIComponent(p.name)}'">
+        ${p.badge ? `<span class="product-badge badge-${p.badge.toLowerCase()}">${p.badge}</span>` : ''}
+        <button class="product-wish" onclick="event.stopPropagation(); this.textContent=this.textContent==='❤️'?'🤍':'❤️'">🤍</button>
+        <button class="product-quick-add"
+          onclick="event.stopPropagation(); Cart.add(${productJson})">
+          🛒 빠른 담기
+        </button>
+      </div>
+      <div class="product-info">
+        <div class="product-category">${p.category}</div>
+        <div class="product-name">${p.name}</div>
+        <div class="product-price">
+          <span class="price-sale">${price.toLocaleString()}원</span>
+          ${p.salePrice ? `<span class="price-original">${p.price.toLocaleString()}원</span>` : ''}
+          ${discount ? `<span class="price-discount">${discount}%</span>` : ''}
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+// ============================================================
+// 페이지 초기화
+// ============================================================
+async function initPage() {
+  // 기본 설정 적용
+  document.getElementById('page-title').textContent = CONFIG.STORE.NAME + ' - 종합쇼핑몰';
+  document.getElementById('store-name').textContent = CONFIG.STORE.NAME;
+  document.getElementById('footer-store-name').textContent = '🛍️ ' + CONFIG.STORE.NAME;
+  document.getElementById('footer-phone').textContent = '📞 ' + CONFIG.STORE.PHONE;
+  document.getElementById('footer-email').textContent = '📧 ' + CONFIG.STORE.EMAIL;
+  document.getElementById('footer-address').textContent = CONFIG.STORE.ADDRESS;
+  document.getElementById('sns-instagram').href = CONFIG.STORE.SNS.INSTAGRAM;
+  document.getElementById('sns-kakao').href = CONFIG.STORE.SNS.KAKAO;
+  document.getElementById('sns-youtube').href = CONFIG.STORE.SNS.YOUTUBE;
+
+  // 장바구니 초기화
+  Cart.init();
+
+  // 팝업 로드 (500ms 후)
+  setTimeout(() => Popup.loadAndShow(), 500);
+
+  // 배너 초기화
+  Banner.init(3); // 기본 3개
+
+  // 카테고리 로드
+  loadCategories();
+
+  // 상품 로드
+  loadProducts();
+}
+
+// 카테고리 로드
+async function loadCategories() {
+  const grid = document.getElementById('category-grid');
+  const nav = document.getElementById('main-nav');
+
+  try {
+    const categories = await CategoryAPI.getMain();
+    if (!categories.length) throw new Error('no data');
+
+    grid.innerHTML = categories.map(c => `
+      <div class="category-card" onclick="filterCategory('${c.id}', null)">
+        <span class="cat-icon">${c.icon}</span>
+        <span class="cat-name">${c.name}</span>
+      </div>
+    `).join('');
+
+    // 네비게이션에도 추가
+    categories.forEach(c => {
+      const btn = document.createElement('button');
+      btn.className = 'nav-item';
+      btn.innerHTML = `${c.icon} ${c.name}`;
+      btn.onclick = () => filterCategory(c.id, btn);
+      nav.appendChild(btn);
+    });
+
+  } catch(e) {
+    // 시트 미연결 시 샘플 카테고리 표시
+    const samples = [
+      {icon:'👗', name:'의류'}, {icon:'👟', name:'신발'},
+      {icon:'💄', name:'뷰티'}, {icon:'🏠', name:'생활'},
+      {icon:'📱', name:'전자'}, {icon:'🍕', name:'식품'},
+      {icon:'🏃', name:'스포츠'}, {icon:'📚', name:'도서'},
+    ];
+    grid.innerHTML = samples.map(c => `
+      <div class="category-card" onclick="filterCategory('${c.name}', null)">
+        <span class="cat-icon">${c.icon}</span>
+        <span class="cat-name">${c.name}</span>
+      </div>
+    `).join('');
+  }
+}
+
+// 상품 로드
+async function loadProducts() {
+  try {
+    const products = await ProductAPI.getAll();
+
+    // 베스트 상품
+    const best = products.filter(p => p.badge === 'BEST' || p.isFeatured).slice(0, 4);
+    renderProducts('best-products', best.length ? best : products.slice(0, 4));
+
+    // 신상품
+    const newItems = products.filter(p => p.badge === 'NEW').slice(0, 4);
+    renderProducts('new-products', newItems.length ? newItems : products.slice(4, 8));
+
+    // 특가 상품
+    const sale = products.filter(p => p.salePrice > 0).slice(0, 4);
+    renderProducts('sale-products', sale.length ? sale : products.slice(0, 4));
+
+  } catch(e) {
+    // 샘플 데이터
+    const sampleProducts = Array.from({length: 4}, (_, i) => ({
+      id: 'sample-' + i,
+      name: ['프리미엄 반팔 티셔츠', '클래식 데님 팬츠', '캐주얼 스니커즈', '레더 크로스백'][i],
+      price: [29000, 59000, 89000, 79000][i],
+      salePrice: [0, 49000, 0, 65000][i],
+      category: ['의류', '의류', '신발', '가방'][i],
+      image: `https://picsum.photos/400/400?random=${i+10}`,
+      badge: ['NEW', 'BEST', '', 'SALE'][i],
+    }));
+    ['best-products', 'new-products', 'sale-products'].forEach(id => {
+      renderProducts(id, sampleProducts);
+    });
+  }
+}
+
+function renderProducts(containerId, products) {
+  const el = document.getElementById(containerId);
+  if (!products.length) {
+    el.innerHTML = '<p style="color:#999; font-size:13px; padding:20px;">상품이 없습니다</p>';
+    return;
+  }
+  el.innerHTML = products.map(createProductCard).join('');
+}
+
+// 카테고리 필터
+function filterCategory(id, btn) {
+  if (btn) {
+    document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+  }
+  if (id === 'all') {
+    loadProducts();
+  } else {
+    // 해당 카테고리 상품만 표시
+    ProductAPI.getByCategory(id).then(products => {
+      renderProducts('best-products', products.slice(0, 4));
+    });
+  }
+}
+
+function toggleWishlist() {
+  alert('찜목록 기능은 로그인 후 사용 가능합니다');
+}
+
+// 실행
+initPage();
+</script>
+</body>
+</html>

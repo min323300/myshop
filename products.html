@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>상품 목록</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .products-layout { display: grid; grid-template-columns: 220px 1fr; gap: 24px; margin-top: 20px; }
+    .filter-panel { background: var(--white); border-radius: var(--radius); border: 1px solid var(--border); padding: 20px; height: fit-content; position: sticky; top: 120px; }
+    .filter-group { margin-bottom: 24px; }
+    .filter-group h4 { font-size: 13px; font-weight: 700; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+    .filter-item { display: flex; align-items: center; gap: 8px; padding: 5px 0; font-size: 13px; color: var(--gray-dark); cursor: pointer; }
+    .filter-item input { accent-color: var(--accent); }
+    .price-range { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .price-range input { width: 100%; border: 1px solid var(--border); border-radius: 6px; padding: 6px 10px; font-size: 12px; outline: none; }
+    .price-range input:focus { border-color: var(--accent); }
+    .products-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+    .products-count { font-size: 13px; color: var(--gray); }
+    .sort-select { border: 1px solid var(--border); border-radius: 6px; padding: 6px 12px; font-size: 13px; font-family: var(--font-main); outline: none; background: var(--white); cursor: pointer; }
+    .sort-select:focus { border-color: var(--accent); }
+    .filter-btn { display: none; }
+    .pagination { display: flex; justify-content: center; gap: 6px; margin-top: 32px; }
+    .page-btn { width: 36px; height: 36px; border-radius: 8px; border: 1px solid var(--border); background: var(--white); font-size: 13px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: var(--transition); }
+    .page-btn:hover, .page-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+    .filter-apply { width: 100%; padding: 10px; background: var(--accent); color: #fff; border: none; border-radius: 8px; font-size: 13px; font-weight: 700; margin-top: 8px; cursor: pointer; }
+    @media (max-width: 768px) {
+      .products-layout { grid-template-columns: 1fr; }
+      .filter-panel { display: none; position: fixed; inset: 0; z-index: 800; border-radius: 0; overflow-y: auto; }
+      .filter-panel.mobile-open { display: block; }
+      .filter-btn { display: flex; align-items: center; gap: 6px; border: 1px solid var(--border); border-radius: 8px; padding: 8px 14px; font-size: 13px; background: var(--white); cursor: pointer; }
+    }
+  </style>
+</head>
+<body>
+
+<header class="header">
+  <div class="header-notice">🚚 5만원 이상 구매 시 무료배송</div>
+  <div class="header-main">
+    <a href="index.html" class="header-logo">
+      <span>🛍️</span><span id="store-name">마이샵</span>
+    </a>
+    <div class="header-search">
+      <div class="search-bar" onclick="Search.open()">
+        <input type="text" placeholder="상품을 검색하세요" readonly>
+        <button>🔍</button>
+      </div>
+    </div>
+    <div class="header-icons">
+      <a href="mypage.html" class="header-icon"><span class="icon-emoji">👤</span><span>로그인</span></a>
+      <a href="cart.html" class="header-icon"><span class="icon-emoji">🛒</span><span>장바구니</span><span class="cart-badge">0</span></a>
+    </div>
+  </div>
+  <nav class="header-nav">
+    <div class="nav-inner" id="main-nav">
+      <button class="nav-item active" onclick="filterByNav('all', this)">🏠 전체</button>
+    </div>
+  </nav>
+</header>
+
+<div class="search-modal" id="search-modal">
+  <div class="search-modal-box">
+    <div class="search-modal-header">
+      <span>🔍</span>
+      <input type="text" class="search-modal-input" id="search-input" placeholder="검색어를 입력하세요"
+        oninput="Search.run(this.value)">
+      <button class="search-modal-close" onclick="Search.close()">✕</button>
+    </div>
+    <div id="search-results"><p class="search-empty">검색어를 입력하세요</p></div>
+  </div>
+</div>
+
+<main>
+  <div class="main-wrap">
+    <!-- 상단 제목 + 필터 버튼 (모바일) -->
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-top:20px;">
+      <h1 style="font-size:20px; font-weight:800;" id="page-heading">전체 상품</h1>
+      <button class="filter-btn" onclick="document.getElementById('filter-panel').classList.toggle('mobile-open')">
+        🔧 필터
+      </button>
+    </div>
+
+    <div class="products-layout">
+      <!-- 필터 패널 -->
+      <aside class="filter-panel" id="filter-panel">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+          <strong>필터</strong>
+          <button onclick="resetFilters()" style="font-size:12px; color:var(--gray); background:none; border:none; cursor:pointer;">초기화</button>
+        </div>
+
+        <!-- 카테고리 필터 -->
+        <div class="filter-group">
+          <h4>카테고리</h4>
+          <div id="filter-categories">
+            <label class="filter-item"><input type="radio" name="cat" value="all" checked> 전체</label>
+          </div>
+        </div>
+
+        <!-- 가격 필터 -->
+        <div class="filter-group">
+          <h4>가격</h4>
+          <div class="price-range">
+            <input type="number" id="price-min" placeholder="최소" step="1000">
+            <input type="number" id="price-max" placeholder="최대" step="1000">
+          </div>
+        </div>
+
+        <!-- 상태 필터 -->
+        <div class="filter-group">
+          <h4>상품 유형</h4>
+          <label class="filter-item"><input type="checkbox" id="filter-sale"> 할인 상품만</label>
+          <label class="filter-item"><input type="checkbox" id="filter-new"> 신상품만</label>
+          <label class="filter-item"><input type="checkbox" id="filter-best"> 베스트만</label>
+        </div>
+
+        <button class="filter-apply" onclick="applyFilters()">적용하기</button>
+      </aside>
+
+      <!-- 상품 목록 -->
+      <div>
+        <div class="products-header">
+          <span class="products-count" id="products-count">상품 로딩 중...</span>
+          <select class="sort-select" id="sort-select" onchange="sortProducts()">
+            <option value="default">기본순</option>
+            <option value="price-asc">가격 낮은순</option>
+            <option value="price-desc">가격 높은순</option>
+            <option value="name">이름순</option>
+            <option value="discount">할인율순</option>
+          </select>
+        </div>
+
+        <div class="product-grid" id="product-grid">
+          <div class="skeleton skeleton-card"></div>
+          <div class="skeleton skeleton-card"></div>
+          <div class="skeleton skeleton-card"></div>
+          <div class="skeleton skeleton-card"></div>
+          <div class="skeleton skeleton-card"></div>
+          <div class="skeleton skeleton-card"></div>
+        </div>
+
+        <div class="pagination" id="pagination"></div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<footer class="footer">
+  <div class="footer-bottom" style="text-align:center; max-width:1280px; margin:0 auto; padding:20px 0;">
+    <p>© 2025 <span id="footer-name">마이샵</span>. All rights reserved. &nbsp;|&nbsp; <a href="index.html" style="color:#aaa;">홈으로</a></p>
+  </div>
+</footer>
+
+<script src="js/config.js"></script>
+<script src="js/sheets.js"></script>
+<script src="js/app.js"></script>
+<script>
+let allProducts = [];
+let filteredProducts = [];
+let currentPage = 1;
+const PER_PAGE = CONFIG.PRODUCTS_PER_PAGE;
+
+function createProductCard(p) {
+  const price = p.salePrice || p.price;
+  const discount = p.salePrice ? Math.round((1 - p.salePrice / p.price) * 100) : 0;
+  const productJson = JSON.stringify(p).replace(/"/g, '&quot;');
+  return `
+    <div class="product-card" onclick="Popup.showProduct(${productJson})">
+      <div class="product-img-wrap">
+        <img src="${p.image}" alt="${p.name}" loading="lazy"
+          onerror="this.src='https://via.placeholder.com/400x400?text=${encodeURIComponent(p.name)}'">
+        ${p.badge ? `<span class="product-badge badge-${p.badge.toLowerCase()}">${p.badge}</span>` : ''}
+        <button class="product-wish" onclick="event.stopPropagation(); this.textContent=this.textContent==='❤️'?'🤍':'❤️'">🤍</button>
+        <button class="product-quick-add" onclick="event.stopPropagation(); Cart.add(${productJson})">🛒 빠른 담기</button>
+      </div>
+      <div class="product-info">
+        <div class="product-category">${p.category}</div>
+        <div class="product-name">${p.name}</div>
+        <div class="product-price">
+          <span class="price-sale">${price.toLocaleString()}원</span>
+          ${p.salePrice ? `<span class="price-original">${p.price.toLocaleString()}원</span>` : ''}
+          ${discount ? `<span class="price-discount">${discount}%</span>` : ''}
+        </div>
+      </div>
+    </div>`;
+}
+
+function renderPage() {
+  const start = (currentPage - 1) * PER_PAGE;
+  const pageItems = filteredProducts.slice(start, start + PER_PAGE);
+  const grid = document.getElementById('product-grid');
+  if (!pageItems.length) {
+    grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:60px;color:var(--gray);">검색 결과가 없습니다 😢</div>';
+  } else {
+    grid.innerHTML = pageItems.map(createProductCard).join('');
+  }
+  document.getElementById('products-count').textContent = `총 ${filteredProducts.length}개 상품`;
+  renderPagination();
+}
+
+function renderPagination() {
+  const total = Math.ceil(filteredProducts.length / PER_PAGE);
+  const el = document.getElementById('pagination');
+  if (total <= 1) { el.innerHTML = ''; return; }
+  let html = '';
+  for (let i = 1; i <= total; i++) {
+    html += `<button class="page-btn${i === currentPage ? ' active' : ''}" onclick="goPage(${i})">${i}</button>`;
+  }
+  el.innerHTML = html;
+}
+
+function goPage(n) {
+  currentPage = n;
+  renderPage();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function sortProducts() {
+  const sort = document.getElementById('sort-select').value;
+  filteredProducts = [...filteredProducts].sort((a, b) => {
+    const pa = a.salePrice || a.price, pb = b.salePrice || b.price;
+    if (sort === 'price-asc') return pa - pb;
+    if (sort === 'price-desc') return pb - pa;
+    if (sort === 'name') return a.name.localeCompare(b.name);
+    if (sort === 'discount') {
+      const da = a.salePrice ? (1 - a.salePrice / a.price) : 0;
+      const db = b.salePrice ? (1 - b.salePrice / b.price) : 0;
+      return db - da;
+    }
+    return 0;
+  });
+  currentPage = 1;
+  renderPage();
+}
+
+function applyFilters() {
+  const cat = document.querySelector('input[name="cat"]:checked')?.value || 'all';
+  const minP = parseInt(document.getElementById('price-min').value) || 0;
+  const maxP = parseInt(document.getElementById('price-max').value) || Infinity;
+  const onlySale = document.getElementById('filter-sale').checked;
+  const onlyNew = document.getElementById('filter-new').checked;
+  const onlyBest = document.getElementById('filter-best').checked;
+
+  filteredProducts = allProducts.filter(p => {
+    const price = p.salePrice || p.price;
+    if (cat !== 'all' && p.category !== cat) return false;
+    if (price < minP || price > maxP) return false;
+    if (onlySale && !p.salePrice) return false;
+    if (onlyNew && p.badge !== 'NEW') return false;
+    if (onlyBest && p.badge !== 'BEST') return false;
+    return true;
+  });
+  currentPage = 1;
+  renderPage();
+  document.getElementById('filter-panel').classList.remove('mobile-open');
+}
+
+function resetFilters() {
+  document.querySelectorAll('input[name="cat"]')[0].checked = true;
+  document.getElementById('price-min').value = '';
+  document.getElementById('price-max').value = '';
+  document.getElementById('filter-sale').checked = false;
+  document.getElementById('filter-new').checked = false;
+  document.getElementById('filter-best').checked = false;
+  filteredProducts = [...allProducts];
+  currentPage = 1;
+  renderPage();
+}
+
+function filterByNav(id, btn) {
+  document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  if (id === 'all') { filteredProducts = [...allProducts]; }
+  else { filteredProducts = allProducts.filter(p => p.category === id); }
+  currentPage = 1;
+  renderPage();
+}
+
+async function initPage() {
+  document.getElementById('store-name').textContent = CONFIG.STORE.NAME;
+  document.getElementById('footer-name').textContent = CONFIG.STORE.NAME;
+  Cart.init();
+
+  // URL 파라미터로 필터 확인
+  const params = new URLSearchParams(location.search);
+  const filterParam = params.get('filter');
+  if (filterParam) {
+    document.getElementById('page-heading').textContent =
+      {sale:'특가 상품', new:'신상품', best:'베스트 상품'}[filterParam] || '전체 상품';
+  }
+
+  try {
+    allProducts = await ProductAPI.getAll();
+    if (!allProducts.length) throw new Error('empty');
+  } catch(e) {
+    allProducts = Array.from({length: 12}, (_, i) => ({
+      id: 'sample-' + i,
+      name: ['프리미엄 반팔 티셔츠', '클래식 데님 팬츠', '캐주얼 스니커즈', '레더 크로스백',
+             '린넨 셔츠', '코튼 원피스', '슬립온 슈즈', '미니 숄더백',
+             '와이드 팬츠', '니트 가디건', '러닝화', '토트백'][i],
+      price: [29000,59000,89000,79000,49000,69000,55000,85000,52000,79000,99000,65000][i],
+      salePrice: [0,49000,0,65000,39000,0,0,72000,0,59000,79000,0][i],
+      category: ['의류','의류','신발','가방','의류','의류','신발','가방','의류','의류','신발','가방'][i],
+      image: `https://picsum.photos/400/400?random=${i+20}`,
+      badge: ['NEW','BEST','','SALE','','NEW','','SALE','BEST','','NEW',''][i],
+      isFeatured: i < 4,
+    }));
+  }
+
+  // URL 필터 적용
+  if (filterParam === 'sale') filteredProducts = allProducts.filter(p => p.salePrice > 0);
+  else if (filterParam === 'new') filteredProducts = allProducts.filter(p => p.badge === 'NEW');
+  else if (filterParam === 'best') filteredProducts = allProducts.filter(p => p.badge === 'BEST' || p.isFeatured);
+  else filteredProducts = [...allProducts];
+
+  // 카테고리 필터 로드
+  try {
+    const categories = await CategoryAPI.getMain();
+    const catContainer = document.getElementById('filter-categories');
+    const nav = document.getElementById('main-nav');
+    categories.forEach(c => {
+      catContainer.innerHTML += `<label class="filter-item"><input type="radio" name="cat" value="${c.id}"> ${c.icon} ${c.name}</label>`;
+      const btn = document.createElement('button');
+      btn.className = 'nav-item';
+      btn.textContent = `${c.icon} ${c.name}`;
+      btn.onclick = () => filterByNav(c.id, btn);
+      nav.appendChild(btn);
+    });
+  } catch(e) {}
+
+  renderPage();
+}
+
+initPage();
+</script>
+</body>
+</html>
