@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title id="page-title">담누리마켓 - 본사 종합쇼핑몰</title>
+  <title id="page-title">본사 종합쇼핑몰</title>
   <meta name="description" content="다양한 상품을 한 곳에서">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -17,15 +17,15 @@
 <header class="header">
   <!-- 상단 공지 -->
   <div class="header-notice" id="header-notice">
-    🎉 담누리마켓 오픈 기념! 가입 시 3,000원 적립 &nbsp;|&nbsp; 5만원 이상 무료배송
+    🎉 지금 가입하면 3,000원 적립금 즉시 지급! &nbsp;|&nbsp; 5만원 이상 구매 시 무료배송
   </div>
 
   <!-- 메인 헤더 -->
   <div class="header-main">
     <!-- 로고 -->
     <a href="index.html" class="header-logo" id="header-logo">
-      <span>🏪</span>
-      <span id="store-name">담누리마켓</span>
+      <span>🛍️</span>
+      <span id="store-name">마이샵</span>
     </a>
 
     <!-- 검색바 -->
@@ -94,8 +94,8 @@
         <!-- 기본 배너 (Google Sheets 로드 전) -->
         <div class="banner-slide" style="background: linear-gradient(135deg, #FF5733, #FF8C00);">
           <div class="banner-content">
-            <h2>담누리마켓<br>오픈했습니다!</h2>
-            <p>세상의 모든 것을 담누리마켓에서</p>
+            <h2>지금 시작하는<br>특별한 쇼핑</h2>
+            <p>다양한 상품을 한 곳에서 만나보세요</p>
             <a href="products.html" class="banner-btn">쇼핑 시작하기</a>
           </div>
         </div>
@@ -187,7 +187,7 @@
 <footer class="footer">
   <div class="footer-inner">
     <div>
-      <h4 id="footer-store-name">🏪 담누리마켓</h4>
+      <h4 id="footer-store-name">🛍️ 마이샵</h4>
       <p style="font-size:12px; line-height:1.8; margin-top:8px;">
         다양한 상품을 합리적인 가격에<br>
         고객님께 전달합니다.
@@ -221,8 +221,8 @@
     </div>
   </div>
   <div class="footer-bottom">
-    <p id="footer-info">상호: 담누리마켓 | 사업자번호: 000-00-00000 | 통신판매업신고: 제0000-서울강남-0000호</p>
-    <p style="margin-top:6px;">주소: <span id="footer-address">서울시 강남구 테헤란로 123</span> | © 2025 담누리마켓. All rights reserved.</p>
+    <p id="footer-info">상호: 마이샵 | 사업자번호: 000-00-00000 | 통신판매업신고: 제0000-서울강남-0000호</p>
+    <p style="margin-top:6px;">주소: <span id="footer-address">서울시 강남구 테헤란로 123</span> | © 2025 마이샵. All rights reserved.</p>
   </div>
 </footer>
 
@@ -307,7 +307,7 @@ async function initPage() {
   // 기본 설정 적용
   document.getElementById('page-title').textContent = CONFIG.STORE.NAME + ' - 종합쇼핑몰';
   document.getElementById('store-name').textContent = CONFIG.STORE.NAME;
-  document.getElementById('footer-store-name').textContent = '🏪 ' + CONFIG.STORE.NAME;
+  document.getElementById('footer-store-name').textContent = '🛍️ ' + CONFIG.STORE.NAME;
   document.getElementById('footer-phone').textContent = '📞 ' + CONFIG.STORE.PHONE;
   document.getElementById('footer-email').textContent = '📧 ' + CONFIG.STORE.EMAIL;
   document.getElementById('footer-address').textContent = CONFIG.STORE.ADDRESS;
