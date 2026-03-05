@@ -1,3 +1,7 @@
+// ============================================================
+// 📊 Google Sheets 연동 모듈 - sheets.js (한글 헤더 버전)
+// ============================================================
+
 const SheetAPI = {
   parseCSV(csv) {
     const lines = csv.trim().split('\n');
@@ -16,6 +20,7 @@ const SheetAPI = {
       return obj;
     }).filter(row => Object.values(row).some(v => v));
   },
+
   async fetch(url) {
     try {
       const res = await fetch(url);
@@ -23,6 +28,7 @@ const SheetAPI = {
       return this.parseCSV(csv);
     } catch(e) { console.warn('시트 로드 실패:', url); return []; }
   },
+
   _cache: {},
   async fetchCached(url, ttl = 300000) {
     const now = Date.now();
@@ -33,6 +39,9 @@ const SheetAPI = {
   }
 };
 
+// ============================================================
+// 상품 데이터 (한글 헤더 매핑)
+// ============================================================
 const ProductAPI = {
   async getAll() {
     const rows = await SheetAPI.fetchCached(CONFIG.SHEETS.상품목록);
@@ -55,23 +64,28 @@ const ProductAPI = {
     }))
     .filter(p => p.isActive && p.name)
     .sort((a, b) => {
+      // 랭킹 공식: 판매수량×0.4 + 별점평균×0.4 + 리뷰수×0.2
       const scoreA = (a.salesCount * 0.4) + (a.rating * 20 * 0.4) + (a.reviewCount * 0.2);
       const scoreB = (b.salesCount * 0.4) + (b.rating * 20 * 0.4) + (b.reviewCount * 0.2);
       return scoreB - scoreA;
     });
   },
+
   async getById(id) {
     const all = await this.getAll();
     return all.find(p => p.id === id) || null;
   },
+
   async getByCategory(category) {
     const all = await this.getAll();
     return all.filter(p => p.category === category);
   },
+
   async getFeatured() {
     const all = await this.getAll();
     return all.filter(p => p.isFeatured).slice(0, 8);
   },
+
   async search(query) {
     const all = await this.getAll();
     const q = query.toLowerCase();
@@ -83,19 +97,16 @@ const ProductAPI = {
   }
 };
 
+// ============================================================
+// 카테고리 데이터
+// ============================================================
 const CategoryAPI = {
-  _icons: {
-    '의류':'👗','신발':'👟','뷰티':'💄','생활':'🏠',
-    '전자':'📱','식품':'🍕','스포츠':'🏃','도서':'📚',
-    '가방':'👜','액세서리':'💍','반려동물':'🐾','유아':'🍼',
-    '가전':'🖥️','주방':'🍳','침구':'🛏️','욕실':'🚿',
-  },
   async getAll() {
     const rows = await SheetAPI.fetchCached(CONFIG.SHEETS.카테고리);
     return rows.map(row => ({
       id: row['번호'] || '',
       name: row['카테고리명'] || '',
-      icon: this._icons[row['카테고리명']] || '📦',
+      icon: row['아이콘'] || '📦',
       parentId: row['상위카테고리'] || '',
       order: parseInt(row['순서']) || 0,
     })).sort((a, b) => a.order - b.order);
@@ -110,6 +121,9 @@ const CategoryAPI = {
   }
 };
 
+// ============================================================
+// 리뷰 데이터
+// ============================================================
 const ReviewAPI = {
   async getByProduct(productId) {
     const rows = await SheetAPI.fetchCached(CONFIG.SHEETS.리뷰, 60000);
@@ -118,6 +132,7 @@ const ReviewAPI = {
       .map(row => ({
         id: row['번호'],
         productId: row['상품번호'],
+        orderNo: row['주문번호'],
         author: row['작성자'],
         rating: parseInt(row['별점']) || 0,
         content: row['리뷰내용'],
@@ -128,9 +143,18 @@ const ReviewAPI = {
         replyDate: row['답글작성일'],
       }))
       .sort((a, b) => new Date(b.date) - new Date(a.date));
+  },
+
+  async getAvgRating(productId) {
+    const reviews = await this.getByProduct(productId);
+    if (!reviews.length) return 0;
+    return (reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length).toFixed(1);
   }
 };
 
+// ============================================================
+// 팝업 데이터
+// ============================================================
 const PopupAPI = {
   async getActive() {
     const rows = await SheetAPI.fetchCached(CONFIG.SHEETS.팝업, 60000);
@@ -155,6 +179,9 @@ const PopupAPI = {
   }
 };
 
+// ============================================================
+// 배너 데이터
+// ============================================================
 const BannerAPI = {
   async getActive() {
     const rows = await SheetAPI.fetchCached(CONFIG.SHEETS.배너);
@@ -173,11 +200,19 @@ const BannerAPI = {
       textColor: row['글자색'] || '#ffffff',
       link: row['링크'] || '#',
       btnText: row['버튼텍스트'] || '자세히 보기',
-    }));
+    })).sort((a, b) => (a.order || 0) - (b.order || 0));
   }
 };
 
+// ============================================================
+// 가맹점 데이터
+// ============================================================
 const FranchiseAPI = {
+  async getById(id) {
+    const rows = await SheetAPI.fetchCached(CONFIG.SHEETS.가맹점);
+    return rows.find(row => row['가맹점ID'] === id) || null;
+  },
+
   async getAll() {
     const rows = await SheetAPI.fetchCached(CONFIG.SHEETS.가맹점);
     return rows.map(row => ({
@@ -186,10 +221,15 @@ const FranchiseAPI = {
       owner: row['대표자명'],
       phone: row['연락처'],
       email: row['이메일'],
+      address: row['주소'],
       domain: row['도메인'],
       color: row['테마색상'],
+      logo: row['로고이미지'],
+      contractStart: row['계약일'],
+      contractEnd: row['계약종료일'],
       status: row['상태'],
       commissionRate: parseFloat(row['수수료율']) || 2,
+      bankAccount: row['정산계좌'],
     })).filter(f => f.status !== '해지');
   }
 };
