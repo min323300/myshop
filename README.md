@@ -7,7 +7,7 @@
 ## 📁 파일 구조
 
 ```
-myshop/
+damnuri/
 ├─ index.html          ← 메인 페이지 (홈)
 ├─ products.html       ← 상품 목록 페이지
 ├─ cart.html           ← 장바구니 페이지
@@ -25,7 +25,7 @@ myshop/
 
 ### 1단계 — GitHub 레포지토리 생성
 1. GitHub 접속 → **New repository**
-2. Repository name: `myshop` (또는 원하는 이름)
+2. Repository name: `damnuri` (또는 원하는 이름)
 3. **Public** 선택 (GitHub Pages 무료 사용)
 4. **Create repository** 클릭
 
@@ -40,7 +40,7 @@ GitHub 레포지토리 → "uploading an existing file" 클릭
 git init
 git add .
 git commit -m "본사 쇼핑몰 최초 업로드"
-git remote add origin https://github.com/아이디/myshop.git
+git remote add origin https://github.com/아이디/damnuri.git
 git push -u origin main
 ```
 
@@ -50,7 +50,7 @@ git push -u origin main
 3. Source: **Deploy from a branch**
 4. Branch: **main** / **/ (root)** 선택
 5. **Save** 클릭
-6. 약 1~2분 후 `https://아이디.github.io/myshop/` 으로 접속 가능!
+6. 약 1~2분 후 `https://아이디.github.io/damnuri/` 으로 접속 가능!
 
 ### 4단계 — 가비아 도메인 연결
 ```
@@ -59,7 +59,7 @@ git push -u origin main
 - 호스트: www  →  아이디.github.io
 
 GitHub Settings → Pages → Custom domain:
-- myshop.co.kr 입력 후 Save
+- damnuri.co.kr 입력 후 Save
 ```
 
 ---
@@ -129,7 +129,7 @@ STORE: {
    FRANCHISE_NAME: '강남점',
    ```
 3. GitHub Pages로 별도 배포
-4. 가비아에서 서브도메인 연결 (예: `gangnam.myshop.co.kr`)
+4. 가비아에서 서브도메인 연결 (예: `gangnam.damnuri.co.kr`)
 
 ---
 

@@ -21,11 +21,11 @@ const CONFIG = {
 
   // ✅ 본사 기본 정보
   STORE: {
-    NAME: '마이샵',               // 쇼핑몰 이름
-    LOGO: '🛍️',                  // 로고 이모지 (이미지로 교체 가능)
-    TAGLINE: '당신의 일상을 더 특별하게',
+    NAME: '담누리마켓',               // 쇼핑몰 이름
+    LOGO: '🏪',                  // 로고 이모지 (이미지로 교체 가능)
+    TAGLINE: '담누리마켓에서 모든 것을 담으세요',
     PHONE: '1588-0000',
-    EMAIL: 'help@myshop.co.kr',
+    EMAIL: 'help@damnuri.co.kr',
     ADDRESS: '서울시 강남구 테헤란로 123',
     SNS: {
       INSTAGRAM: 'https://instagram.com/',
