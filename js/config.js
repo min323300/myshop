@@ -1,5 +1,5 @@
 const CONFIG = {
-  SHEET_ID: '1t804fRO8HfQtmOzpDAz2IZfzRDQ7t8LYlIFGZr3ftUI',
+  SHEET_ID: '1t804fRO8HfQtmOzpDAz2IZfzRDQ7t8LYllFGZr3ftUI',
 
   STORE: {
     NAME: '담누리마켓',
