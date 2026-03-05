@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>주문완료 - 담누리마켓</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .complete-wrap { max-width: 600px; margin: 60px auto; padding: 0 24px; text-align: center; }
+    .complete-icon { font-size: 80px; margin-bottom: 24px; animation: bounce 0.6s ease; }
+    @keyframes bounce { 0%{transform:scale(0)} 60%{transform:scale(1.2)} 100%{transform:scale(1)} }
+    .complete-title { font-size: 28px; font-weight: 900; margin-bottom: 12px; }
+    .complete-sub { font-size: 15px; color: var(--gray); margin-bottom: 32px; line-height: 1.8; }
+    .order-info-box {
+      background: var(--bg); border-radius: 16px; padding: 28px;
+      margin-bottom: 32px; text-align: left;
+    }
+    .order-info-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 14px; }
+    .order-info-row:last-child { border-bottom: none; }
+    .order-info-row .label { color: var(--gray); }
+    .order-info-row .value { font-weight: 700; }
+    .order-info-row .value.accent { color: var(--accent); }
+    .complete-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .btn-outline { padding: 16px; border: 2px solid var(--accent); color: var(--accent); background: #fff; border-radius: 12px; font-size: 15px; font-weight: 700; cursor: pointer; transition: var(--transition); }
+    .btn-outline:hover { background: var(--accent-light); }
+    .btn-filled { padding: 16px; background: var(--accent); color: #fff; border: none; border-radius: 12px; font-size: 15px; font-weight: 700; cursor: pointer; transition: var(--transition); }
+    .btn-filled:hover { background: var(--accent-dark); }
+    .steps { display: flex; justify-content: center; gap: 0; margin-bottom: 40px; }
+    .step { display: flex; flex-direction: column; align-items: center; gap: 6px; flex: 1; position: relative; }
+    .step::after { content: '›'; position: absolute; right: -8px; top: 16px; font-size: 20px; color: var(--border); }
+    .step:last-child::after { display: none; }
+    .step-circle { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; background: var(--border); color: var(--gray); }
+    .step.done .step-circle { background: var(--accent); color: #fff; }
+    .step-label { font-size: 11px; color: var(--gray); }
+    .step.done .step-label { color: var(--accent); font-weight: 700; }
+  </style>
+</head>
+<body>
+<header class="header">
+  <div class="header-main">
+    <a href="index.html" class="header-logo"><span>🏪</span><span>담누리마켓</span></a>
+  </div>
+</header>
+
+<main>
+  <div class="complete-wrap">
+    <div class="complete-icon">✅</div>
+    <h1 class="complete-title">주문이 완료됐습니다!</h1>
+    <p class="complete-sub">
+      주문해 주셔서 감사합니다 😊<br>
+      빠르게 준비해서 배송해드리겠습니다.
+    </p>
+
+    <!-- 배송 단계 -->
+    <div class="steps">
+      <div class="step done"><div class="step-circle">✅</div><div class="step-label">주문완료</div></div>
+      <div class="step"><div class="step-circle">📦</div><div class="step-label">상품준비</div></div>
+      <div class="step"><div class="step-circle">🚚</div><div class="step-label">배송중</div></div>
+      <div class="step"><div class="step-circle">🏠</div><div class="step-label">배송완료</div></div>
+    </div>
+
+    <!-- 주문 정보 -->
+    <div class="order-info-box">
+      <div class="order-info-row">
+        <span class="label">주문번호</span>
+        <span class="value accent" id="order-no">-</span>
+      </div>
+      <div class="order-info-row">
+        <span class="label">주문일시</span>
+        <span class="value" id="order-date">-</span>
+      </div>
+      <div class="order-info-row">
+        <span class="label">결제방법</span>
+        <span class="value">PG 연동 후 처리</span>
+      </div>
+      <div class="order-info-row">
+        <span class="label">배송예정</span>
+        <span class="value" id="delivery-date">-</span>
+      </div>
+      <div class="order-info-row">
+        <span class="label">고객센터</span>
+        <span class="value">1588-0000 (평일 09~18시)</span>
+      </div>
+    </div>
+
+    <div class="complete-btns">
+      <button class="btn-outline" onclick="location.href='mypage.html'">📋 주문 내역 확인</button>
+      <button class="btn-filled" onclick="location.href='index.html'">🏪 쇼핑 계속하기</button>
+    </div>
+  </div>
+</main>
+
+<script src="js/config.js"></script>
+<script src="js/app.js"></script>
+<script>
+const params = new URLSearchParams(location.search);
+const orderNo = params.get('no') || 'ORD' + Date.now();
+document.getElementById('order-no').textContent = orderNo;
+
+const now = new Date();
+document.getElementById('order-date').textContent = now.toLocaleDateString('ko-KR') + ' ' + now.toLocaleTimeString('ko-KR', {hour:'2-digit',minute:'2-digit'});
+
+const delivery = new Date();
+delivery.setDate(delivery.getDate() + 3);
+const days = ['일','월','화','수','목','금','토'];
+document.getElementById('delivery-date').textContent = `${delivery.getMonth()+1}/${delivery.getDate()}(${days[delivery.getDay()]}) 도착 예정`;
+</script>
+</body>
+</html>

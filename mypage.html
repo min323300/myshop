@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>로그인 - 담누리마켓</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .auth-wrap { max-width: 480px; margin: 60px auto; padding: 0 24px; }
+    .auth-logo { text-align: center; margin-bottom: 32px; }
+    .auth-logo a { font-size: 24px; font-weight: 900; color: var(--accent); }
+    .auth-tabs { display: flex; border-bottom: 2px solid var(--border); margin-bottom: 32px; }
+    .auth-tab { flex: 1; padding: 14px; text-align: center; font-size: 16px; font-weight: 700; color: var(--gray); border: none; background: none; cursor: pointer; border-bottom: 3px solid transparent; margin-bottom: -2px; transition: var(--transition); }
+    .auth-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+    .auth-panel { display: none; }
+    .auth-panel.active { display: block; }
+    .form-group { margin-bottom: 16px; }
+    .form-group label { display: block; font-size: 13px; font-weight: 700; margin-bottom: 6px; color: var(--gray-dark); }
+    .form-group input { width: 100%; padding: 14px 16px; border: 1.5px solid var(--border); border-radius: 10px; font-size: 15px; font-family: var(--font-main); outline: none; transition: var(--transition); box-sizing: border-box; }
+    .form-group input:focus { border-color: var(--accent); }
+    .btn-auth { width: 100%; padding: 16px; background: var(--accent); color: #fff; border: none; border-radius: 10px; font-size: 16px; font-weight: 800; cursor: pointer; margin-top: 8px; transition: var(--transition); }
+    .btn-auth:hover { background: var(--accent-dark); transform: translateY(-1px); }
+    .social-divider { text-align: center; color: var(--gray-light); font-size: 13px; margin: 24px 0; position: relative; }
+    .social-divider::before, .social-divider::after { content: ''; position: absolute; top: 50%; width: 42%; height: 1px; background: var(--border); }
+    .social-divider::before { left: 0; }
+    .social-divider::after { right: 0; }
+    .social-btns { display: flex; flex-direction: column; gap: 10px; }
+    .btn-social { padding: 14px; border: 1.5px solid var(--border); border-radius: 10px; font-size: 14px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; transition: var(--transition); background: #fff; }
+    .btn-social:hover { border-color: var(--accent); }
+    .btn-kakao { background: #FEE500; border-color: #FEE500; }
+    .btn-naver { background: #03C75A; color: #fff; border-color: #03C75A; }
+    .terms-note { font-size: 11px; color: var(--gray-light); text-align: center; margin-top: 16px; line-height: 1.8; }
+    .terms-note a { color: var(--accent); }
+    .find-links { display: flex; justify-content: center; gap: 16px; margin-top: 16px; font-size: 13px; }
+    .find-links a { color: var(--gray); }
+
+    /* 마이페이지 */
+    .mypage-wrap { max-width: 900px; margin: 32px auto; padding: 0 24px; }
+    .mypage-header { display: flex; align-items: center; gap: 20px; background: linear-gradient(135deg, var(--accent), #FF8C00); color: #fff; border-radius: 16px; padding: 28px; margin-bottom: 24px; }
+    .mypage-avatar { width: 72px; height: 72px; border-radius: 50%; background: rgba(255,255,255,0.3); display: flex; align-items: center; justify-content: center; font-size: 36px; }
+    .mypage-name { font-size: 22px; font-weight: 900; }
+    .mypage-grade { font-size: 13px; opacity: 0.9; margin-top: 4px; }
+    .mypage-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 24px; }
+    .stat-card { background: #fff; border: 1.5px solid var(--border); border-radius: 12px; padding: 20px; text-align: center; }
+    .stat-num { font-size: 28px; font-weight: 900; color: var(--accent); }
+    .stat-label { font-size: 12px; color: var(--gray); margin-top: 4px; }
+    .mypage-menu { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+    .menu-card { background: #fff; border: 1.5px solid var(--border); border-radius: 12px; padding: 20px; display: flex; align-items: center; gap: 14px; cursor: pointer; transition: var(--transition); }
+    .menu-card:hover { border-color: var(--accent); background: #fff5f2; }
+    .menu-icon { font-size: 28px; }
+    .menu-title { font-size: 15px; font-weight: 700; }
+    .menu-desc { font-size: 12px; color: var(--gray); margin-top: 2px; }
+
+    @media (max-width: 768px) {
+      .mypage-stats { grid-template-columns: repeat(2, 1fr); }
+      .mypage-menu { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+<header class="header">
+  <div class="header-main">
+    <a href="index.html" class="header-logo"><span>🏪</span><span>담누리마켓</span></a>
+    <div class="header-icons">
+      <a href="cart.html" class="header-icon"><span class="icon-emoji">🛒</span><span>장바구니</span><span class="cart-badge">0</span></a>
+    </div>
+  </div>
+</header>
+
+<main>
+  <!-- 로그인/회원가입 화면 -->
+  <div class="auth-wrap" id="auth-section">
+    <div class="auth-logo">
+      <a href="index.html">🏪 담누리마켓</a>
+    </div>
+
+    <div class="auth-tabs">
+      <button class="auth-tab active" onclick="switchAuth('login', this)">로그인</button>
+      <button class="auth-tab" onclick="switchAuth('signup', this)">회원가입</button>
+    </div>
+
+    <!-- 로그인 -->
+    <div class="auth-panel active" id="panel-login">
+      <div class="form-group">
+        <label>이메일</label>
+        <input type="email" id="login-email" placeholder="이메일 입력">
+      </div>
+      <div class="form-group">
+        <label>비밀번호</label>
+        <input type="password" id="login-pw" placeholder="비밀번호 입력" onkeydown="if(event.key==='Enter') doLogin()">
+      </div>
+      <button class="btn-auth" onclick="doLogin()">로그인</button>
+
+      <div class="find-links">
+        <a href="#">아이디 찾기</a>
+        <a href="#">비밀번호 찾기</a>
+      </div>
+
+      <div class="social-divider">간편 로그인</div>
+      <div class="social-btns">
+        <button class="btn-social btn-kakao" onclick="alert('카카오 로그인은 준비 중입니다')">
+          💛 카카오로 시작하기
+        </button>
+        <button class="btn-social btn-naver" onclick="alert('네이버 로그인은 준비 중입니다')">
+          N 네이버로 시작하기
+        </button>
+      </div>
+    </div>
+
+    <!-- 회원가입 -->
+    <div class="auth-panel" id="panel-signup">
+      <div class="form-group">
+        <label>이름 *</label>
+        <input type="text" id="signup-name" placeholder="실명 입력">
+      </div>
+      <div class="form-group">
+        <label>이메일 *</label>
+        <input type="email" id="signup-email" placeholder="이메일 입력">
+      </div>
+      <div class="form-group">
+        <label>비밀번호 *</label>
+        <input type="password" id="signup-pw" placeholder="8자 이상 입력">
+      </div>
+      <div class="form-group">
+        <label>비밀번호 확인 *</label>
+        <input type="password" id="signup-pw2" placeholder="비밀번호 재입력">
+      </div>
+      <div class="form-group">
+        <label>연락처</label>
+        <input type="tel" id="signup-phone" placeholder="010-0000-0000">
+      </div>
+      <button class="btn-auth" onclick="doSignup()">회원가입</button>
+      <div class="terms-note">
+        가입 시 <a href="terms.html">이용약관</a> 및 <a href="privacy.html">개인정보처리방침</a>에 동의하는 것으로 간주합니다.
+      </div>
+    </div>
+  </div>
+
+  <!-- 마이페이지 (로그인 후) -->
+  <div class="mypage-wrap" id="mypage-section" style="display:none;">
+    <div class="mypage-header">
+      <div class="mypage-avatar">👤</div>
+      <div>
+        <div class="mypage-name" id="mp-name">회원님</div>
+        <div class="mypage-grade">🌟 일반 회원 | 가입일: <span id="mp-date">-</span></div>
+      </div>
+      <button onclick="doLogout()" style="margin-left:auto; padding:8px 16px; background:rgba(255,255,255,0.2); color:#fff; border:1px solid rgba(255,255,255,0.4); border-radius:8px; cursor:pointer; font-size:13px;">로그아웃</button>
+    </div>
+
+    <div class="mypage-stats">
+      <div class="stat-card"><div class="stat-num">0</div><div class="stat-label">주문</div></div>
+      <div class="stat-card"><div class="stat-num">0</div><div class="stat-label">배송중</div></div>
+      <div class="stat-card"><div class="stat-num">0</div><div class="stat-label">찜목록</div></div>
+      <div class="stat-card"><div class="stat-num">0</div><div class="stat-label">적립금</div></div>
+    </div>
+
+    <div class="mypage-menu">
+      <div class="menu-card" onclick="alert('주문내역 기능은 준비 중입니다')">
+        <div class="menu-icon">📋</div>
+        <div><div class="menu-title">주문 내역</div><div class="menu-desc">주문 현황을 확인하세요</div></div>
+      </div>
+      <div class="menu-card" onclick="alert('배송조회 기능은 준비 중입니다')">
+        <div class="menu-icon">🚚</div>
+        <div><div class="menu-title">배송 조회</div><div class="menu-desc">배송 현황을 확인하세요</div></div>
+      </div>
+      <div class="menu-card" onclick="alert('찜목록 기능은 준비 중입니다')">
+        <div class="menu-icon">❤️</div>
+        <div><div class="menu-title">찜 목록</div><div class="menu-desc">관심 상품을 확인하세요</div></div>
+      </div>
+      <div class="menu-card" onclick="alert('리뷰 기능은 준비 중입니다')">
+        <div class="menu-icon">⭐</div>
+        <div><div class="menu-title">내 리뷰</div><div class="menu-desc">작성한 리뷰를 확인하세요</div></div>
+      </div>
+      <div class="menu-card" onclick="alert('쿠폰 기능은 준비 중입니다')">
+        <div class="menu-icon">🎫</div>
+        <div><div class="menu-title">쿠폰 / 적립금</div><div class="menu-desc">보유 혜택을 확인하세요</div></div>
+      </div>
+      <div class="menu-card" onclick="alert('정보수정 기능은 준비 중입니다')">
+        <div class="menu-icon">⚙️</div>
+        <div><div class="menu-title">회원 정보 수정</div><div class="menu-desc">개인 정보를 관리하세요</div></div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script src="js/config.js"></script>
+<script src="js/app.js"></script>
+<script>
+function switchAuth(tab, btn) {
+  document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.auth-panel').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('panel-' + tab).classList.add('active');
+}
+
+function doLogin() {
+  const email = document.getElementById('login-email').value.trim();
+  const pw = document.getElementById('login-pw').value;
+  if (!email || !pw) { alert('이메일과 비밀번호를 입력해주세요'); return; }
+
+  // 임시 로그인 (실제 구현 시 서버 인증 필요)
+  const user = { name: email.split('@')[0], email, date: new Date().toLocaleDateString('ko-KR') };
+  sessionStorage.setItem('user', JSON.stringify(user));
+  showMypage(user);
+}
+
+function doSignup() {
+  const name = document.getElementById('signup-name').value.trim();
+  const email = document.getElementById('signup-email').value.trim();
+  const pw = document.getElementById('signup-pw').value;
+  const pw2 = document.getElementById('signup-pw2').value;
+
+  if (!name || !email || !pw) { alert('필수 항목을 모두 입력해주세요'); return; }
+  if (pw !== pw2) { alert('비밀번호가 일치하지 않습니다'); return; }
+  if (pw.length < 8) { alert('비밀번호는 8자 이상이어야 합니다'); return; }
+
+  const user = { name, email, date: new Date().toLocaleDateString('ko-KR') };
+  sessionStorage.setItem('user', JSON.stringify(user));
+  alert(`환영합니다, ${name}님! 가입 완료됐습니다 🎉\n가입 축하 적립금 3,000원이 지급됐습니다!`);
+  showMypage(user);
+}
+
+function doLogout() {
+  sessionStorage.removeItem('user');
+  document.getElementById('auth-section').style.display = 'block';
+  document.getElementById('mypage-section').style.display = 'none';
+}
+
+function showMypage(user) {
+  document.getElementById('auth-section').style.display = 'none';
+  document.getElementById('mypage-section').style.display = 'block';
+  document.getElementById('mp-name').textContent = user.name + '님';
+  document.getElementById('mp-date').textContent = user.date;
+  document.title = '마이페이지 - 담누리마켓';
+}
+
+// 자동 로그인 체크
+const savedUser = sessionStorage.getItem('user');
+if (savedUser) showMypage(JSON.parse(savedUser));
+
+Cart.init();
+</script>
+</body>
+</html>

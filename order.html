@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>주문서 - 담누리마켓</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .order-wrap { max-width: 1000px; margin: 32px auto; padding: 0 24px; }
+    .order-title { font-size: 24px; font-weight: 900; margin-bottom: 32px; }
+    .order-grid { display: grid; grid-template-columns: 1fr 380px; gap: 24px; }
+    .order-section { background: #fff; border: 1.5px solid var(--border); border-radius: 12px; padding: 24px; margin-bottom: 16px; }
+    .order-section h3 { font-size: 16px; font-weight: 800; margin-bottom: 20px; padding-bottom: 12px; border-bottom: 1px solid var(--border); }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+    .form-group { display: flex; flex-direction: column; gap: 6px; }
+    .form-group label { font-size: 13px; font-weight: 600; color: var(--gray-dark); }
+    .form-group input, .form-group select, .form-group textarea {
+      padding: 10px 14px; border: 1.5px solid var(--border); border-radius: 8px;
+      font-size: 14px; font-family: var(--font-main); outline: none; transition: var(--transition);
+    }
+    .form-group input:focus, .form-group select:focus { border-color: var(--accent); }
+    .form-full { grid-column: 1 / -1; }
+    .btn-address { padding: 10px 16px; background: var(--gray-dark); color: #fff; border: none; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; margin-top: 4px; }
+
+    /* 결제 방법 */
+    .pay-methods { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+    .pay-method { padding: 14px; border: 2px solid var(--border); border-radius: 10px; text-align: center; cursor: pointer; transition: var(--transition); font-size: 13px; font-weight: 600; }
+    .pay-method.active { border-color: var(--accent); background: #fff5f2; color: var(--accent); }
+    .pay-method .pay-icon { font-size: 24px; display: block; margin-bottom: 4px; }
+
+    /* 주문 상품 */
+    .order-item { display: flex; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--border); }
+    .order-item:last-child { border-bottom: none; }
+    .order-item img { width: 72px; height: 72px; object-fit: cover; border-radius: 8px; border: 1px solid var(--border); }
+    .order-item-info { flex: 1; }
+    .order-item-name { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+    .order-item-meta { font-size: 12px; color: var(--gray); }
+    .order-item-price { font-size: 15px; font-weight: 800; color: var(--accent); }
+
+    /* 가격 요약 */
+    .price-summary { display: flex; flex-direction: column; gap: 10px; }
+    .price-row { display: flex; justify-content: space-between; font-size: 14px; }
+    .price-row.total { font-size: 18px; font-weight: 900; padding-top: 12px; border-top: 2px solid var(--black); margin-top: 4px; }
+    .price-row .label { color: var(--gray); }
+    .price-row.total .label { color: var(--black); }
+
+    /* 약관 동의 */
+    .agree-list { display: flex; flex-direction: column; gap: 10px; }
+    .agree-item { display: flex; align-items: center; gap: 10px; font-size: 14px; }
+    .agree-item input[type=checkbox] { width: 18px; height: 18px; accent-color: var(--accent); cursor: pointer; }
+    .agree-item a { color: var(--accent); text-decoration: underline; }
+    .agree-all { font-weight: 800; font-size: 15px; padding-bottom: 10px; border-bottom: 1px solid var(--border); margin-bottom: 4px; }
+
+    .btn-order { width: 100%; padding: 18px; background: var(--accent); color: #fff; border: none; border-radius: 12px; font-size: 18px; font-weight: 900; cursor: pointer; margin-top: 16px; transition: var(--transition); }
+    .btn-order:hover { background: var(--accent-dark); transform: translateY(-2px); }
+
+    @media (max-width: 768px) {
+      .order-grid { grid-template-columns: 1fr; }
+      .form-row { grid-template-columns: 1fr; }
+      .pay-methods { grid-template-columns: repeat(2, 1fr); }
+    }
+  </style>
+</head>
+<body>
+<header class="header">
+  <div class="header-main">
+    <a href="index.html" class="header-logo"><span>🏪</span><span>담누리마켓</span></a>
+    <div style="font-size:14px; color:var(--gray); font-weight:600;">안전한 결제를 도와드립니다 🔒</div>
+    <div class="header-icons">
+      <a href="cart.html" class="header-icon"><span class="icon-emoji">🛒</span><span>장바구니</span></a>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="order-wrap">
+    <h1 class="order-title">🛒 주문서</h1>
+
+    <div class="order-grid">
+      <!-- 왼쪽: 배송/결제 정보 -->
+      <div>
+
+        <!-- 배송지 -->
+        <div class="order-section">
+          <h3>📦 배송지 정보</h3>
+          <div class="form-row">
+            <div class="form-group">
+              <label>받는 분 *</label>
+              <input type="text" id="receiver-name" placeholder="이름 입력">
+            </div>
+            <div class="form-group">
+              <label>연락처 *</label>
+              <input type="tel" id="receiver-phone" placeholder="010-0000-0000">
+            </div>
+          </div>
+          <div class="form-group" style="margin-bottom:12px;">
+            <label>주소 *</label>
+            <div style="display:flex;gap:8px;">
+              <input type="text" id="post-code" placeholder="우편번호" style="width:120px;" readonly>
+              <button class="btn-address" onclick="searchAddress()">주소 검색</button>
+            </div>
+            <input type="text" id="address1" placeholder="기본주소" style="margin-top:8px;" readonly>
+            <input type="text" id="address2" placeholder="상세주소 입력" style="margin-top:8px;">
+          </div>
+          <div class="form-group">
+            <label>배송 메모</label>
+            <select id="delivery-memo">
+              <option value="">배송 메모 선택</option>
+              <option>문 앞에 놓아주세요</option>
+              <option>경비실에 맡겨주세요</option>
+              <option>부재 시 연락 부탁드립니다</option>
+              <option>직접 입력</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- 결제 방법 -->
+        <div class="order-section">
+          <h3>💳 결제 방법</h3>
+          <div class="pay-methods">
+            <div class="pay-method active" onclick="selectPay(this, 'card')">
+              <span class="pay-icon">💳</span>신용/체크카드
+            </div>
+            <div class="pay-method" onclick="selectPay(this, 'kakao')">
+              <span class="pay-icon">💛</span>카카오페이
+            </div>
+            <div class="pay-method" onclick="selectPay(this, 'naver')">
+              <span class="pay-icon">🟢</span>네이버페이
+            </div>
+            <div class="pay-method" onclick="selectPay(this, 'bank')">
+              <span class="pay-icon">🏦</span>무통장입금
+            </div>
+            <div class="pay-method" onclick="selectPay(this, 'phone')">
+              <span class="pay-icon">📱</span>휴대폰결제
+            </div>
+            <div class="pay-method" onclick="selectPay(this, 'toss')">
+              <span class="pay-icon">🔵</span>토스페이
+            </div>
+          </div>
+          <div id="bank-info" style="display:none; margin-top:16px; padding:14px; background:var(--bg); border-radius:8px; font-size:13px;">
+            <div style="font-weight:700; margin-bottom:8px;">📌 입금 계좌 안내</div>
+            <div>은행: <b>국민은행</b></div>
+            <div>계좌: <b>000-0000-0000-00</b></div>
+            <div>예금주: <b>담누리마켓</b></div>
+            <div style="margin-top:8px; color:var(--accent);">※ 입금자명을 주문자명과 동일하게 입력해주세요</div>
+          </div>
+        </div>
+
+        <!-- 약관 동의 -->
+        <div class="order-section">
+          <h3>✅ 약관 동의</h3>
+          <div class="agree-list">
+            <div class="agree-item agree-all">
+              <input type="checkbox" id="agree-all" onchange="toggleAll(this)">
+              <label for="agree-all">전체 동의</label>
+            </div>
+            <div class="agree-item">
+              <input type="checkbox" id="agree1" class="agree-check">
+              <label for="agree1">[필수] <a href="terms.html" target="_blank">이용약관</a> 동의</label>
+            </div>
+            <div class="agree-item">
+              <input type="checkbox" id="agree2" class="agree-check">
+              <label for="agree2">[필수] <a href="privacy.html" target="_blank">개인정보처리방침</a> 동의</label>
+            </div>
+            <div class="agree-item">
+              <input type="checkbox" id="agree3" class="agree-check">
+              <label for="agree3">[필수] 구매조건 확인 및 결제 진행 동의</label>
+            </div>
+            <div class="agree-item">
+              <input type="checkbox" id="agree4" class="agree-check">
+              <label for="agree4">[선택] 마케팅 정보 수신 동의</label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 오른쪽: 주문 요약 -->
+      <div>
+        <div class="order-section" style="position:sticky;top:80px;">
+          <h3>🧾 주문 상품</h3>
+          <div id="order-items">
+            <!-- 장바구니에서 동적 로드 -->
+          </div>
+
+          <div class="price-summary" style="margin-top:20px;">
+            <div class="price-row">
+              <span class="label">상품금액</span>
+              <span id="sum-products">0원</span>
+            </div>
+            <div class="price-row">
+              <span class="label">배송비</span>
+              <span id="sum-delivery">3,000원</span>
+            </div>
+            <div class="price-row">
+              <span class="label">할인금액</span>
+              <span id="sum-discount" style="color:var(--accent)">-0원</span>
+            </div>
+            <div class="price-row total">
+              <span class="label">최종 결제금액</span>
+              <span id="sum-total" style="color:var(--accent)">0원</span>
+            </div>
+          </div>
+
+          <button class="btn-order" onclick="submitOrder()">
+            결제하기
+          </button>
+          <p style="text-align:center;font-size:11px;color:var(--gray-light);margin-top:8px;">
+            🔒 SSL 보안 결제 | 개인정보 암호화 전송
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script src="js/config.js"></script>
+<script src="js/sheets.js"></script>
+<script src="js/app.js"></script>
+<script>
+let selectedPay = 'card';
+
+function selectPay(el, type) {
+  document.querySelectorAll('.pay-method').forEach(m => m.classList.remove('active'));
+  el.classList.add('active');
+  selectedPay = type;
+  document.getElementById('bank-info').style.display = type === 'bank' ? 'block' : 'none';
+}
+
+function toggleAll(el) {
+  document.querySelectorAll('.agree-check').forEach(c => c.checked = el.checked);
+}
+
+function searchAddress() {
+  alert('주소 검색은 카카오 우편번호 API 연동 후 사용 가능합니다.\n직접 입력해주세요.');
+  document.getElementById('address1').removeAttribute('readonly');
+  document.getElementById('address1').focus();
+}
+
+function loadOrderItems() {
+  const items = Cart.getItems();
+  const container = document.getElementById('order-items');
+
+  if (!items.length) {
+    container.innerHTML = '<p style="color:var(--gray);font-size:13px;">장바구니가 비어있습니다</p>';
+    return;
+  }
+
+  let total = 0;
+  container.innerHTML = items.map(item => {
+    const price = item.salePrice || item.price;
+    total += price * (item.qty || 1);
+    return `
+      <div class="order-item">
+        <img src="${item.image}" alt="${item.name}" onerror="this.src='https://via.placeholder.com/72'">
+        <div class="order-item-info">
+          <div class="order-item-name">${item.name}</div>
+          <div class="order-item-meta">${item.category} · 수량 ${item.qty || 1}개</div>
+        </div>
+        <div class="order-item-price">${(price * (item.qty||1)).toLocaleString()}원</div>
+      </div>`;
+  }).join('');
+
+  const delivery = total >= 50000 ? 0 : 3000;
+  document.getElementById('sum-products').textContent = total.toLocaleString() + '원';
+  document.getElementById('sum-delivery').textContent = delivery === 0 ? '무료' : delivery.toLocaleString() + '원';
+  document.getElementById('sum-discount').textContent = '-0원';
+  document.getElementById('sum-total').textContent = (total + delivery).toLocaleString() + '원';
+  document.getElementById('btn-order-total').textContent = (total + delivery).toLocaleString() + '원 결제하기';
+}
+
+function submitOrder() {
+  const name = document.getElementById('receiver-name').value.trim();
+  const phone = document.getElementById('receiver-phone').value.trim();
+  const addr = document.getElementById('address1').value.trim();
+
+  if (!name) { alert('받는 분 이름을 입력해주세요'); return; }
+  if (!phone) { alert('연락처를 입력해주세요'); return; }
+  if (!addr) { alert('주소를 입력해주세요'); return; }
+
+  const agree1 = document.getElementById('agree1').checked;
+  const agree2 = document.getElementById('agree2').checked;
+  const agree3 = document.getElementById('agree3').checked;
+  if (!agree1 || !agree2 || !agree3) { alert('필수 약관에 동의해주세요'); return; }
+
+  // PG 연동 전 임시 처리
+  const orderNo = 'ORD' + Date.now();
+  alert(`주문이 접수되었습니다!\n주문번호: ${orderNo}\n\nPG사 연동 후 실제 결제가 진행됩니다.`);
+  Cart.clear();
+  location.href = `order-complete.html?no=${orderNo}`;
+}
+
+Cart.init();
+loadOrderItems();
+</script>
+</body>
+</html>
