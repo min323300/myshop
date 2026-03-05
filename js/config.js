@@ -5,7 +5,7 @@
 const CONFIG = {
   // ✅ Google Sheets ID (아래 1t804fRO8HfQtmOzpDAz2IZfzRDQ7t8LYlIFGZr3ftUI 를 실제 ID로 교체)
   // 주소창에서 확인: docs.google.com/spreadsheets/d/[여기가 ID]/edit
-  SHEET_ID: '1t804fRO8HfQtmOzpDAz2IZfzRDQ7t8LYlIFGZr3ftUI',
+  SHEET_ID: '1t804fRO8HfQtmOzpDAz2IZfzRDQ7t8LYllFGZr3ftUI',
 
   // 시트별 URL 자동 생성 (시트 이름만 관리)
   get SHEETS() {
