@@ -341,7 +341,7 @@ async function loadCategories() {
     if (!categories.length) throw new Error('no data');
 
     grid.innerHTML = categories.map(c => `
-      <div class="category-card" onclick="filterCategory('${c.id}', null)">
+      <div class="category-card" onclick="filterCategory('${c.name}', null)">
         <span class="cat-icon">${c.icon}</span>
         <span class="cat-name">${c.name}</span>
       </div>
@@ -352,7 +352,7 @@ async function loadCategories() {
       const btn = document.createElement('button');
       btn.className = 'nav-item';
       btn.innerHTML = `${c.icon} ${c.name}`;
-      btn.onclick = () => filterCategory(c.id, btn);
+      btn.onclick = () => filterCategory(c.name, btn);
       nav.appendChild(btn);
     });
 
