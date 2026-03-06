@@ -9,6 +9,13 @@
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
   <style>
+    /* 배너 overflow 수정 */
+    .banner-wrap { overflow: hidden !important; border-radius: 12px; }
+    /* 드롭다운이 nav 밖으로 나올 수 있게 */
+    .header-nav { overflow: visible !important; position: relative; z-index: 100; }
+    .nav-inner { overflow: visible !important; position: relative; }
+    .nav-item-wrap { position: relative; display: inline-block; }
+    .nav-dropdown { z-index: 9999 !important; }
     /* 배너 축소 */
     .banner-slide { height: 220px !important; }
     .banner-content h2 { font-size: 22px !important; margin-bottom: 6px !important; }
@@ -249,7 +256,7 @@
       <ul>
         <li><a href="#" id="footer-phone">📞 1588-0000</a></li>
         <li><a href="#">평일 9:00 ~ 18:00</a></li>
-        <li><a href="#" id="footer-email">📧 help@damnuri.co.kr</a></li>
+        <li><a href="#" id="footer-email">📧 <span class="__cf_email__" data-cfemail="97fff2fbe7d7f3f6faf9e2e5feb9f4f8b9fce5">[email&#160;protected]</span></a></li>
       </ul>
     </div>
     <div>
@@ -275,7 +282,7 @@
   </div>
 </footer>
 
-<script src="js/config.js"></script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script src="js/config.js"></script>
 <script src="js/sheets.js"></script>
 <script src="js/app.js"></script>
 <script>
@@ -465,15 +472,4 @@ async function initPage() {
   document.getElementById('page-title').textContent = CONFIG.STORE.NAME+' - 종합쇼핑몰';
   document.getElementById('store-name').textContent = CONFIG.STORE.NAME;
   document.getElementById('footer-store-name').textContent = '🏪 '+CONFIG.STORE.NAME;
-  document.getElementById('footer-phone').textContent = '📞 '+CONFIG.STORE.PHONE;
-  Cart.init();
-  setTimeout(()=>Popup.loadAndShow(),500);
-  Banner.init(3);
-  startFlashTimer();
-  loadProducts();
-}
-
-initPage();
-</script>
-</body>
-</html>
+  document.getElementById('footer-phone'
