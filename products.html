@@ -324,7 +324,7 @@ async function initPage() {
       const btn = document.createElement('button');
       btn.className = 'nav-item';
       btn.textContent = `${c.icon} ${c.name}`;
-      btn.onclick = () => filterByNav(c.id, btn);
+      btn.onclick = () => filterByNav(c.name, btn);
       nav.appendChild(btn);
     });
   } catch(e) {}
