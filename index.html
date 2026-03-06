@@ -3,89 +3,35 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title id="page-title">담누리마켓 - 본사 종합쇼핑몰</title>
+  <title>담누리마켓 - 종합쇼핑몰</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
   <style>
-    /* 배너 축소 */
-    .banner-wrap { overflow: hidden !important; border-radius: 12px; }
-    .banner-slider { display: flex !important; overflow: hidden !important; }
-    .banner-slide { height: 200px !important; min-width: 100% !important; flex-shrink: 0 !important; }
-    .banner-content h2 { font-size: 20px !important; margin-bottom: 6px !important; }
-    .banner-content p { font-size: 13px !important; margin-bottom: 10px !important; }
-    .banner-btn { padding: 7px 18px !important; font-size: 13px !important; }
-
-    /* 드롭다운 네비 */
     .header-nav { overflow: visible !important; position: relative; z-index: 200; }
     .nav-inner { overflow: visible !important; }
     .nav-item-wrap { position: relative; display: inline-block; }
     .nav-dropdown {
-      display: none;
-      position: absolute;
-      top: 100%; left: 50%;
-      transform: translateX(-50%);
-      background: #fff;
-      border: 1px solid #e8e8e8;
-      border-radius: 10px;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.15);
-      min-width: 130px;
-      z-index: 9999;
-      padding: 6px 0;
+      display: none; position: absolute; top: 100%; left: 50%;
+      transform: translateX(-50%); background: #fff;
+      border: 1px solid #e8e8e8; border-radius: 10px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.15); min-width: 130px;
+      z-index: 9999; padding: 6px 0;
     }
     .nav-item-wrap:hover .nav-dropdown { display: block; }
-    .nav-dropdown::before {
-      content:''; position:absolute; top:-6px; left:50%; transform:translateX(-50%);
-      border-left:6px solid transparent; border-right:6px solid transparent;
-      border-bottom:6px solid #e8e8e8;
-    }
-    .nav-dropdown::after {
-      content:''; position:absolute; top:-5px; left:50%; transform:translateX(-50%);
-      border-left:6px solid transparent; border-right:6px solid transparent;
-      border-bottom:6px solid #fff;
-    }
-    .nav-dropdown-item {
-      display:block; width:100%; padding:8px 16px;
-      font-size:13px; font-weight:500; color:#333;
-      background:none; border:none; text-align:left;
-      cursor:pointer; white-space:nowrap;
-      font-family:'Noto Sans KR',sans-serif;
-      transition: background 0.15s, color 0.15s;
-    }
+    .nav-dropdown::before { content:''; position:absolute; top:-6px; left:50%; transform:translateX(-50%); border-left:6px solid transparent; border-right:6px solid transparent; border-bottom:6px solid #e8e8e8; }
+    .nav-dropdown::after { content:''; position:absolute; top:-5px; left:50%; transform:translateX(-50%); border-left:6px solid transparent; border-right:6px solid transparent; border-bottom:6px solid #fff; }
+    .nav-dropdown-item { display:block; width:100%; padding:8px 16px; font-size:13px; font-weight:500; color:#333; background:none; border:none; text-align:left; cursor:pointer; white-space:nowrap; font-family:'Noto Sans KR',sans-serif; }
     .nav-dropdown-item:hover { background:#fff3f0; color:#FF5733; }
-    .nav-item.has-dropdown::after { content:' ▾'; font-size:10px; opacity:0.6; }
-
-    /* 한정특가 타이머 */
-    .flash-header {
-      display:flex; align-items:center;
-      justify-content:space-between; margin-bottom:16px;
-    }
-    .flash-timer {
-      display:flex; align-items:center; gap:4px;
-      background:#FF5733; color:#fff;
-      padding:4px 12px; border-radius:20px;
-      font-size:13px; font-weight:700;
-    }
-    .timer-block {
-      background:rgba(255,255,255,0.25); border-radius:4px;
-      padding:2px 6px; font-size:14px; font-weight:900;
-      min-width:26px; text-align:center;
-    }
-
-    /* 공동구매 카드 */
-    .group-buy-card {
-      background:#fff; border:1px solid #e8e8e8;
-      border-radius:12px; overflow:hidden; cursor:pointer;
-      transition:transform 0.2s, box-shadow 0.2s;
-    }
+    .nav-item.has-sub::after { content:' ▾'; font-size:10px; opacity:0.6; }
+    .flash-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; }
+    .flash-timer { display:flex; align-items:center; gap:4px; background:#FF5733; color:#fff; padding:4px 12px; border-radius:20px; font-size:13px; font-weight:700; }
+    .timer-block { background:rgba(255,255,255,0.25); border-radius:4px; padding:2px 6px; font-size:14px; font-weight:900; min-width:26px; text-align:center; }
+    .group-buy-card { background:#fff; border:1px solid #e8e8e8; border-radius:12px; overflow:hidden; cursor:pointer; transition:transform 0.2s,box-shadow 0.2s; }
     .group-buy-card:hover { transform:translateY(-3px); box-shadow:0 8px 20px rgba(0,0,0,0.1); }
     .group-buy-img { width:100%; aspect-ratio:1; object-fit:cover; display:block; }
     .group-buy-info { padding:12px; }
-    .group-buy-badge {
-      display:inline-block; background:#4CAF50; color:#fff;
-      font-size:11px; font-weight:700; padding:2px 8px;
-      border-radius:4px; margin-bottom:6px;
-    }
+    .group-buy-badge { display:inline-block; background:#4CAF50; color:#fff; font-size:11px; font-weight:700; padding:2px 8px; border-radius:4px; margin-bottom:6px; }
     .group-buy-name { font-size:14px; font-weight:700; margin-bottom:6px; line-height:1.4; }
     .group-buy-bar { height:6px; background:#f0f0f0; border-radius:3px; overflow:hidden; margin:8px 0 4px; }
     .group-buy-fill { height:100%; background:linear-gradient(90deg,#4CAF50,#8BC34A); border-radius:3px; }
@@ -99,13 +45,9 @@
 <body>
 
 <header class="header">
-  <div class="header-notice">
-    🎉 담누리마켓 오픈 기념! 가입 시 3,000원 적립 &nbsp;|&nbsp; 5만원 이상 무료배송
-  </div>
+  <div class="header-notice">🎉 담누리마켓 오픈 기념! 가입 시 3,000원 적립 &nbsp;|&nbsp; 5만원 이상 무료배송</div>
   <div class="header-main">
-    <a href="index.html" class="header-logo">
-      <span>🏪</span><span id="store-name">담누리마켓</span>
-    </a>
+    <a href="index.html" class="header-logo"><span>🏪</span><span id="store-name">담누리마켓</span></a>
     <div class="header-search">
       <div class="search-bar" onclick="Search.open()">
         <input type="text" placeholder="상품을 검색하세요" readonly>
@@ -114,13 +56,8 @@
     </div>
     <div class="header-icons">
       <a href="mypage.html" class="header-icon"><span class="icon-emoji">👤</span><span>로그인</span></a>
-      <button class="header-icon" onclick="alert('찜목록 기능은 로그인 후 사용 가능합니다')">
-        <span class="icon-emoji">❤️</span><span>찜목록</span>
-      </button>
-      <a href="cart.html" class="header-icon">
-        <span class="icon-emoji">🛒</span><span>장바구니</span>
-        <span class="cart-badge">0</span>
-      </a>
+      <button class="header-icon" onclick="alert('찜목록 기능은 로그인 후 사용 가능합니다')"><span class="icon-emoji">❤️</span><span>찜목록</span></button>
+      <a href="cart.html" class="header-icon"><span class="icon-emoji">🛒</span><span>장바구니</span><span class="cart-badge">0</span></a>
     </div>
   </div>
   <nav class="header-nav">
@@ -136,10 +73,7 @@
   <div class="search-modal-box">
     <div class="search-modal-header">
       <span>🔍</span>
-      <input type="text" class="search-modal-input" id="search-input"
-        placeholder="어떤 상품을 찾으시나요?"
-        oninput="Search.run(this.value)"
-        onkeydown="if(event.key==='Escape') Search.close()">
+      <input type="text" class="search-modal-input" id="search-input" placeholder="어떤 상품을 찾으시나요?" oninput="Search.run(this.value)" onkeydown="if(event.key==='Escape') Search.close()">
       <button class="search-modal-close" onclick="Search.close()">✕</button>
     </div>
     <div id="search-results"><p class="search-empty">검색어를 입력하세요</p></div>
@@ -151,32 +85,32 @@
 
     <!-- 배너 -->
     <div style="overflow:hidden;border-radius:12px;position:relative;margin-bottom:32px;height:200px;">
-      <div id="banner-slider" style="display:flex;transition:transform 0.4s ease;height:200px;">
-        <div style="min-width:100%;height:200px;background:linear-gradient(135deg,#FF5733,#FF8C00);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-          <div class="banner-content" style="text-align:center;color:#fff;">
-            <h2 style="font-size:22px;font-weight:900;margin-bottom:6px;">담누리마켓 오픈!</h2>
-            <p style="font-size:13px;margin-bottom:12px;opacity:0.9;">세상의 모든 것을 담누리마켓에서</p>
-            <a href="products.html" style="background:#fff;color:#FF5733;padding:8px 20px;border-radius:25px;font-weight:700;font-size:13px;text-decoration:none;">쇼핑 시작하기</a>
+      <div id="banner-slider" style="display:flex;height:200px;transition:transform 0.4s ease;">
+        <div style="min-width:100%;height:200px;flex-shrink:0;background:linear-gradient(135deg,#FF5733,#FF8C00);display:flex;align-items:center;justify-content:center;">
+          <div style="text-align:center;color:#fff;">
+            <h2 style="font-size:22px;font-weight:900;margin-bottom:8px;">담누리마켓 오픈!</h2>
+            <p style="font-size:13px;margin-bottom:14px;opacity:0.9;">세상의 모든 것을 담누리마켓에서</p>
+            <a href="products.html" style="background:#fff;color:#FF5733;padding:8px 22px;border-radius:25px;font-weight:700;font-size:13px;text-decoration:none;">쇼핑 시작하기</a>
           </div>
         </div>
-        <div style="min-width:100%;height:200px;background:linear-gradient(135deg,#2D3561,#C05C7E);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+        <div style="min-width:100%;height:200px;flex-shrink:0;background:linear-gradient(135deg,#2D3561,#C05C7E);display:flex;align-items:center;justify-content:center;">
           <div style="text-align:center;color:#fff;">
-            <h2 style="font-size:22px;font-weight:900;margin-bottom:6px;">오늘의 특가 최대 50% 할인</h2>
-            <p style="font-size:13px;margin-bottom:12px;opacity:0.9;">매일 새로운 특가 상품을 만나보세요</p>
-            <a href="products.html?filter=sale" style="background:#fff;color:#C05C7E;padding:8px 20px;border-radius:25px;font-weight:700;font-size:13px;text-decoration:none;">특가 보기</a>
+            <h2 style="font-size:22px;font-weight:900;margin-bottom:8px;">오늘의 특가 최대 50% 할인</h2>
+            <p style="font-size:13px;margin-bottom:14px;opacity:0.9;">매일 새로운 특가 상품을 만나보세요</p>
+            <a href="products.html?filter=sale" style="background:#fff;color:#C05C7E;padding:8px 22px;border-radius:25px;font-weight:700;font-size:13px;text-decoration:none;">특가 보기</a>
           </div>
         </div>
-        <div style="min-width:100%;height:200px;background:linear-gradient(135deg,#0A7E8C,#15B8A6);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+        <div style="min-width:100%;height:200px;flex-shrink:0;background:linear-gradient(135deg,#0A7E8C,#15B8A6);display:flex;align-items:center;justify-content:center;">
           <div style="text-align:center;color:#fff;">
-            <h2 style="font-size:22px;font-weight:900;margin-bottom:6px;">가맹점 모집 중</h2>
-            <p style="font-size:13px;margin-bottom:12px;opacity:0.9;">함께 성장하는 파트너를 찾습니다</p>
-            <a href="#" style="background:#fff;color:#0A7E8C;padding:8px 20px;border-radius:25px;font-weight:700;font-size:13px;text-decoration:none;">가맹 문의</a>
+            <h2 style="font-size:22px;font-weight:900;margin-bottom:8px;">가맹점 모집 중</h2>
+            <p style="font-size:13px;margin-bottom:14px;opacity:0.9;">함께 성장하는 파트너를 찾습니다</p>
+            <a href="#" style="background:#fff;color:#0A7E8C;padding:8px 22px;border-radius:25px;font-weight:700;font-size:13px;text-decoration:none;">가맹 문의</a>
           </div>
         </div>
       </div>
-      <button class="banner-arrow banner-prev" onclick="BannerCtrl.prev()">‹</button>
-      <button class="banner-arrow banner-next" onclick="BannerCtrl.next()">›</button>
-      <div id="banner-dots" style="position:absolute;bottom:10px;left:50%;transform:translateX(-50%);display:flex;gap:6px;z-index:10;"></div>
+      <button onclick="BC.prev()" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);background:rgba(255,255,255,0.3);border:none;border-radius:50%;width:36px;height:36px;font-size:20px;cursor:pointer;color:#fff;">‹</button>
+      <button onclick="BC.next()" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:rgba(255,255,255,0.3);border:none;border-radius:50%;width:36px;height:36px;font-size:20px;cursor:pointer;color:#fff;">›</button>
+      <div id="banner-dots" style="position:absolute;bottom:10px;left:50%;transform:translateX(-50%);display:flex;gap:6px;"></div>
     </div>
 
     <!-- 베스트 상품 -->
@@ -186,10 +120,8 @@
         <button class="section-more" onclick="location.href='products.html?filter=best'">더보기</button>
       </div>
       <div class="product-grid" id="best-products">
-        <div class="skeleton skeleton-card"></div>
-        <div class="skeleton skeleton-card"></div>
-        <div class="skeleton skeleton-card"></div>
-        <div class="skeleton skeleton-card"></div>
+        <div class="skeleton skeleton-card"></div><div class="skeleton skeleton-card"></div>
+        <div class="skeleton skeleton-card"></div><div class="skeleton skeleton-card"></div>
       </div>
     </section>
 
@@ -200,10 +132,8 @@
         <button class="section-more" onclick="location.href='products.html?filter=new'">더보기</button>
       </div>
       <div class="product-grid" id="new-products">
-        <div class="skeleton skeleton-card"></div>
-        <div class="skeleton skeleton-card"></div>
-        <div class="skeleton skeleton-card"></div>
-        <div class="skeleton skeleton-card"></div>
+        <div class="skeleton skeleton-card"></div><div class="skeleton skeleton-card"></div>
+        <div class="skeleton skeleton-card"></div><div class="skeleton skeleton-card"></div>
       </div>
     </section>
 
@@ -214,10 +144,8 @@
         <button class="section-more" onclick="location.href='products.html?filter=sale'">더보기</button>
       </div>
       <div class="product-grid" id="sale-products">
-        <div class="skeleton skeleton-card"></div>
-        <div class="skeleton skeleton-card"></div>
-        <div class="skeleton skeleton-card"></div>
-        <div class="skeleton skeleton-card"></div>
+        <div class="skeleton skeleton-card"></div><div class="skeleton skeleton-card"></div>
+        <div class="skeleton skeleton-card"></div><div class="skeleton skeleton-card"></div>
       </div>
     </section>
 
@@ -225,19 +153,12 @@
     <section class="section">
       <div class="flash-header">
         <h2 class="section-title">⚡ 한정 특가</h2>
-        <div class="flash-timer">
-          ⏰ 종료까지
-          <span class="timer-block" id="timer-h">00</span>:
-          <span class="timer-block" id="timer-m">00</span>:
-          <span class="timer-block" id="timer-s">00</span>
-        </div>
+        <div class="flash-timer">⏰ 종료까지 <span class="timer-block" id="timer-h">00</span>:<span class="timer-block" id="timer-m">00</span>:<span class="timer-block" id="timer-s">00</span></div>
         <button class="section-more" onclick="location.href='products.html?filter=sale'">더보기</button>
       </div>
       <div class="product-grid" id="flash-products">
-        <div class="skeleton skeleton-card"></div>
-        <div class="skeleton skeleton-card"></div>
-        <div class="skeleton skeleton-card"></div>
-        <div class="skeleton skeleton-card"></div>
+        <div class="skeleton skeleton-card"></div><div class="skeleton skeleton-card"></div>
+        <div class="skeleton skeleton-card"></div><div class="skeleton skeleton-card"></div>
       </div>
     </section>
 
@@ -248,10 +169,8 @@
         <button class="section-more" onclick="location.href='products.html'">더보기</button>
       </div>
       <div class="product-grid" id="group-products">
-        <div class="skeleton skeleton-card"></div>
-        <div class="skeleton skeleton-card"></div>
-        <div class="skeleton skeleton-card"></div>
-        <div class="skeleton skeleton-card"></div>
+        <div class="skeleton skeleton-card"></div><div class="skeleton skeleton-card"></div>
+        <div class="skeleton skeleton-card"></div><div class="skeleton skeleton-card"></div>
       </div>
     </section>
 
@@ -269,7 +188,7 @@
       <ul>
         <li><a href="#" id="footer-phone">📞 1588-0000</a></li>
         <li><a href="#">평일 9:00 ~ 18:00</a></li>
-        <li><a href="#" id="footer-email">📧 <span class="__cf_email__" data-cfemail="d5bdb0b9a595b1b4b8bba0a7bcfbb6bafbbea7">[email&#160;protected]</span></a></li>
+        <li><a href="#" id="footer-email">📧 help@damnuri.co.kr</a></li>
       </ul>
     </div>
     <div>
@@ -295,214 +214,168 @@
   </div>
 </footer>
 
-<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script src="js/config.js"></script>
+<script src="js/config.js"></script>
 <script src="js/sheets.js"></script>
 <script src="js/app.js"></script>
 <script>
-
-// ============================================================
 // 배너
-// ============================================================
-var BannerCtrl = {
-  current: 0, total: 3, timer: null,
+var BC = {
+  n: 3, c: 0, t: null,
   init: function() {
-    var dotsEl = document.getElementById('banner-dots');
-    dotsEl.innerHTML = '';
-    for (var i = 0; i < this.total; i++) {
-      var dot = document.createElement('button');
-      dot.className = 'banner-dot' + (i === 0 ? ' active' : '');
-      dot.setAttribute('data-i', i);
-      dot.onclick = function() { BannerCtrl.goTo(parseInt(this.getAttribute('data-i'))); };
-      dotsEl.appendChild(dot);
+    var el = document.getElementById('banner-dots');
+    for (var i = 0; i < this.n; i++) {
+      var d = document.createElement('button');
+      d.style.cssText = 'width:8px;height:8px;border-radius:50%;border:none;cursor:pointer;background:' + (i===0?'#fff':'rgba(255,255,255,0.5)');
+      d.setAttribute('data-i', i);
+      d.onclick = function() { BC.go(+this.getAttribute('data-i')); };
+      el.appendChild(d);
     }
-    this.startAuto();
+    this.t = setInterval(function(){ BC.next(); }, 5000);
   },
-  goTo: function(idx) {
-    this.current = (idx + this.total) % this.total;
-    document.getElementById('banner-slider').style.transform = 'translateX(-' + (this.current * 100) + '%)';
-    var dots = document.querySelectorAll('.banner-dot');
-    for (var i = 0; i < dots.length; i++) {
-      dots[i].classList.toggle('active', i === this.current);
+  go: function(i) {
+    this.c = (i + this.n) % this.n;
+    document.getElementById('banner-slider').style.transform = 'translateX(-' + (this.c*100) + '%)';
+    var dots = document.getElementById('banner-dots').children;
+    for (var j = 0; j < dots.length; j++) {
+      dots[j].style.background = j===this.c ? '#fff' : 'rgba(255,255,255,0.5)';
     }
   },
-  prev: function() { this.goTo(this.current - 1); this.resetAuto(); },
-  next: function() { this.goTo(this.current + 1); this.resetAuto(); },
-  startAuto: function() { this.timer = setInterval(function() { BannerCtrl.next(); }, 5000); },
-  resetAuto: function() { clearInterval(this.timer); this.startAuto(); }
+  prev: function() { clearInterval(this.t); this.go(this.c-1); this.t=setInterval(function(){BC.next();},5000); },
+  next: function() { this.go(this.c+1); }
 };
 
-// ============================================================
 // 타이머
-// ============================================================
-function startFlashTimer() {
-  function update() {
-    var now = new Date();
-    var midnight = new Date();
-    midnight.setHours(24, 0, 0, 0);
-    var diff = Math.floor((midnight - now) / 1000);
-    document.getElementById('timer-h').textContent = String(Math.floor(diff / 3600)).padStart(2, '0');
-    document.getElementById('timer-m').textContent = String(Math.floor((diff % 3600) / 60)).padStart(2, '0');
-    document.getElementById('timer-s').textContent = String(diff % 60).padStart(2, '0');
+function startTimer() {
+  function upd() {
+    var now = new Date(), mid = new Date(); mid.setHours(24,0,0,0);
+    var d = Math.floor((mid-now)/1000);
+    document.getElementById('timer-h').textContent = String(Math.floor(d/3600)).padStart(2,'0');
+    document.getElementById('timer-m').textContent = String(Math.floor((d%3600)/60)).padStart(2,'0');
+    document.getElementById('timer-s').textContent = String(d%60).padStart(2,'0');
   }
-  update();
-  setInterval(update, 1000);
+  upd(); setInterval(upd, 1000);
 }
 
-// ============================================================
 // 상품 카드
-// ============================================================
-function makeCard(p) {
-  var price = p.salePrice || p.price;
-  var discount = p.salePrice ? Math.round((1 - p.salePrice / p.price) * 100) : 0;
-  var pJson = JSON.stringify(p).replace(/"/g, '&quot;');
-  return '<div class="product-card" onclick="location.href=\'product.html?id=' + p.id + '\'">'
-    + '<div class="product-img-wrap">'
-    + '<img src="' + p.image + '" alt="' + p.name + '" loading="lazy" onerror="this.src=\'https://via.placeholder.com/400x400\'">'
-    + (p.badge ? '<span class="product-badge badge-' + p.badge.toLowerCase() + '">' + p.badge + '</span>' : '')
-    + '<button class="product-wish" onclick="event.stopPropagation();this.textContent=this.textContent===\'❤️\'?\'🤍\':\'❤️\'">🤍</button>'
-    + '<button class="product-quick-add" onclick="event.stopPropagation();Cart.add(' + pJson + ')">🛒 빠른 담기</button>'
-    + '</div>'
-    + '<div class="product-info">'
-    + '<div class="product-category">' + p.category + '</div>'
-    + '<div class="product-name">' + p.name + '</div>'
-    + '<div class="product-price">'
-    + '<span class="price-sale">' + price.toLocaleString() + '원</span>'
-    + (p.salePrice ? '<span class="price-original">' + p.price.toLocaleString() + '원</span>' : '')
-    + (discount ? '<span class="price-discount">' + discount + '%</span>' : '')
-    + '</div></div></div>';
+function mkCard(p) {
+  var pr = p.salePrice || p.price;
+  var dc = p.salePrice ? Math.round((1-p.salePrice/p.price)*100) : 0;
+  var pj = JSON.stringify(p).replace(/"/g,'&quot;');
+  return '<div class="product-card" onclick="location.href=\'product.html?id='+p.id+'\'">'
+    +'<div class="product-img-wrap">'
+    +'<img src="'+p.image+'" alt="'+p.name+'" loading="lazy" onerror="this.src=\'https://via.placeholder.com/400x400\'">'
+    +(p.badge?'<span class="product-badge badge-'+p.badge.toLowerCase()+'">'+p.badge+'</span>':'')
+    +'<button class="product-wish" onclick="event.stopPropagation();this.textContent=this.textContent===\'❤️\'?\'🤍\':\'❤️\'">🤍</button>'
+    +'<button class="product-quick-add" onclick="event.stopPropagation();Cart.add('+pj+')">🛒 빠른 담기</button>'
+    +'</div><div class="product-info">'
+    +'<div class="product-category">'+p.category+'</div>'
+    +'<div class="product-name">'+p.name+'</div>'
+    +'<div class="product-price"><span class="price-sale">'+pr.toLocaleString()+'원</span>'
+    +(p.salePrice?'<span class="price-original">'+p.price.toLocaleString()+'원</span>':'')
+    +(dc?'<span class="price-discount">'+dc+'%</span>':'')
+    +'</div></div></div>';
 }
 
-function makeGroupCard(p) {
-  var price = p.salePrice || p.price;
-  var discount = p.salePrice ? Math.round((1 - p.salePrice / p.price) * 100) : 0;
-  var pct = Math.floor(Math.random() * 40 + 50);
-  return '<div class="group-buy-card" onclick="location.href=\'product.html?id=' + p.id + '\'">'
-    + '<img src="' + p.image + '" class="group-buy-img" alt="' + p.name + '" loading="lazy" onerror="this.src=\'https://via.placeholder.com/400x400\'">'
-    + '<div class="group-buy-info">'
-    + '<span class="group-buy-badge">👥 공동구매</span>'
-    + '<div class="group-buy-name">' + p.name + '</div>'
-    + '<div class="group-buy-bar"><div class="group-buy-fill" style="width:' + pct + '%"></div></div>'
-    + '<div class="group-buy-pct"><span style="color:#4CAF50;font-weight:700">' + pct + '% 달성</span><span>목표 100명</span></div>'
-    + '<div class="group-buy-price">'
-    + '<span class="group-buy-sale">' + price.toLocaleString() + '원</span>'
-    + (p.salePrice ? '<span class="group-buy-original">' + p.price.toLocaleString() + '원</span>' : '')
-    + (discount ? '<span class="group-buy-discount">' + discount + '% 할인</span>' : '')
-    + '</div></div></div>';
+function mkGroup(p) {
+  var pr = p.salePrice||p.price;
+  var dc = p.salePrice?Math.round((1-p.salePrice/p.price)*100):0;
+  var pct = Math.floor(Math.random()*40+50);
+  return '<div class="group-buy-card" onclick="location.href=\'product.html?id='+p.id+'\'">'
+    +'<img src="'+p.image+'" class="group-buy-img" alt="'+p.name+'" loading="lazy">'
+    +'<div class="group-buy-info">'
+    +'<span class="group-buy-badge">👥 공동구매</span>'
+    +'<div class="group-buy-name">'+p.name+'</div>'
+    +'<div class="group-buy-bar"><div class="group-buy-fill" style="width:'+pct+'%"></div></div>'
+    +'<div class="group-buy-pct"><span style="color:#4CAF50;font-weight:700">'+pct+'% 달성</span><span>목표 100명</span></div>'
+    +'<div class="group-buy-price"><span class="group-buy-sale">'+pr.toLocaleString()+'원</span>'
+    +(p.salePrice?'<span class="group-buy-original">'+p.price.toLocaleString()+'원</span>':'')
+    +(dc?'<span class="group-buy-discount">'+dc+'% 할인</span>':'')
+    +'</div></div></div>';
 }
 
-function showProducts(id, items, type) {
+function showP(id, arr, type) {
   var el = document.getElementById(id);
-  if (!items || !items.length) {
-    el.innerHTML = '<p style="color:#999;font-size:13px;padding:20px;grid-column:1/-1">상품이 없습니다</p>';
-    return;
-  }
-  var html = '';
-  for (var i = 0; i < items.length; i++) {
-    html += (type === 'group') ? makeGroupCard(items[i]) : makeCard(items[i]);
-  }
-  el.innerHTML = html;
+  if (!arr||!arr.length) { el.innerHTML='<p style="color:#999;padding:20px;grid-column:1/-1">상품이 없습니다</p>'; return; }
+  var h='';
+  for(var i=0;i<arr.length;i++) h += type==='g' ? mkGroup(arr[i]) : mkCard(arr[i]);
+  el.innerHTML = h;
 }
 
-// ============================================================
-// 드롭다운 네비
-// ============================================================
+// 네비 드롭다운
 function buildNav(products) {
   try {
     var nav = document.getElementById('main-nav');
-    var catMap = {};
-    for (var i = 0; i < products.length; i++) {
-      var p = products[i];
-      var cat = (p.category || p.카테고리 || '').trim();
-      var sub = (p.subCategory || p.세부카테고리 || p.sub || '').trim();
-      if (!cat) continue;
-      if (!catMap[cat]) catMap[cat] = [];
-      if (sub && catMap[cat].indexOf(sub) === -1) catMap[cat].push(sub);
+    var map = {};
+    for (var i=0;i<products.length;i++) {
+      var cat=(products[i].category||'').trim();
+      var sub=(products[i].subCategory||'').trim();
+      if(!cat) continue;
+      if(!map[cat]) map[cat]=[];
+      if(sub&&map[cat].indexOf(sub)===-1) map[cat].push(sub);
     }
-    var cats = Object.keys(catMap);
-    for (var c = 0; c < cats.length; c++) {
-      var catName = cats[c];
-      var subs = catMap[catName];
-      var wrap = document.createElement('div');
-      wrap.className = 'nav-item-wrap';
-      var btn = document.createElement('button');
-      btn.className = 'nav-item' + (subs.length ? ' has-dropdown' : '');
-      btn.textContent = catName;
-      btn.setAttribute('data-cat', catName);
-      btn.onclick = function() { location.href = 'products.html?category=' + encodeURIComponent(this.getAttribute('data-cat')); };
+    var cats=Object.keys(map);
+    for(var c=0;c<cats.length;c++) {
+      var cn=cats[c], subs=map[cn];
+      var wrap=document.createElement('div'); wrap.className='nav-item-wrap';
+      var btn=document.createElement('button');
+      btn.className='nav-item'+(subs.length?' has-sub':'');
+      btn.textContent=cn; btn.setAttribute('data-c',cn);
+      btn.onclick=function(){location.href='products.html?category='+encodeURIComponent(this.getAttribute('data-c'));};
       wrap.appendChild(btn);
-      if (subs.length) {
-        var dd = document.createElement('div');
-        dd.className = 'nav-dropdown';
-        var allBtn = document.createElement('button');
-        allBtn.className = 'nav-dropdown-item';
-        allBtn.textContent = '✦ 전체보기';
-        allBtn.setAttribute('data-cat', catName);
-        allBtn.onclick = function(e) { e.stopPropagation(); location.href = 'products.html?category=' + encodeURIComponent(this.getAttribute('data-cat')); };
-        dd.appendChild(allBtn);
-        for (var s = 0; s < subs.length; s++) {
-          var sb = document.createElement('button');
-          sb.className = 'nav-dropdown-item';
-          sb.textContent = subs[s];
-          sb.setAttribute('data-cat', catName);
-          sb.setAttribute('data-sub', subs[s]);
-          sb.onclick = function(e) {
-            e.stopPropagation();
-            location.href = 'products.html?category=' + encodeURIComponent(this.getAttribute('data-cat')) + '&sub=' + encodeURIComponent(this.getAttribute('data-sub'));
-          };
+      if(subs.length){
+        var dd=document.createElement('div'); dd.className='nav-dropdown';
+        var ab=document.createElement('button'); ab.className='nav-dropdown-item'; ab.textContent='✦ 전체보기'; ab.setAttribute('data-c',cn);
+        ab.onclick=function(e){e.stopPropagation();location.href='products.html?category='+encodeURIComponent(this.getAttribute('data-c'));};
+        dd.appendChild(ab);
+        for(var s=0;s<subs.length;s++){
+          var sb=document.createElement('button'); sb.className='nav-dropdown-item'; sb.textContent=subs[s];
+          sb.setAttribute('data-c',cn); sb.setAttribute('data-s',subs[s]);
+          sb.onclick=function(e){e.stopPropagation();location.href='products.html?category='+encodeURIComponent(this.getAttribute('data-c'))+'&sub='+encodeURIComponent(this.getAttribute('data-s'));};
           dd.appendChild(sb);
         }
         wrap.appendChild(dd);
       }
       nav.appendChild(wrap);
     }
-  } catch(e) {
-    console.log('네비 생성 오류(무시):', e);
-  }
+  } catch(e){ console.log('nav err:',e); }
 }
 
-// ============================================================
-// 메인 상품 로드
-// ============================================================
-function loadAllProducts() {
+// 메인 로드
+function runApp() {
+  try { Cart.init(); } catch(e){}
+  try { BC.init(); } catch(e){}
+  try { startTimer(); } catch(e){}
+  try {
+    var sn = document.getElementById('store-name');
+    if(sn && CONFIG && CONFIG.STORE) sn.textContent = CONFIG.STORE.NAME;
+  } catch(e){}
+  try { setTimeout(function(){ Popup.loadAndShow(); }, 800); } catch(e){}
+
   ProductAPI.getAll().then(function(products) {
-    // 네비 생성
     buildNav(products);
-
-    // 베스트
-    var best = products.filter(function(p) { return p.badge === 'BEST' || p.isFeatured; }).slice(0, 4);
-    showProducts('best-products', best.length ? best : products.slice(0, 4));
-
-    // 신상품
-    var newItems = products.filter(function(p) { return p.badge === 'NEW'; }).slice(0, 4);
-    showProducts('new-products', newItems.length ? newItems : products.slice(2, 6));
-
-    // 오늘의 특가
-    var sale = products.filter(function(p) { return p.salePrice > 0; }).slice(0, 4);
-    showProducts('sale-products', sale.length ? sale : products.slice(0, 4));
-
-    // 한정 특가 (할인율 높은 순)
-    var flash = products.filter(function(p) { return p.salePrice > 0; })
-      .sort(function(a, b) { return (1 - b.salePrice/b.price) - (1 - a.salePrice/a.price); })
-      .slice(0, 4);
-    showProducts('flash-products', flash.length ? flash : products.slice(0, 4));
-
-    // 공동구매
-    var group = products.filter(function(p) { return p.isFeatured || p.badge === 'BEST'; }).slice(0, 4);
-    showProducts('group-products', group.length ? group : products.slice(0, 4), 'group');
-
-  }).catch(function(err) {
-    console.error('상품 로드 실패:', err);
-    var ids = ['best-products','new-products','sale-products','flash-products','group-products'];
-    for (var i = 0; i < ids.length; i++) {
-      document.getElementById(ids[i]).innerHTML = '<p style="color:#999;padding:20px;grid-column:1/-1">상품을 불러올 수 없습니다</p>';
-    }
+    var best=products.filter(function(p){return p.badge==='BEST'||p.isFeatured;}).slice(0,4);
+    showP('best-products', best.length?best:products.slice(0,4));
+    var nw=products.filter(function(p){return p.badge==='NEW';}).slice(0,4);
+    showP('new-products', nw.length?nw:products.slice(2,6));
+    var sale=products.filter(function(p){return p.salePrice>0;}).slice(0,4);
+    showP('sale-products', sale.length?sale:products.slice(0,4));
+    var flash=products.filter(function(p){return p.salePrice>0;}).sort(function(a,b){return(1-b.salePrice/b.price)-(1-a.salePrice/a.price);}).slice(0,4);
+    showP('flash-products', flash.length?flash:products.slice(0,4));
+    var grp=products.filter(function(p){return p.isFeatured||p.badge==='BEST';}).slice(0,4);
+    showP('group-products', grp.length?grp:products.slice(0,4),'g');
+  }).catch(function(e){
+    console.error('상품 로드 실패:',e);
+    var ids=['best-products','new-products','sale-products','flash-products','group-products'];
+    for(var i=0;i<ids.length;i++) document.getElementById(ids[i]).innerHTML='<p style="color:#999;padding:20px;grid-column:1/-1">상품 로드 실패</p>';
   });
 }
 
-// ============================================================
-// 페이지 초기화
-// ============================================================
-document.getElementById('page-title').textContent = CONFIG.STORE.NAME + ' - 종합쇼핑몰';
-document.getElementById('store-name').textContent = CONFIG.STORE.NAME;
-document.getElementById('footer-store-name').textContent = '🏪 ' + CONFIG.STORE.NAME;
-document.getElementById('footer-phon
+// 실행
+if(document.readyState==='loading') {
+  document.addEventListener('DOMContentLoaded', runApp);
+} else {
+  runApp();
+}
+</script>
+</body>
+</html>
