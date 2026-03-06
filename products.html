@@ -74,7 +74,6 @@
 
 <main>
   <div class="main-wrap">
-    <!-- 상단 제목 + 필터 버튼 (모바일) -->
     <div style="display:flex; align-items:center; justify-content:space-between; margin-top:20px;">
       <h1 style="font-size:20px; font-weight:800;" id="page-heading">전체 상품</h1>
       <button class="filter-btn" onclick="document.getElementById('filter-panel').classList.toggle('mobile-open')">
@@ -83,14 +82,12 @@
     </div>
 
     <div class="products-layout">
-      <!-- 필터 패널 -->
       <aside class="filter-panel" id="filter-panel">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
           <strong>필터</strong>
           <button onclick="resetFilters()" style="font-size:12px; color:var(--gray); background:none; border:none; cursor:pointer;">초기화</button>
         </div>
 
-        <!-- 카테고리 필터 -->
         <div class="filter-group">
           <h4>카테고리</h4>
           <div id="filter-categories">
@@ -98,7 +95,6 @@
           </div>
         </div>
 
-        <!-- 가격 필터 -->
         <div class="filter-group">
           <h4>가격</h4>
           <div class="price-range">
@@ -107,7 +103,6 @@
           </div>
         </div>
 
-        <!-- 상태 필터 -->
         <div class="filter-group">
           <h4>상품 유형</h4>
           <label class="filter-item"><input type="checkbox" id="filter-sale"> 할인 상품만</label>
@@ -118,7 +113,6 @@
         <button class="filter-apply" onclick="applyFilters()">적용하기</button>
       </aside>
 
-      <!-- 상품 목록 -->
       <div>
         <div class="products-header">
           <span class="products-count" id="products-count">상품 로딩 중...</span>
@@ -148,7 +142,7 @@
 
 <footer class="footer">
   <div class="footer-bottom" style="text-align:center; max-width:1280px; margin:0 auto; padding:20px 0;">
-    <p>© 2025 <span id="footer-name">담누리마켓</span>. All rights reserved. &nbsp;|&nbsp; <a href="index.html" style="color:#aaa;">홈으로</a></p>
+    <p>© 2026 <span id="footer-name">담누리마켓</span>. All rights reserved. &nbsp;|&nbsp; <a href="index.html" style="color:#aaa;">홈으로</a></p>
   </div>
 </footer>
 
@@ -160,6 +154,9 @@ let allProducts = [];
 let filteredProducts = [];
 let currentPage = 1;
 const PER_PAGE = CONFIG.PRODUCTS_PER_PAGE;
+
+// 현재 선택된 카테고리명 저장
+let currentCategoryName = 'all';
 
 function createProductCard(p) {
   const price = p.salePrice || p.price;
@@ -235,16 +232,19 @@ function sortProducts() {
 }
 
 function applyFilters() {
-  const cat = document.querySelector('input[name="cat"]:checked')?.value || 'all';
   const minP = parseInt(document.getElementById('price-min').value) || 0;
   const maxP = parseInt(document.getElementById('price-max').value) || Infinity;
   const onlySale = document.getElementById('filter-sale').checked;
   const onlyNew = document.getElementById('filter-new').checked;
   const onlyBest = document.getElementById('filter-best').checked;
 
-  filteredProducts = allProducts.filter(p => {
+  // 현재 선택된 카테고리 기준으로 필터
+  let base = currentCategoryName === 'all'
+    ? [...allProducts]
+    : allProducts.filter(p => p.category.trim() === currentCategoryName.trim());
+
+  filteredProducts = base.filter(p => {
     const price = p.salePrice || p.price;
-    if (cat !== 'all' && p.category !== cat) return false;
     if (price < minP || price > maxP) return false;
     if (onlySale && !p.salePrice) return false;
     if (onlyNew && p.badge !== 'NEW') return false;
@@ -257,22 +257,38 @@ function applyFilters() {
 }
 
 function resetFilters() {
-  document.querySelectorAll('input[name="cat"]')[0].checked = true;
   document.getElementById('price-min').value = '';
   document.getElementById('price-max').value = '';
   document.getElementById('filter-sale').checked = false;
   document.getElementById('filter-new').checked = false;
   document.getElementById('filter-best').checked = false;
+  currentCategoryName = 'all';
   filteredProducts = [...allProducts];
   currentPage = 1;
   renderPage();
+
+  // 전체 버튼 활성화
+  document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+  document.querySelector('.nav-item').classList.add('active');
 }
 
-function filterByNav(id, btn) {
+// ✅ 핵심 수정: 카테고리명(문자열)으로 필터링
+function filterByNav(categoryName, btn) {
+  // 모든 nav 버튼 비활성화 후 클릭한 버튼만 활성화
   document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
   if (btn) btn.classList.add('active');
-  if (id === 'all') { filteredProducts = [...allProducts]; }
-  else { filteredProducts = allProducts.filter(p => p.category === id); }
+
+  currentCategoryName = categoryName;
+
+  if (categoryName === 'all') {
+    filteredProducts = [...allProducts];
+    document.getElementById('page-heading').textContent = '전체 상품';
+  } else {
+    // trim()으로 공백 제거 후 비교
+    filteredProducts = allProducts.filter(p => p.category.trim() === categoryName.trim());
+    document.getElementById('page-heading').textContent = categoryName + ' 상품';
+  }
+
   currentPage = 1;
   renderPage();
 }
@@ -282,9 +298,10 @@ async function initPage() {
   document.getElementById('footer-name').textContent = CONFIG.STORE.NAME;
   Cart.init();
 
-  // URL 파라미터로 필터 확인
   const params = new URLSearchParams(location.search);
   const filterParam = params.get('filter');
+  const categoryParam = params.get('category');
+
   if (filterParam) {
     document.getElementById('page-heading').textContent =
       {sale:'특가 상품', new:'신상품', best:'베스트 상품'}[filterParam] || '전체 상품';
@@ -294,40 +311,59 @@ async function initPage() {
     allProducts = await ProductAPI.getAll();
     if (!allProducts.length) throw new Error('empty');
   } catch(e) {
-    allProducts = Array.from({length: 12}, (_, i) => ({
-      id: 'sample-' + i,
-      name: ['프리미엄 반팔 티셔츠', '클래식 데님 팬츠', '캐주얼 스니커즈', '레더 크로스백',
-             '린넨 셔츠', '코튼 원피스', '슬립온 슈즈', '미니 숄더백',
-             '와이드 팬츠', '니트 가디건', '러닝화', '토트백'][i],
-      price: [29000,59000,89000,79000,49000,69000,55000,85000,52000,79000,99000,65000][i],
-      salePrice: [0,49000,0,65000,39000,0,0,72000,0,59000,79000,0][i],
-      category: ['의류','의류','신발','가방','의류','의류','신발','가방','의류','의류','신발','가방'][i],
-      image: `https://picsum.photos/400/400?random=${i+20}`,
-      badge: ['NEW','BEST','','SALE','','NEW','','SALE','BEST','','NEW',''][i],
-      isFeatured: i < 4,
-    }));
+    allProducts = [];
   }
 
   // URL 필터 적용
   if (filterParam === 'sale') filteredProducts = allProducts.filter(p => p.salePrice > 0);
   else if (filterParam === 'new') filteredProducts = allProducts.filter(p => p.badge === 'NEW');
   else if (filterParam === 'best') filteredProducts = allProducts.filter(p => p.badge === 'BEST' || p.isFeatured);
-  else filteredProducts = [...allProducts];
+  else if (categoryParam) {
+    currentCategoryName = categoryParam;
+    filteredProducts = allProducts.filter(p => p.category.trim() === categoryParam.trim());
+    document.getElementById('page-heading').textContent = categoryParam + ' 상품';
+  } else {
+    filteredProducts = [...allProducts];
+  }
 
-  // 카테고리 필터 로드
+  // 카테고리 네비 + 필터 패널 로드
   try {
     const categories = await CategoryAPI.getMain();
     const catContainer = document.getElementById('filter-categories');
     const nav = document.getElementById('main-nav');
+
     categories.forEach(c => {
-      catContainer.innerHTML += `<label class="filter-item"><input type="radio" name="cat" value="${c.id}"> ${c.icon} ${c.name}</label>`;
+      const catName = c.name.trim();
+
+      // 사이드 필터 라디오
+      catContainer.innerHTML += `
+        <label class="filter-item">
+          <input type="radio" name="cat" value="${catName}"
+            onchange="filterByNav('${catName}', null)">
+          ${c.icon} ${catName}
+        </label>`;
+
+      // 상단 네비 버튼 - ✅ c.name(카테고리명)으로 필터링
       const btn = document.createElement('button');
       btn.className = 'nav-item';
-      btn.textContent = `${c.icon} ${c.name}`;
-      btn.onclick = () => filterByNav(c.name, btn);
+      btn.textContent = `${c.icon} ${catName}`;
+      btn.setAttribute('data-category', catName);
+      btn.onclick = function() { filterByNav(catName, this); };
       nav.appendChild(btn);
     });
-  } catch(e) {}
+
+    // URL에서 카테고리 파라미터 왔으면 해당 버튼 활성화
+    if (categoryParam) {
+      document.querySelectorAll('.nav-item').forEach(b => {
+        if (b.getAttribute('data-category') === categoryParam) {
+          b.classList.add('active');
+          document.querySelector('.nav-item').classList.remove('active');
+        }
+      });
+    }
+  } catch(e) {
+    console.log('카테고리 로드 실패:', e);
+  }
 
   renderPage();
 }
