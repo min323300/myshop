@@ -150,33 +150,33 @@
   <div class="main-wrap">
 
     <!-- 배너 -->
-    <section class="banner-wrap" id="banner-section">
-      <div class="banner-slider" id="banner-slider">
-        <div class="banner-slide" style="background:linear-gradient(135deg,#FF5733,#FF8C00)">
-          <div class="banner-content">
-            <h2>담누리마켓 오픈!</h2>
-            <p>세상의 모든 것을 담누리마켓에서</p>
-            <a href="products.html" class="banner-btn">쇼핑 시작하기</a>
+    <section style="overflow:hidden;border-radius:12px;position:relative;margin-bottom:32px;">
+      <div id="banner-slider" style="display:flex;transition:transform 0.4s ease;height:200px;">
+        <div style="min-width:100%;height:200px;background:linear-gradient(135deg,#FF5733,#FF8C00);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+          <div class="banner-content" style="text-align:center;color:#fff;">
+            <h2 style="font-size:22px;font-weight:900;margin-bottom:6px;">담누리마켓 오픈!</h2>
+            <p style="font-size:13px;margin-bottom:12px;opacity:0.9;">세상의 모든 것을 담누리마켓에서</p>
+            <a href="products.html" style="background:#fff;color:#FF5733;padding:8px 20px;border-radius:25px;font-weight:700;font-size:13px;text-decoration:none;">쇼핑 시작하기</a>
           </div>
         </div>
-        <div class="banner-slide" style="background:linear-gradient(135deg,#2D3561,#C05C7E)">
-          <div class="banner-content">
-            <h2>오늘의 특가 최대 50% 할인</h2>
-            <p>매일 새로운 특가 상품을 만나보세요</p>
-            <a href="products.html?filter=sale" class="banner-btn">특가 보기</a>
+        <div style="min-width:100%;height:200px;background:linear-gradient(135deg,#2D3561,#C05C7E);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+          <div style="text-align:center;color:#fff;">
+            <h2 style="font-size:22px;font-weight:900;margin-bottom:6px;">오늘의 특가 최대 50% 할인</h2>
+            <p style="font-size:13px;margin-bottom:12px;opacity:0.9;">매일 새로운 특가 상품을 만나보세요</p>
+            <a href="products.html?filter=sale" style="background:#fff;color:#C05C7E;padding:8px 20px;border-radius:25px;font-weight:700;font-size:13px;text-decoration:none;">특가 보기</a>
           </div>
         </div>
-        <div class="banner-slide" style="background:linear-gradient(135deg,#0A7E8C,#15B8A6)">
-          <div class="banner-content">
-            <h2>가맹점 모집 중</h2>
-            <p>함께 성장하는 파트너를 찾습니다</p>
-            <a href="#" class="banner-btn">가맹 문의</a>
+        <div style="min-width:100%;height:200px;background:linear-gradient(135deg,#0A7E8C,#15B8A6);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+          <div style="text-align:center;color:#fff;">
+            <h2 style="font-size:22px;font-weight:900;margin-bottom:6px;">가맹점 모집 중</h2>
+            <p style="font-size:13px;margin-bottom:12px;opacity:0.9;">함께 성장하는 파트너를 찾습니다</p>
+            <a href="#" style="background:#fff;color:#0A7E8C;padding:8px 20px;border-radius:25px;font-weight:700;font-size:13px;text-decoration:none;">가맹 문의</a>
           </div>
         </div>
       </div>
       <button class="banner-arrow banner-prev" onclick="BannerCtrl.prev()">‹</button>
       <button class="banner-arrow banner-next" onclick="BannerCtrl.next()">›</button>
-      <div class="banner-dots" id="banner-dots"></div>
+      <div class="banner-dots" id="banner-dots" style="position:absolute;bottom:10px;left:50%;transform:translateX(-50%);display:flex;gap:6px;"></div>
     </section>
 
     <!-- 베스트 상품 -->
@@ -269,7 +269,7 @@
       <ul>
         <li><a href="#" id="footer-phone">📞 1588-0000</a></li>
         <li><a href="#">평일 9:00 ~ 18:00</a></li>
-        <li><a href="#" id="footer-email">📧 help@damnuri.co.kr</a></li>
+        <li><a href="#" id="footer-email">📧 <span class="__cf_email__" data-cfemail="d5bdb0b9a595b1b4b8bba0a7bcfbb6bafbbea7">[email&#160;protected]</span></a></li>
       </ul>
     </div>
     <div>
@@ -295,7 +295,7 @@
   </div>
 </footer>
 
-<script src="js/config.js"></script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script src="js/config.js"></script>
 <script src="js/sheets.js"></script>
 <script src="js/app.js"></script>
 <script>
@@ -504,14 +504,4 @@ function loadAllProducts() {
 document.getElementById('page-title').textContent = CONFIG.STORE.NAME + ' - 종합쇼핑몰';
 document.getElementById('store-name').textContent = CONFIG.STORE.NAME;
 document.getElementById('footer-store-name').textContent = '🏪 ' + CONFIG.STORE.NAME;
-document.getElementById('footer-phone').textContent = '📞 ' + CONFIG.STORE.PHONE;
-
-Cart.init();
-BannerCtrl.init();
-startFlashTimer();
-setTimeout(function() { Popup.loadAndShow(); }, 500);
-loadAllProducts();
-
-</script>
-</body>
-</html>
+document.getElementById('footer-phon
