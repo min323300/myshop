@@ -11,6 +11,8 @@
   <style>
     /* 배너 overflow 수정 */
     .banner-wrap { overflow: hidden !important; border-radius: 12px; }
+    .banner-slider { display: flex !important; overflow: hidden !important; }
+    .banner-slide { height: 220px !important; min-width: 100% !important; flex-shrink: 0 !important; }
     /* 드롭다운이 nav 밖으로 나올 수 있게 */
     .header-nav { overflow: visible !important; position: relative; z-index: 100; }
     .nav-inner { overflow: visible !important; position: relative; }
@@ -441,7 +443,9 @@ async function loadCategoryNav(products) {
 async function loadProducts() {
   try {
     const products = await ProductAPI.getAll();
-    await loadCategoryNav(products);
+
+    // 네비 로드는 별도 처리 - 실패해도 상품에 영향 없음
+    loadCategoryNav(products).catch(e => console.log('네비 로드 실패(무시):', e));
 
     const best = products.filter(p=>p.badge==='BEST'||p.isFeatured).slice(0,4);
     renderProducts('best-products', best.length?best:products.slice(0,4));
