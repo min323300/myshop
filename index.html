@@ -150,7 +150,7 @@
   <div class="main-wrap">
 
     <!-- 배너 -->
-    <section style="overflow:hidden;border-radius:12px;position:relative;margin-bottom:32px;">
+    <div style="overflow:hidden;border-radius:12px;position:relative;margin-bottom:32px;height:200px;">
       <div id="banner-slider" style="display:flex;transition:transform 0.4s ease;height:200px;">
         <div style="min-width:100%;height:200px;background:linear-gradient(135deg,#FF5733,#FF8C00);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
           <div class="banner-content" style="text-align:center;color:#fff;">
@@ -176,8 +176,8 @@
       </div>
       <button class="banner-arrow banner-prev" onclick="BannerCtrl.prev()">‹</button>
       <button class="banner-arrow banner-next" onclick="BannerCtrl.next()">›</button>
-      <div class="banner-dots" id="banner-dots" style="position:absolute;bottom:10px;left:50%;transform:translateX(-50%);display:flex;gap:6px;"></div>
-    </section>
+      <div id="banner-dots" style="position:absolute;bottom:10px;left:50%;transform:translateX(-50%);display:flex;gap:6px;z-index:10;"></div>
+    </div>
 
     <!-- 베스트 상품 -->
     <section class="section">
@@ -411,8 +411,9 @@ function buildNav(products) {
     var nav = document.getElementById('main-nav');
     var catMap = {};
     for (var i = 0; i < products.length; i++) {
-      var cat = (products[i].category || '').trim();
-      var sub = (products[i].subCategory || '').trim();
+      var p = products[i];
+      var cat = (p.category || p.카테고리 || '').trim();
+      var sub = (p.subCategory || p.세부카테고리 || p.sub || '').trim();
       if (!cat) continue;
       if (!catMap[cat]) catMap[cat] = [];
       if (sub && catMap[cat].indexOf(sub) === -1) catMap[cat].push(sub);
