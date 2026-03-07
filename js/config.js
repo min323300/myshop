@@ -1,13 +1,12 @@
 // ============================================================
 // ⚙️ 설정 파일 - config.js (담누리마켓)
 // ============================================================
-
 const CONFIG = {
-  // ✅ Google Sheets ID (아래 1t804fRO8HfQtmOzpDAz2IZfzRDQ7t8LYlIFGZr3ftUI 를 실제 ID로 교체)
-  // 주소창에서 확인: docs.google.com/spreadsheets/d/[여기가 ID]/edit
+  // ✅ Google Sheets ID
   SHEET_ID: '1t804fRO8HfQtmOzpDAz2IZfzRDQ7t8LYllFGZr3ftUI',
-
-  // 시트별 URL 자동 생성 (시트 이름만 관리)
+  // ✅ 이미지 기본 URL (파일명만 입력하면 자동으로 앞에 붙음)
+  IMAGE_BASE: 'https://min323300.github.io/myshop/images/',
+  // 시트별 URL 자동 생성
   get SHEETS() {
     const base = `https://docs.google.com/spreadsheets/d/${this.SHEET_ID}/gviz/tq?tqx=out:csv&sheet=`;
     return {
@@ -22,9 +21,10 @@ const CONFIG = {
       PG설정: base + encodeURIComponent('PG설정'),
       팝업: base + encodeURIComponent('팝업'),
       배너: base + encodeURIComponent('배너'),
+      배송정책: base + encodeURIComponent('배송정책'),
+      사업자정보: base + encodeURIComponent('사업자정보'),
     };
   },
-
   // ✅ 본사 기본 정보
   STORE: {
     NAME: '담누리마켓',
@@ -39,19 +39,16 @@ const CONFIG = {
       YOUTUBE: 'https://youtube.com/',
     }
   },
-
-  // ✅ 가맹점 설정 (가맹점 쇼핑몰에서만 변경)
+  // ✅ 가맹점 설정
   IS_FRANCHISE: false,
   FRANCHISE_ID: '',
   FRANCHISE_NAME: '',
-
-  // ✅ PG 설정 (PG사 확정 후 입력)
+  // ✅ PG 설정
   PG: {
     PROVIDER: '',
     MERCHANT_ID: '',
     API_PROXY_URL: '',
   },
-
   // ✅ 기타 설정
   PRODUCTS_PER_PAGE: 12,
   CURRENCY: 'KRW',
