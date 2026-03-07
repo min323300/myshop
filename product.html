@@ -3,248 +3,187 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title id="page-title">상품 상세 - 담누리마켓</title>
+  <title>상품 상세 - 담누리마켓</title>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
   <style>
-    .product-detail-wrap { max-width:1100px; margin:32px auto; padding:0 24px; }
-
-    /* 빵부스러기 */
-    .breadcrumb { display:flex; align-items:center; gap:6px; font-size:13px; color:var(--gray-light); margin-bottom:24px; }
-    .breadcrumb a { color:var(--gray-light); transition:var(--transition); }
-    .breadcrumb a:hover { color:var(--accent); }
-    .breadcrumb span { color:var(--gray-dark); font-weight:600; }
-
-    /* 상단 레이아웃 */
-    .product-top { display:grid; grid-template-columns:1fr 1fr; gap:48px; margin-bottom:48px; }
-
-    /* 갤러리 */
-    .gallery-wrap { position:sticky; top:80px; }
-    .gallery-main {
-      aspect-ratio:1; border-radius:16px; overflow:hidden;
-      border:1px solid var(--border); background:#f8f8f8;
-      margin-bottom:12px; position:relative; cursor:zoom-in;
-    }
-    .gallery-main img { width:100%; height:100%; object-fit:cover; transition:transform 0.4s ease; display:block; }
-    .gallery-main:hover img { transform:scale(1.06); }
-    .gallery-zoom-overlay {
-      position:absolute; bottom:12px; right:12px;
-      background:rgba(0,0,0,0.45); color:#fff;
-      border-radius:8px; padding:6px 10px; font-size:12px;
-      display:flex; align-items:center; gap:4px; pointer-events:none;
-    }
-    .gallery-nav {
-      position:absolute; top:50%; transform:translateY(-50%);
-      background:rgba(255,255,255,0.9); border:none; border-radius:50%;
-      width:36px; height:36px; display:flex; align-items:center; justify-content:center;
-      font-size:16px; cursor:pointer; box-shadow:0 2px 8px rgba(0,0,0,0.15);
-      transition:all 0.2s; z-index:2;
-    }
-    .gallery-nav:hover { background:#fff; box-shadow:0 4px 12px rgba(0,0,0,0.2); }
-    .gallery-nav.prev { left:10px; }
-    .gallery-nav.next { right:10px; }
-    .gallery-nav-hidden { display:none !important; }
-    .gallery-badge { position:absolute; top:12px; left:12px; font-size:12px; font-weight:800; padding:4px 10px; border-radius:6px; z-index:2; }
-    .gallery-counter {
-      position:absolute; bottom:12px; left:50%; transform:translateX(-50%);
-      background:rgba(0,0,0,0.45); color:#fff; border-radius:20px;
-      padding:4px 12px; font-size:12px; font-weight:600; pointer-events:none;
-    }
-    .gallery-thumbs { display:flex; gap:8px; overflow-x:auto; scrollbar-width:none; padding-bottom:4px; }
-    .gallery-thumbs::-webkit-scrollbar { display:none; }
-    .gallery-thumb {
-      width:72px; height:72px; flex-shrink:0; border-radius:8px; overflow:hidden;
-      border:2.5px solid transparent; cursor:pointer; transition:all 0.2s; background:#f0f0f0;
-    }
-    .gallery-thumb:hover { border-color:#ccc; }
-    .gallery-thumb.active { border-color:var(--accent); box-shadow:0 0 0 2px var(--accent)22; }
-    .gallery-thumb img { width:100%; height:100%; object-fit:cover; display:block; }
-
-    /* 라이트박스 */
-    .lightbox { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.92); z-index:9999; align-items:center; justify-content:center; flex-direction:column; }
-    .lightbox.open { display:flex; }
-    .lightbox-img { max-width:90vw; max-height:85vh; object-fit:contain; border-radius:8px; }
-    .lightbox-close { position:absolute; top:20px; right:24px; color:#fff; font-size:28px; background:none; border:none; cursor:pointer; opacity:0.7; transition:opacity 0.2s; }
-    .lightbox-close:hover { opacity:1; }
-    .lightbox-counter { color:rgba(255,255,255,0.6); font-size:13px; margin-top:12px; }
-    .lightbox-nav { position:absolute; top:50%; transform:translateY(-50%); background:rgba(255,255,255,0.15); color:#fff; border:none; border-radius:50%; width:44px; height:44px; font-size:20px; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:background 0.2s; }
-    .lightbox-nav:hover { background:rgba(255,255,255,0.3); }
-    .lightbox-nav.prev { left:20px; }
-    .lightbox-nav.next { right:20px; }
-
-    /* 상품 정보 */
-    .product-info-panel { padding:4px 0; }
-    .product-info-category { font-size:12px; color:var(--accent); font-weight:600; margin-bottom:8px; display:flex; align-items:center; gap:6px; }
-    .product-info-name { font-size:24px; font-weight:900; line-height:1.4; margin-bottom:12px; color:var(--black); }
-    .rating-summary { display:flex; align-items:center; gap:10px; padding:12px 0; border-top:1px solid var(--border); border-bottom:1px solid var(--border); margin-bottom:20px; }
-    .stars-display { display:flex; gap:2px; }
-    .star { font-size:18px; }
-    .rating-score { font-size:20px; font-weight:800; color:#FF8C00; }
-    .rating-count { font-size:13px; color:var(--gray); }
-    .sales-count { font-size:13px; color:var(--gray); margin-left:auto; }
-
-    /* 가격 */
-    .price-section { margin-bottom:24px; }
-    .price-original-line { font-size:14px; color:var(--gray-light); text-decoration:line-through; margin-bottom:4px; }
-    .price-main-line { display:flex; align-items:baseline; gap:12px; }
-    .price-main { font-size:32px; font-weight:900; color:var(--black); }
-    .price-discount-badge { background:var(--accent); color:#fff; font-size:14px; font-weight:800; padding:4px 10px; border-radius:6px; }
-    .price-note { font-size:12px; color:var(--gray-light); margin-top:6px; }
-
-    /* 옵션 */
-    .option-section { margin-bottom:20px; display:none; }
-    .option-section.has-options { display:block; }
-    .option-label { font-size:14px; font-weight:700; margin-bottom:10px; }
-    .option-chips { display:flex; flex-wrap:wrap; gap:8px; }
-    .option-chip { padding:7px 14px; border:1.5px solid var(--border); border-radius:20px; font-size:13px; font-weight:500; cursor:pointer; transition:all 0.2s; background:#fff; }
-    .option-chip:hover { border-color:var(--accent); color:var(--accent); }
-    .option-chip.active { background:var(--accent); color:#fff; border-color:var(--accent); }
-
-    /* 배송 */
-    .delivery-info { background:var(--bg); border-radius:10px; padding:16px; margin-bottom:24px; }
-    .delivery-row { display:flex; gap:12px; font-size:13px; padding:4px 0; }
-    .delivery-label { color:var(--gray); width:70px; flex-shrink:0; }
-    .delivery-value { color:var(--gray-dark); font-weight:500; }
-    .delivery-free { color:var(--accent); font-weight:700; }
-
-    /* 수량 */
-    .qty-section { margin-bottom:24px; }
-    .qty-label { font-size:14px; font-weight:700; margin-bottom:10px; }
-    .qty-row { display:flex; align-items:center; justify-content:space-between; }
-    .qty-control { display:flex; align-items:center; border:1.5px solid var(--border); border-radius:8px; overflow:hidden; }
-    .qty-control button { padding:10px 16px; background:var(--bg); border:none; font-size:18px; color:var(--gray-dark); cursor:pointer; transition:var(--transition); }
-    .qty-control button:hover { background:var(--border); }
-    .qty-control input { width:56px; text-align:center; border:none; border-left:1.5px solid var(--border); border-right:1.5px solid var(--border); font-size:16px; font-weight:700; padding:10px 0; font-family:var(--font-main); }
-    .qty-total { font-size:18px; font-weight:800; color:var(--accent); }
-
-    /* 버튼 */
-    .buy-buttons { display:grid; grid-template-columns:48px 1fr 1fr; gap:8px; margin-bottom:16px; }
-    .btn-wish-lg { padding:16px; border:1.5px solid var(--border); background:#fff; border-radius:10px; font-size:20px; cursor:pointer; transition:var(--transition); }
-    .btn-wish-lg:hover { border-color:#ff4081; background:#fff5f8; }
-    .btn-cart-lg { padding:16px; border:2px solid var(--accent); background:#fff; color:var(--accent); border-radius:10px; font-size:15px; font-weight:800; cursor:pointer; transition:var(--transition); font-family:var(--font-main); }
-    .btn-cart-lg:hover { background:var(--accent-light); }
-    .btn-buy-lg { padding:16px; background:var(--accent); color:#fff; border:none; border-radius:10px; font-size:15px; font-weight:800; cursor:pointer; transition:var(--transition); font-family:var(--font-main); }
-    .btn-buy-lg:hover { background:var(--accent-dark); transform:translateY(-1px); }
-    .share-row { display:flex; align-items:center; gap:8px; font-size:13px; color:var(--gray); }
-    .share-btn { padding:6px 12px; border:1px solid var(--border); border-radius:16px; background:#fff; font-size:12px; cursor:pointer; transition:var(--transition); }
-    .share-btn:hover { border-color:var(--accent); color:var(--accent); }
-
-    /* 탭 */
-    .detail-tabs { border-bottom:2px solid var(--border); display:flex; gap:0; margin-bottom:32px; }
-    .detail-tab { padding:14px 28px; font-size:15px; font-weight:600; color:var(--gray); background:none; border:none; border-bottom:3px solid transparent; margin-bottom:-2px; cursor:pointer; transition:var(--transition); font-family:var(--font-main); }
-    .detail-tab.active { color:var(--accent); border-bottom-color:var(--accent); }
-    .tab-panel { display:none; }
-    .tab-panel.active { display:block; }
-
-    /* 상품 설명 */
-    .product-description { font-size:15px; line-height:1.9; color:var(--gray-dark); }
-    .product-description.html-mode img { max-width:100%; border-radius:10px; margin:16px 0; display:block; }
-    .product-description.html-mode h2 { font-size:20px; font-weight:800; margin:28px 0 12px; color:var(--black); padding-bottom:8px; border-bottom:2px solid var(--border); }
-    .product-description.html-mode h3 { font-size:17px; font-weight:700; margin:20px 0 8px; color:var(--gray-dark); }
-    .product-description.html-mode ul, .product-description.html-mode ol { padding-left:20px; margin:12px 0; }
-    .product-description.html-mode li { margin-bottom:6px; }
-    .product-description.html-mode table { width:100%; border-collapse:collapse; margin:16px 0; font-size:14px; }
-    .product-description.html-mode table th, .product-description.html-mode table td { padding:10px 14px; border:1px solid var(--border); text-align:left; }
-    .product-description.html-mode table th { background:var(--bg); font-weight:700; }
-    .product-description.html-mode .highlight-box { background:var(--accent-light,#fff3f0); border-left:4px solid var(--accent); border-radius:0 8px 8px 0; padding:14px 18px; margin:16px 0; }
-    .product-description.text-mode { white-space:pre-line; }
-
-    /* 배송/반품 탭 */
-    .shipping-info-wrap { max-width:700px; }
-    .shipping-block { margin-bottom:28px; padding-bottom:28px; border-bottom:1px solid var(--border); }
-    .shipping-block:last-child { border-bottom:none; }
-    .shipping-block h3 { font-size:16px; font-weight:800; margin-bottom:14px; display:flex; align-items:center; gap:8px; }
-    .shipping-table { width:100%; border-collapse:collapse; font-size:14px; }
-    .shipping-table tr:nth-child(even) td:first-child { background:#f9f9fb; }
-    .shipping-table td { padding:10px 14px; border:1px solid var(--border); }
-    .shipping-table td:first-child { width:130px; font-weight:700; color:var(--gray-dark); background:var(--bg); }
-    .shipping-notice { background:#fff8f7; border:1px solid #ffd4cc; border-radius:8px; padding:14px 16px; font-size:13px; color:#c0392b; line-height:1.7; margin-top:12px; }
-    .shipping-notice strong { display:block; font-size:14px; margin-bottom:6px; }
-
-    /* Q&A */
-    .qna-write { background:#fff; border:1.5px solid var(--border); border-radius:12px; padding:24px; margin-bottom:28px; }
-    .qna-write h4 { font-size:16px; font-weight:800; margin-bottom:16px; }
-    .qna-type-row { display:flex; gap:8px; margin-bottom:12px; }
-    .qna-type-btn { padding:6px 14px; border:1.5px solid var(--border); border-radius:20px; font-size:13px; cursor:pointer; background:#fff; font-family:var(--font-main); transition:all 0.2s; }
-    .qna-type-btn.active { background:var(--accent); color:#fff; border-color:var(--accent); }
-    .qna-textarea { width:100%; border:1.5px solid var(--border); border-radius:8px; padding:12px; font-size:14px; font-family:var(--font-main); resize:vertical; min-height:100px; outline:none; transition:var(--transition); box-sizing:border-box; }
-    .qna-textarea:focus { border-color:var(--accent); }
-    .qna-secret-row { display:flex; align-items:center; gap:8px; margin-top:10px; font-size:13px; color:var(--gray); }
-    .qna-submit-row { display:flex; justify-content:flex-end; margin-top:12px; }
-    .btn-qna-submit { background:var(--accent); color:#fff; border:none; padding:10px 24px; border-radius:8px; font-size:14px; font-weight:700; cursor:pointer; transition:var(--transition); font-family:var(--font-main); }
-    .btn-qna-submit:hover { background:var(--accent-dark); }
-    .qna-item { padding:18px 0; border-bottom:1px solid var(--border); }
-    .qna-item:last-child { border-bottom:none; }
-    .qna-header { display:flex; align-items:center; gap:10px; margin-bottom:6px; cursor:pointer; }
-    .qna-badge { font-size:11px; font-weight:700; padding:2px 8px; border-radius:4px; }
-    .qna-badge.answered { background:#e8f5e9; color:#2e7d32; }
-    .qna-badge.waiting  { background:#fff3e0; color:#e65100; }
-    .qna-badge.secret   { background:#f3e5f5; color:#6a1b9a; }
-    .qna-title { font-size:14px; font-weight:600; flex:1; }
-    .qna-meta  { font-size:12px; color:var(--gray-light); }
-    .qna-body  { font-size:14px; color:var(--gray-dark); line-height:1.7; padding:12px 0 0 2px; }
-    .qna-answer { background:var(--bg); border-radius:8px; padding:12px 16px; margin-top:10px; font-size:13px; }
-    .qna-answer-label { font-weight:700; color:var(--accent); margin-bottom:4px; font-size:12px; }
-    .qna-empty { text-align:center; padding:60px 20px; color:var(--gray-light); font-size:14px; }
-    .qna-empty .empty-icon { font-size:48px; margin-bottom:12px; }
-
-    /* 리뷰 */
-    .review-summary { display:grid; grid-template-columns:200px 1fr; gap:32px; padding:32px; background:var(--bg); border-radius:12px; margin-bottom:32px; }
-    .review-score-big { text-align:center; display:flex; flex-direction:column; align-items:center; justify-content:center; }
-    .score-number { font-size:56px; font-weight:900; color:#FF8C00; line-height:1; }
-    .score-stars { display:flex; gap:3px; margin:8px 0; }
-    .score-stars .star { font-size:22px; }
-    .score-total { font-size:13px; color:var(--gray); }
-    .review-bars { display:flex; flex-direction:column; justify-content:center; gap:8px; }
-    .review-bar-row { display:flex; align-items:center; gap:10px; font-size:13px; }
-    .review-bar-label { width:30px; text-align:right; color:var(--gray); }
-    .review-bar-track { flex:1; height:8px; background:var(--border); border-radius:4px; overflow:hidden; }
-    .review-bar-fill  { height:100%; background:#FF8C00; border-radius:4px; transition:width 0.6s ease; }
-    .review-bar-count { width:24px; color:var(--gray); }
-    .review-write { background:#fff; border:1.5px solid var(--border); border-radius:12px; padding:24px; margin-bottom:32px; }
-    .review-write h4 { font-size:16px; font-weight:800; margin-bottom:16px; }
-    .star-input { display:flex; gap:4px; margin-bottom:16px; }
-    .star-btn { font-size:32px; background:none; border:none; cursor:pointer; transition:transform 0.1s; filter:grayscale(1); opacity:0.4; }
-    .star-btn.active { filter:none; opacity:1; transform:scale(1.1); }
-    .review-textarea { width:100%; border:1.5px solid var(--border); border-radius:8px; padding:12px; font-size:14px; font-family:var(--font-main); resize:vertical; min-height:100px; outline:none; transition:var(--transition); box-sizing:border-box; }
-    .review-textarea:focus { border-color:var(--accent); }
-    .review-submit { display:flex; justify-content:space-between; align-items:center; margin-top:12px; }
-    .review-char { font-size:12px; color:var(--gray-light); }
-    .btn-review-submit { background:var(--accent); color:#fff; border:none; padding:10px 24px; border-radius:8px; font-size:14px; font-weight:700; cursor:pointer; transition:var(--transition); font-family:var(--font-main); }
-    .btn-review-submit:hover { background:var(--accent-dark); }
-    .review-filters { display:flex; gap:8px; margin-bottom:20px; }
-    .review-filter-btn { padding:6px 14px; border:1px solid var(--border); border-radius:16px; background:#fff; font-size:13px; cursor:pointer; transition:var(--transition); }
-    .review-filter-btn.active { background:var(--accent); color:#fff; border-color:var(--accent); }
-    .review-item { padding:20px 0; border-bottom:1px solid var(--border); }
-    .review-item:last-child { border-bottom:none; }
-    .review-header { display:flex; align-items:center; gap:10px; margin-bottom:8px; }
-    .review-avatar { width:36px; height:36px; border-radius:50%; background:var(--accent); color:#fff; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:700; flex-shrink:0; }
-    .review-author { font-size:14px; font-weight:700; }
-    .review-date   { font-size:12px; color:var(--gray-light); margin-left:auto; }
-    .review-stars  { display:flex; gap:1px; }
-    .review-stars .star { font-size:14px; }
-    .review-content { font-size:14px; color:var(--gray-dark); line-height:1.7; margin:8px 0; }
-    .review-img { width:80px; height:80px; object-fit:cover; border-radius:8px; border:1px solid var(--border); margin-top:8px; cursor:pointer; }
-    .review-reply { background:var(--bg); border-radius:8px; padding:12px 16px; margin-top:12px; font-size:13px; }
-    .review-reply-label { font-weight:700; color:var(--accent); margin-bottom:4px; font-size:12px; }
-    .review-reply-content { color:var(--gray-dark); line-height:1.6; }
-    .review-empty { text-align:center; padding:60px 20px; color:var(--gray-light); font-size:14px; }
-    .review-empty .empty-icon { font-size:48px; margin-bottom:12px; }
-
-    /* 연관 상품 */
-    .related-section { margin-top:48px; }
-
-    /* 반응형 */
-    @media (max-width:768px) {
-      .product-top { grid-template-columns:1fr; gap:24px; }
-      .gallery-wrap { position:static; }
-      .buy-buttons { grid-template-columns:48px 1fr 1fr; }
-      .review-summary { grid-template-columns:1fr; }
-      .review-score-big { flex-direction:row; gap:16px; }
-      .product-detail-wrap { padding:0 16px; }
-      .product-info-name { font-size:20px; }
-      .price-main { font-size:26px; }
-      .detail-tab { padding:12px 16px; font-size:13px; }
+    .product-detail-wrap{max-width:1100px;margin:32px auto;padding:0 24px;}
+    .breadcrumb{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--gray-light);margin-bottom:24px;}
+    .breadcrumb a{color:var(--gray-light);transition:var(--transition);}
+    .breadcrumb a:hover{color:var(--accent);}
+    .breadcrumb span{color:var(--gray-dark);font-weight:600;}
+    .product-top{display:grid;grid-template-columns:1fr 1fr;gap:48px;margin-bottom:48px;}
+    .gallery-wrap{position:sticky;top:80px;}
+    .gallery-main{aspect-ratio:1;border-radius:16px;overflow:hidden;border:1px solid var(--border);background:#f8f8f8;margin-bottom:12px;position:relative;cursor:zoom-in;}
+    .gallery-main img{width:100%;height:100%;object-fit:cover;transition:transform 0.4s ease;display:block;}
+    .gallery-main:hover img{transform:scale(1.06);}
+    .gallery-zoom-overlay{position:absolute;bottom:12px;right:12px;background:rgba(0,0,0,0.45);color:#fff;border-radius:8px;padding:6px 10px;font-size:12px;display:flex;align-items:center;gap:4px;pointer-events:none;}
+    .gallery-nav{position:absolute;top:50%;transform:translateY(-50%);background:rgba(255,255,255,0.9);border:none;border-radius:50%;width:36px;height:36px;display:flex;align-items:center;justify-content:center;font-size:16px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.15);transition:all 0.2s;z-index:2;}
+    .gallery-nav:hover{background:#fff;box-shadow:0 4px 12px rgba(0,0,0,0.2);}
+    .gallery-nav.prev{left:10px;}.gallery-nav.next{right:10px;}
+    .gallery-nav-hidden{display:none !important;}
+    .gallery-badge{position:absolute;top:12px;left:12px;font-size:12px;font-weight:800;padding:4px 10px;border-radius:6px;z-index:2;}
+    .gallery-counter{position:absolute;bottom:12px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.45);color:#fff;border-radius:20px;padding:4px 12px;font-size:12px;font-weight:600;pointer-events:none;}
+    .gallery-thumbs{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding-bottom:4px;}
+    .gallery-thumbs::-webkit-scrollbar{display:none;}
+    .gallery-thumb{width:72px;height:72px;flex-shrink:0;border-radius:8px;overflow:hidden;border:2.5px solid transparent;cursor:pointer;transition:all 0.2s;background:#f0f0f0;}
+    .gallery-thumb:hover{border-color:#ccc;}
+    .gallery-thumb.active{border-color:var(--accent);}
+    .gallery-thumb img{width:100%;height:100%;object-fit:cover;display:block;}
+    .lightbox{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.92);z-index:9999;align-items:center;justify-content:center;flex-direction:column;}
+    .lightbox.open{display:flex;}
+    .lightbox-img{max-width:90vw;max-height:85vh;object-fit:contain;border-radius:8px;}
+    .lightbox-close{position:absolute;top:20px;right:24px;color:#fff;font-size:28px;background:none;border:none;cursor:pointer;opacity:0.7;}
+    .lightbox-close:hover{opacity:1;}
+    .lightbox-counter{color:rgba(255,255,255,0.6);font-size:13px;margin-top:12px;}
+    .lightbox-nav{position:absolute;top:50%;transform:translateY(-50%);background:rgba(255,255,255,0.15);color:#fff;border:none;border-radius:50%;width:44px;height:44px;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+    .lightbox-nav:hover{background:rgba(255,255,255,0.3);}
+    .lightbox-nav.prev{left:20px;}.lightbox-nav.next{right:20px;}
+    .product-info-panel{padding:4px 0;}
+    .product-info-category{font-size:12px;color:var(--accent);font-weight:600;margin-bottom:8px;display:flex;align-items:center;gap:6px;}
+    .product-info-name{font-size:24px;font-weight:900;line-height:1.4;margin-bottom:12px;color:var(--black);}
+    .rating-summary{display:flex;align-items:center;gap:10px;padding:12px 0;border-top:1px solid var(--border);border-bottom:1px solid var(--border);margin-bottom:20px;}
+    .stars-display{display:flex;gap:2px;}.star{font-size:18px;}
+    .rating-score{font-size:20px;font-weight:800;color:#FF8C00;}
+    .rating-count{font-size:13px;color:var(--gray);}
+    .sales-count{font-size:13px;color:var(--gray);margin-left:auto;}
+    .price-section{margin-bottom:24px;}
+    .price-original-line{font-size:14px;color:var(--gray-light);text-decoration:line-through;margin-bottom:4px;}
+    .price-main-line{display:flex;align-items:baseline;gap:12px;}
+    .price-main{font-size:32px;font-weight:900;color:var(--black);}
+    .price-discount-badge{background:var(--accent);color:#fff;font-size:14px;font-weight:800;padding:4px 10px;border-radius:6px;}
+    .price-note{font-size:12px;color:var(--gray-light);margin-top:6px;}
+    .option-section{margin-bottom:20px;display:none;}
+    .option-section.has-options{display:block;}
+    .option-label{font-size:14px;font-weight:700;margin-bottom:10px;}
+    .option-chips{display:flex;flex-wrap:wrap;gap:8px;}
+    .option-chip{padding:7px 14px;border:1.5px solid var(--border);border-radius:20px;font-size:13px;font-weight:500;cursor:pointer;transition:all 0.2s;background:#fff;}
+    .option-chip:hover{border-color:var(--accent);color:var(--accent);}
+    .option-chip.active{background:var(--accent);color:#fff;border-color:var(--accent);}
+    .delivery-info{background:var(--bg);border-radius:10px;padding:16px;margin-bottom:24px;}
+    .delivery-row{display:flex;gap:12px;font-size:13px;padding:4px 0;}
+    .delivery-label{color:var(--gray);width:70px;flex-shrink:0;}
+    .delivery-value{color:var(--gray-dark);font-weight:500;}
+    .delivery-free{color:var(--accent);font-weight:700;}
+    .qty-section{margin-bottom:24px;}
+    .qty-label{font-size:14px;font-weight:700;margin-bottom:10px;}
+    .qty-row{display:flex;align-items:center;justify-content:space-between;}
+    .qty-control{display:flex;align-items:center;border:1.5px solid var(--border);border-radius:8px;overflow:hidden;}
+    .qty-control button{padding:10px 16px;background:var(--bg);border:none;font-size:18px;color:var(--gray-dark);cursor:pointer;}
+    .qty-control button:hover{background:var(--border);}
+    .qty-control input{width:56px;text-align:center;border:none;border-left:1.5px solid var(--border);border-right:1.5px solid var(--border);font-size:16px;font-weight:700;padding:10px 0;font-family:var(--font-main);}
+    .qty-total{font-size:18px;font-weight:800;color:var(--accent);}
+    .buy-buttons{display:grid;grid-template-columns:48px 1fr 1fr;gap:8px;margin-bottom:16px;}
+    .btn-wish-lg{padding:16px;border:1.5px solid var(--border);background:#fff;border-radius:10px;font-size:20px;cursor:pointer;}
+    .btn-wish-lg:hover{border-color:#ff4081;background:#fff5f8;}
+    .btn-cart-lg{padding:16px;border:2px solid var(--accent);background:#fff;color:var(--accent);border-radius:10px;font-size:15px;font-weight:800;cursor:pointer;font-family:var(--font-main);}
+    .btn-cart-lg:hover{background:var(--accent-light);}
+    .btn-buy-lg{padding:16px;background:var(--accent);color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:800;cursor:pointer;font-family:var(--font-main);}
+    .btn-buy-lg:hover{background:var(--accent-dark);transform:translateY(-1px);}
+    .share-row{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--gray);}
+    .share-btn{padding:6px 12px;border:1px solid var(--border);border-radius:16px;background:#fff;font-size:12px;cursor:pointer;}
+    .share-btn:hover{border-color:var(--accent);color:var(--accent);}
+    .detail-tabs{border-bottom:2px solid var(--border);display:flex;margin-bottom:32px;}
+    .detail-tab{padding:14px 28px;font-size:15px;font-weight:600;color:var(--gray);background:none;border:none;border-bottom:3px solid transparent;margin-bottom:-2px;cursor:pointer;font-family:var(--font-main);}
+    .detail-tab.active{color:var(--accent);border-bottom-color:var(--accent);}
+    .tab-panel{display:none;}.tab-panel.active{display:block;}
+    .product-description{font-size:15px;line-height:1.9;color:var(--gray-dark);}
+    .product-description.html-mode img{max-width:100%;border-radius:10px;margin:16px 0;display:block;}
+    .product-description.html-mode h2{font-size:20px;font-weight:800;margin:28px 0 12px;color:var(--black);padding-bottom:8px;border-bottom:2px solid var(--border);}
+    .product-description.html-mode h3{font-size:17px;font-weight:700;margin:20px 0 8px;}
+    .product-description.html-mode ul,.product-description.html-mode ol{padding-left:20px;margin:12px 0;}
+    .product-description.html-mode li{margin-bottom:6px;}
+    .product-description.html-mode table{width:100%;border-collapse:collapse;margin:16px 0;font-size:14px;}
+    .product-description.html-mode table th,.product-description.html-mode table td{padding:10px 14px;border:1px solid var(--border);text-align:left;}
+    .product-description.html-mode table th{background:var(--bg);font-weight:700;}
+    .product-description.html-mode .highlight-box{background:var(--accent-light,#fff3f0);border-left:4px solid var(--accent);border-radius:0 8px 8px 0;padding:14px 18px;margin:16px 0;}
+    .product-description.text-mode{white-space:pre-line;}
+    .shipping-info-wrap{max-width:700px;}
+    .shipping-block{margin-bottom:28px;padding-bottom:28px;border-bottom:1px solid var(--border);}
+    .shipping-block:last-child{border-bottom:none;}
+    .shipping-block h3{font-size:16px;font-weight:800;margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+    .shipping-table{width:100%;border-collapse:collapse;font-size:14px;}
+    .shipping-table tr:nth-child(even) td:first-child{background:#f9f9fb;}
+    .shipping-table td{padding:10px 14px;border:1px solid var(--border);}
+    .shipping-table td:first-child{width:130px;font-weight:700;color:var(--gray-dark);background:var(--bg);}
+    .shipping-notice{background:#fff8f7;border:1px solid #ffd4cc;border-radius:8px;padding:14px 16px;font-size:13px;color:#c0392b;line-height:1.7;margin-top:12px;}
+    .shipping-notice strong{display:block;font-size:14px;margin-bottom:6px;}
+    .qna-write{background:#fff;border:1.5px solid var(--border);border-radius:12px;padding:24px;margin-bottom:28px;}
+    .qna-write h4{font-size:16px;font-weight:800;margin-bottom:16px;}
+    .qna-type-row{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;}
+    .qna-type-btn{padding:6px 14px;border:1.5px solid var(--border);border-radius:20px;font-size:13px;cursor:pointer;background:#fff;font-family:var(--font-main);transition:all 0.2s;}
+    .qna-type-btn.active{background:var(--accent);color:#fff;border-color:var(--accent);}
+    .qna-textarea{width:100%;border:1.5px solid var(--border);border-radius:8px;padding:12px;font-size:14px;font-family:var(--font-main);resize:vertical;min-height:100px;outline:none;box-sizing:border-box;}
+    .qna-textarea:focus{border-color:var(--accent);}
+    .qna-secret-row{display:flex;align-items:center;gap:8px;margin-top:10px;font-size:13px;color:var(--gray);}
+    .qna-submit-row{display:flex;justify-content:flex-end;margin-top:12px;}
+    .btn-qna-submit{background:var(--accent);color:#fff;border:none;padding:10px 24px;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;font-family:var(--font-main);}
+    .btn-qna-submit:hover{background:var(--accent-dark);}
+    .qna-item{padding:18px 0;border-bottom:1px solid var(--border);}
+    .qna-item:last-child{border-bottom:none;}
+    .qna-header{display:flex;align-items:center;gap:10px;margin-bottom:6px;cursor:pointer;}
+    .qna-badge{font-size:11px;font-weight:700;padding:2px 8px;border-radius:4px;}
+    .qna-badge.answered{background:#e8f5e9;color:#2e7d32;}
+    .qna-badge.waiting{background:#fff3e0;color:#e65100;}
+    .qna-badge.secret{background:#f3e5f5;color:#6a1b9a;}
+    .qna-title{font-size:14px;font-weight:600;flex:1;}
+    .qna-meta{font-size:12px;color:var(--gray-light);}
+    .qna-body{font-size:14px;color:var(--gray-dark);line-height:1.7;padding:12px 0 0 2px;}
+    .qna-answer{background:var(--bg);border-radius:8px;padding:12px 16px;margin-top:10px;font-size:13px;}
+    .qna-answer-label{font-weight:700;color:var(--accent);margin-bottom:4px;font-size:12px;}
+    .qna-empty{text-align:center;padding:60px 20px;color:var(--gray-light);font-size:14px;}
+    .qna-empty .empty-icon{font-size:48px;margin-bottom:12px;}
+    .review-summary{display:grid;grid-template-columns:200px 1fr;gap:32px;padding:32px;background:var(--bg);border-radius:12px;margin-bottom:32px;}
+    .review-score-big{text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+    .score-number{font-size:56px;font-weight:900;color:#FF8C00;line-height:1;}
+    .score-stars{display:flex;gap:3px;margin:8px 0;}
+    .score-stars .star{font-size:22px;}
+    .score-total{font-size:13px;color:var(--gray);}
+    .review-bars{display:flex;flex-direction:column;justify-content:center;gap:8px;}
+    .review-bar-row{display:flex;align-items:center;gap:10px;font-size:13px;}
+    .review-bar-label{width:30px;text-align:right;color:var(--gray);}
+    .review-bar-track{flex:1;height:8px;background:var(--border);border-radius:4px;overflow:hidden;}
+    .review-bar-fill{height:100%;background:#FF8C00;border-radius:4px;transition:width 0.6s ease;}
+    .review-bar-count{width:24px;color:var(--gray);}
+    .review-write{background:#fff;border:1.5px solid var(--border);border-radius:12px;padding:24px;margin-bottom:32px;}
+    .review-write h4{font-size:16px;font-weight:800;margin-bottom:16px;}
+    .star-input{display:flex;gap:4px;margin-bottom:16px;}
+    .star-btn{font-size:32px;background:none;border:none;cursor:pointer;filter:grayscale(1);opacity:0.4;}
+    .star-btn.active{filter:none;opacity:1;transform:scale(1.1);}
+    .review-textarea{width:100%;border:1.5px solid var(--border);border-radius:8px;padding:12px;font-size:14px;font-family:var(--font-main);resize:vertical;min-height:100px;outline:none;box-sizing:border-box;}
+    .review-textarea:focus{border-color:var(--accent);}
+    .review-submit{display:flex;justify-content:space-between;align-items:center;margin-top:12px;}
+    .review-char{font-size:12px;color:var(--gray-light);}
+    .btn-review-submit{background:var(--accent);color:#fff;border:none;padding:10px 24px;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;font-family:var(--font-main);}
+    .btn-review-submit:hover{background:var(--accent-dark);}
+    .review-filters{display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;}
+    .review-filter-btn{padding:6px 14px;border:1px solid var(--border);border-radius:16px;background:#fff;font-size:13px;cursor:pointer;}
+    .review-filter-btn.active{background:var(--accent);color:#fff;border-color:var(--accent);}
+    .review-item{padding:20px 0;border-bottom:1px solid var(--border);}
+    .review-item:last-child{border-bottom:none;}
+    .review-header{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
+    .review-avatar{width:36px;height:36px;border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;flex-shrink:0;}
+    .review-author{font-size:14px;font-weight:700;}
+    .review-date{font-size:12px;color:var(--gray-light);margin-left:auto;}
+    .review-stars{display:flex;gap:1px;}
+    .review-stars .star{font-size:14px;}
+    .review-content{font-size:14px;color:var(--gray-dark);line-height:1.7;margin:8px 0;}
+    .review-img{width:80px;height:80px;object-fit:cover;border-radius:8px;border:1px solid var(--border);margin-top:8px;cursor:pointer;}
+    .review-reply{background:var(--bg);border-radius:8px;padding:12px 16px;margin-top:12px;font-size:13px;}
+    .review-reply-label{font-weight:700;color:var(--accent);margin-bottom:4px;font-size:12px;}
+    .review-reply-content{color:var(--gray-dark);line-height:1.6;}
+    .review-empty{text-align:center;padding:60px 20px;color:var(--gray-light);font-size:14px;}
+    .review-empty .empty-icon{font-size:48px;margin-bottom:12px;}
+    .related-section{margin-top:48px;}
+    @media(max-width:768px){
+      .product-top{grid-template-columns:1fr;gap:24px;}
+      .gallery-wrap{position:static;}
+      .review-summary{grid-template-columns:1fr;}
+      .review-score-big{flex-direction:row;gap:16px;}
+      .product-detail-wrap{padding:0 16px;}
+      .product-info-name{font-size:20px;}
+      .price-main{font-size:26px;}
+      .detail-tab{padding:12px 16px;font-size:13px;}
     }
   </style>
 </head>
@@ -253,9 +192,7 @@
 <!-- HEADER -->
 <header class="header">
   <div class="header-main">
-    <a href="index.html" class="header-logo">
-      <span>🏪</span><span id="store-name">담누리마켓</span>
-    </a>
+    <a href="index.html" class="header-logo"><span>🏪</span><span id="store-name">담누리마켓</span></a>
     <div class="header-search">
       <div class="search-bar" onclick="Search.open()">
         <input type="text" placeholder="상품을 검색하세요" readonly>
@@ -275,8 +212,7 @@
   <div class="search-modal-box">
     <div class="search-modal-header">
       <span>🔍</span>
-      <input type="text" class="search-modal-input" id="search-input"
-        placeholder="검색어를 입력하세요" oninput="Search.run(this.value)">
+      <input type="text" class="search-modal-input" id="search-input" placeholder="검색어를 입력하세요" oninput="Search.run(this.value)">
       <button class="search-modal-close" onclick="Search.close()">✕</button>
     </div>
     <div id="search-results"><p class="search-empty">검색어를 입력하세요</p></div>
@@ -295,17 +231,14 @@
 <main>
   <div class="product-detail-wrap">
 
-    <!-- 빵부스러기 -->
-    <div class="breadcrumb" id="breadcrumb">
+    <div class="breadcrumb">
       <a href="index.html">🏠 홈</a> ›
       <a href="products.html">상품목록</a> ›
       <span id="bc-category">카테고리</span> ›
       <span id="bc-name">상품명</span>
     </div>
 
-    <!-- 상품 상단 -->
     <div class="product-top">
-
       <!-- 이미지 갤러리 -->
       <div class="gallery-wrap">
         <div class="gallery-main" id="gallery-main" onclick="openLightbox(currentImgIdx)">
@@ -326,19 +259,14 @@
           <span id="detail-subcategory-wrap" style="display:none">› <span id="detail-subcategory"></span></span>
         </div>
         <h1 class="product-info-name" id="detail-name">상품명 로딩 중...</h1>
-
-        <!-- 별점 -->
         <div class="rating-summary">
           <div class="stars-display" id="detail-stars">
-            <span class="star">☆</span><span class="star">☆</span>
-            <span class="star">☆</span><span class="star">☆</span><span class="star">☆</span>
+            <span class="star">☆</span><span class="star">☆</span><span class="star">☆</span><span class="star">☆</span><span class="star">☆</span>
           </div>
           <span class="rating-score" id="detail-rating">0.0</span>
           <span class="rating-count" id="detail-review-count">(리뷰 0개)</span>
           <span class="sales-count" id="detail-sales">판매 0개</span>
         </div>
-
-        <!-- 가격 -->
         <div class="price-section">
           <div class="price-original-line" id="detail-original-price" style="display:none"></div>
           <div class="price-main-line">
@@ -347,24 +275,18 @@
           </div>
           <div class="price-note">부가세 포함 · 카드 무이자 최대 12개월</div>
         </div>
-
-        <!-- 색상 옵션 -->
         <div class="option-section" id="option-color-section">
           <div class="option-label">색상</div>
           <div class="option-chips" id="option-color-chips"></div>
         </div>
-
-        <!-- 사이즈 옵션 -->
         <div class="option-section" id="option-size-section">
           <div class="option-label">사이즈</div>
           <div class="option-chips" id="option-size-chips"></div>
         </div>
-
-        <!-- 배송 정보 -->
         <div class="delivery-info">
           <div class="delivery-row">
             <span class="delivery-label">배송</span>
-            <span class="delivery-value">택배배송 (CJ대한통운)</span>
+            <span class="delivery-value" id="delivery-carrier">택배배송</span>
           </div>
           <div class="delivery-row">
             <span class="delivery-label">배송비</span>
@@ -379,8 +301,6 @@
             <span class="delivery-value" id="detail-stock">확인 중...</span>
           </div>
         </div>
-
-        <!-- 수량 -->
         <div class="qty-section">
           <div class="qty-label">수량</div>
           <div class="qty-row">
@@ -392,15 +312,11 @@
             <div class="qty-total" id="qty-total">총 0원</div>
           </div>
         </div>
-
-        <!-- 구매 버튼 -->
         <div class="buy-buttons">
           <button class="btn-wish-lg" id="wish-btn" onclick="toggleWish()" title="찜하기">🤍</button>
           <button class="btn-cart-lg" onclick="addToCart()">🛒 장바구니</button>
           <button class="btn-buy-lg" onclick="buyNow()">바로 구매</button>
         </div>
-
-        <!-- 공유 -->
         <div class="share-row">
           <span>공유</span>
           <button class="share-btn" onclick="shareKakao()">💛 카카오</button>
@@ -417,14 +333,12 @@
       <button class="detail-tab" onclick="switchTab('shipping',this)">배송/반품</button>
     </div>
 
-    <!-- 탭: 상품 상세 -->
+    <!-- 상품 상세 탭 -->
     <div class="tab-panel active" id="tab-desc">
-      <div class="product-description" id="detail-description">
-        상품 정보를 불러오는 중입니다...
-      </div>
+      <div class="product-description" id="detail-description">상품 정보를 불러오는 중입니다...</div>
     </div>
 
-    <!-- 탭: 리뷰 -->
+    <!-- 리뷰 탭 -->
     <div class="tab-panel" id="tab-review">
       <div class="review-summary" id="review-summary">
         <div class="review-score-big">
@@ -436,7 +350,6 @@
         </div>
         <div class="review-bars" id="review-bars"></div>
       </div>
-
       <div class="review-write">
         <h4>✍️ 리뷰 작성</h4>
         <div style="font-size:13px;color:var(--gray);margin-bottom:8px;">별점을 선택하세요</div>
@@ -447,16 +360,12 @@
           <button class="star-btn" onclick="setRating(4)">⭐</button>
           <button class="star-btn" onclick="setRating(5)">⭐</button>
         </div>
-        <textarea class="review-textarea" id="review-text"
-          placeholder="상품을 사용해보신 후기를 남겨주세요 (최소 10자)"
-          maxlength="500"
-          oninput="document.getElementById('review-char').textContent=this.value.length+'/500'"></textarea>
+        <textarea class="review-textarea" id="review-text" placeholder="상품을 사용해보신 후기를 남겨주세요 (최소 10자)" maxlength="500" oninput="document.getElementById('review-char').textContent=this.value.length+'/500'"></textarea>
         <div class="review-submit">
           <span class="review-char" id="review-char">0/500</span>
           <button class="btn-review-submit" onclick="submitReview()">리뷰 등록</button>
         </div>
       </div>
-
       <div class="review-filters">
         <button class="review-filter-btn active" onclick="filterReview('all',this)">전체</button>
         <button class="review-filter-btn" onclick="filterReview(5,this)">⭐⭐⭐⭐⭐</button>
@@ -464,16 +373,12 @@
         <button class="review-filter-btn" onclick="filterReview(3,this)">⭐⭐⭐ 이하</button>
         <button class="review-filter-btn" onclick="filterReview('photo',this)">📷 포토</button>
       </div>
-
       <div id="review-list">
-        <div class="review-empty">
-          <div class="empty-icon">⭐</div>
-          <div>리뷰를 불러오는 중...</div>
-        </div>
+        <div class="review-empty"><div class="empty-icon">⭐</div><div>리뷰를 불러오는 중...</div></div>
       </div>
     </div>
 
-    <!-- 탭: Q&A -->
+    <!-- Q&A 탭 -->
     <div class="tab-panel" id="tab-qna">
       <div class="qna-write">
         <h4>❓ 상품 문의 작성</h4>
@@ -483,9 +388,7 @@
           <button class="qna-type-btn" onclick="selectQnaType(this,'교환/반품')">🔄 교환/반품</button>
           <button class="qna-type-btn" onclick="selectQnaType(this,'기타')">💬 기타</button>
         </div>
-        <textarea class="qna-textarea" id="qna-text"
-          placeholder="문의 내용을 입력해주세요. 평일 24시간 이내 답변드립니다."
-          maxlength="500"></textarea>
+        <textarea class="qna-textarea" id="qna-text" placeholder="문의 내용을 입력해주세요. 평일 24시간 이내 답변드립니다." maxlength="500"></textarea>
         <div class="qna-secret-row">
           <input type="checkbox" id="qna-secret">
           <label for="qna-secret">🔒 비밀글로 등록</label>
@@ -494,19 +397,14 @@
           <button class="btn-qna-submit" onclick="submitQna()">문의 등록</button>
         </div>
       </div>
-
       <div id="qna-list">
-        <div class="qna-empty">
-          <div class="empty-icon">❓</div>
-          <div>등록된 문의가 없습니다.</div>
-        </div>
+        <div class="qna-empty"><div class="empty-icon">❓</div><div>등록된 문의가 없습니다.</div></div>
       </div>
     </div>
 
-    <!-- 탭: 배송/반품 -->
+    <!-- 배송/반품 탭 -->
     <div class="tab-panel" id="tab-shipping">
       <div class="shipping-info-wrap">
-
         <div class="shipping-block">
           <h3>📦 배송 안내</h3>
           <table class="shipping-table">
@@ -514,10 +412,9 @@
             <tr><td>배송기간</td><td><span id="ship-period">결제 완료 후 1~3 영업일 이내 출고</span></td></tr>
             <tr><td>배송비</td><td><span id="ship-fee">3,000원 (50,000원 이상 구매 시 무료)</span></td></tr>
             <tr><td>도서산간</td><td><span id="ship-island">추가 배송비 발생 (제주 3,000원 / 도서산간 5,000원)</span></td></tr>
-            <tr><td>배송조회</td><td><span id="ship-track">출고 후 문자 발송 (CJ대한통운 1588-1255)</span></td></tr>
+            <tr><td>배송조회</td><td><span id="ship-track">출고 후 문자 발송</span></td></tr>
           </table>
         </div>
-
         <div class="shipping-block">
           <h3>🔄 교환/반품 안내</h3>
           <table class="shipping-table">
@@ -528,28 +425,21 @@
             <tr><td>처리기간</td><td><span id="ret-process">접수 후 3~5 영업일</span></td></tr>
           </table>
         </div>
-
         <div class="shipping-block">
           <h3>❌ 교환/반품 불가 사유</h3>
           <div class="shipping-notice">
             <strong>아래의 경우 교환/반품이 불가합니다.</strong>
-            고객 사용 또는 일부 소비에 의해 상품 가치가 감소한 경우<br>
-            포장을 개봉하여 상품 가치가 현저히 감소한 경우<br>
-            시간이 지나 재판매가 어려울 정도로 상품 가치가 감소한 경우<br>
-            복제가 가능한 상품의 포장을 훼손한 경우<br>
-            고객의 요청으로 맞춤 제작된 상품인 경우
+            <span id="ret-reject">고객 사용 또는 훼손된 경우 | 포장 개봉 후 상품 가치 감소한 경우 | 맞춤 제작 상품</span>
           </div>
         </div>
-
         <div class="shipping-block">
           <h3>📞 고객센터</h3>
           <table class="shipping-table">
             <tr><td>전화</td><td id="shipping-phone">1588-0000</td></tr>
             <tr><td>운영시간</td><td>평일 09:00 ~ 18:00 (주말·공휴일 휴무)</td></tr>
-            <tr><td>이메일</td><td id="shipping-email"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="c3aba6afb383a7a2aeadb6b1aaeda0aceda8b1">[email&#160;protected]</a></td></tr>
+            <tr><td>이메일</td><td id="shipping-email">help@damnuri.co.kr</td></tr>
           </table>
         </div>
-
       </div>
     </div>
 
@@ -575,16 +465,14 @@
   <div class="footer-inner">
     <div>
       <h4 id="footer-store-name">🏪 담누리마켓</h4>
-      <p style="font-size:12px;line-height:1.8;margin-top:8px;color:#aaa;">
-        다양한 상품을 합리적인 가격에<br>고객님께 전달합니다.
-      </p>
+      <p style="font-size:12px;line-height:1.8;margin-top:8px;color:#aaa;">다양한 상품을 합리적인 가격에<br>고객님께 전달합니다.</p>
     </div>
     <div>
       <h4>고객센터</h4>
       <ul>
         <li><a href="#" id="footer-phone">📞 1588-0000</a></li>
         <li><a href="#">평일 9:00 ~ 18:00</a></li>
-        <li><a href="#" id="footer-email">📧 <span class="__cf_email__" data-cfemail="563e333a261632373b3823243f783539783d24">[email&#160;protected]</span></a></li>
+        <li><a href="#" id="footer-email">📧 help@damnuri.co.kr</a></li>
       </ul>
     </div>
     <div>
@@ -611,4 +499,13 @@
   </div>
 </footer>
 
-<!-- 스크립트 (인라인 없음 - CSP 안�
+<!-- 스크립트 (인라인 없음 - CSP 안전) -->
+<script src="js/config.js"></script>
+<script src="js/sheets.js"></script>
+<script src="js/app.js"></script>
+<script src="js/sheets-patch.js"></script>
+<script src="js/product-detail.js"></script>
+<script src="js/main.js"></script>
+
+</body>
+</html>
