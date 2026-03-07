@@ -187,6 +187,50 @@ function renderProduct(p) {
   updateTotal();
 }
 
+function renderSpecs(p) {
+  var tab = document.getElementById('tab-detail');
+  if (!tab) return;
+
+  // 상세스펙 테이블
+  if (p.specs) {
+    var items = p.specs.split('|').map(function(s){ return s.trim(); }).filter(Boolean);
+    if (items.length) {
+      var rows = items.map(function(item){
+        var parts = item.split(':');
+        var label = parts[0].trim();
+        var value = parts.slice(1).join(':').trim();
+        return '<tr><th style="width:35%;background:#f8f8f8;padding:10px 14px;font-weight:600;font-size:13px;border-bottom:1px solid #eee;white-space:nowrap;">'
+          + label + '</th>'
+          + '<td style="padding:10px 14px;font-size:13px;border-bottom:1px solid #eee;">' + value + '</td></tr>';
+      }).join('');
+
+      var specHtml = '<div style="margin:24px 0;">'
+        + '<h4 style="font-size:15px;font-weight:700;margin-bottom:12px;color:#333;">📋 상품 정보</h4>'
+        + '<table style="width:100%;border-collapse:collapse;border:1px solid #eee;border-radius:8px;overflow:hidden;">'
+        + rows + '</table></div>';
+
+      tab.insertAdjacentHTML('beforeend', specHtml);
+    }
+  }
+
+  // 인증이미지
+  if (p.certImage) {
+    var certHtml = '<div style="margin:24px 0;">'
+      + '<h4 style="font-size:15px;font-weight:700;margin-bottom:12px;color:#333;">🏅 인증서</h4>'
+      + '<img src="' + p.certImage + '" style="max-width:100%;border-radius:8px;border:1px solid #eee;" '
+      + 'onerror="this.style.display='none'" alt="인증서"></div>';
+    tab.insertAdjacentHTML('beforeend', certHtml);
+  }
+
+  // 주의사항
+  if (p.caution) {
+    var cautionHtml = '<div style="margin:24px 0;background:#fff8f0;border:1px solid #ffd4a0;border-radius:8px;padding:16px;">'
+      + '<h4 style="font-size:14px;font-weight:700;margin-bottom:8px;color:#e67e00;">⚠️ 주의사항</h4>'
+      + '<p style="font-size:13px;color:#666;line-height:1.7;margin:0;">' + p.caution + '</p></div>';
+    tab.insertAdjacentHTML('beforeend', cautionHtml);
+  }
+}
+
 function renderYoutube(url) {
   var wrap = document.getElementById('youtube-wrap');
   if (!url || !url.trim()) {
