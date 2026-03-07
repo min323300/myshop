@@ -1,404 +1,622 @@
-var currentProduct = null;
-var currentRating = 0;
-var allReviews = [];
-var images = [];
-var currentImgIdx = 0;
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title id="page-title">상품 상세 - 담누리마켓</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .product-detail-wrap { max-width:1100px; margin:32px auto; padding:0 24px; }
 
-function initPage() {
-  try {
-    var sn = document.getElementById('store-name');
-    if (sn && typeof CONFIG !== 'undefined') sn.textContent = CONFIG.STORE.NAME;
-  } catch(e){}
-  try { Cart.init(); } catch(e){}
+    /* 빵부스러기 */
+    .breadcrumb { display:flex; align-items:center; gap:6px; font-size:13px; color:var(--gray-light); margin-bottom:24px; }
+    .breadcrumb a { color:var(--gray-light); transition:var(--transition); }
+    .breadcrumb a:hover { color:var(--accent); }
+    .breadcrumb span { color:var(--gray-dark); font-weight:600; }
 
-  var params = new URLSearchParams(location.search);
-  var productId = params.get('id');
-  if (!productId) { alert('상품 정보를 찾을 수 없습니다'); location.href = 'products.html'; return; }
+    /* 상단 레이아웃 */
+    .product-top { display:grid; grid-template-columns:1fr 1fr; gap:48px; margin-bottom:48px; }
 
-  loadProduct(productId);
-}
-
-function loadProduct(id) {
-  ProductAPI.getAll().then(function(products) {
-    currentProduct = products.find(function(p){ return String(p.id) === String(id); });
-    if (!currentProduct) throw new Error('not found');
-    renderProduct(currentProduct);
-    loadReviews(id);
-    loadRelated();
-  }).catch(function() {
-    currentProduct = {
-      id: id, name: '샘플 상품', price: 29000, salePrice: 19000,
-      category: '의류', subCategory: '상의',
-      image: 'https://picsum.photos/600/600?random=' + id,
-      detailImages: 'https://picsum.photos/600/601?random='+id+'|https://picsum.photos/600/602?random='+id,
-      description: '<h2>상품 소개</h2><p>고품질 소재를 사용하여 제작된 프리미엄 상품입니다.</p><div class="highlight-box">✅ 무료 반품 보장 · 정품 인증</div>',
-      colors: '화이트|블랙|네이비', sizes: 'S|M|L|XL',
-      stock: 100, badge: 'NEW', salesCount: 50, rating: 4.5, reviewCount: 12
-    };
-    renderProduct(currentProduct);
-    loadReviews(id);
-    loadRelated();
-  });
-}
-
-function renderProduct(p) {
-  document.title = p.name + ' - ' + (typeof CONFIG !== 'undefined' ? CONFIG.STORE.NAME : '담누리마켓');
-
-  var bcCat = document.getElementById('bc-category');
-  var bcName = document.getElementById('bc-name');
-  if (bcCat) bcCat.textContent = p.category;
-  if (bcName) bcName.textContent = p.name;
-
-  var detCat = document.getElementById('detail-category');
-  if (detCat) detCat.textContent = p.category;
-
-  if (p.subCategory) {
-    var subWrap = document.getElementById('detail-subcategory-wrap');
-    var subEl = document.getElementById('detail-subcategory');
-    if (subEl) subEl.textContent = p.subCategory;
-    if (subWrap) subWrap.style.display = 'inline';
-  }
-
-  var nameEl = document.getElementById('detail-name');
-  if (nameEl) nameEl.textContent = p.name;
-
-  // 이미지 갤러리
-  var extraImages = p.detailImages ? p.detailImages.split('|').map(function(s){ return s.trim(); }).filter(Boolean) : [];
-  images = [p.image].concat(extraImages).filter(Boolean);
-  if (!images.length) images = ['https://picsum.photos/600/600?random=' + p.id];
-  currentImgIdx = 0;
-  renderGallery();
-
-  // 뱃지
-  if (p.badge) {
-    var badge = document.getElementById('detail-badge');
-    if (badge) {
-      badge.textContent = p.badge;
-      badge.className = 'gallery-badge product-badge badge-' + p.badge.toLowerCase();
-      badge.style.display = 'block';
+    /* 갤러리 */
+    .gallery-wrap { position:sticky; top:80px; }
+    .gallery-main {
+      aspect-ratio:1; border-radius:16px; overflow:hidden;
+      border:1px solid var(--border); background:#f8f8f8;
+      margin-bottom:12px; position:relative; cursor:zoom-in;
     }
-  }
-
-  // 별점
-  var rating = p.rating || 0;
-  var detRating = document.getElementById('detail-rating');
-  var detReview = document.getElementById('detail-review-count');
-  var detSales = document.getElementById('detail-sales');
-  var tabReview = document.getElementById('tab-review-count');
-  if (detRating) detRating.textContent = parseFloat(rating).toFixed(1);
-  if (detReview) detReview.textContent = '(리뷰 ' + (p.reviewCount || 0) + '개)';
-  if (detSales) detSales.textContent = '판매 ' + (p.salesCount || 0).toLocaleString() + '개';
-  if (tabReview) tabReview.textContent = '(' + (p.reviewCount || 0) + ')';
-  renderStars('detail-stars', rating);
-
-  // 가격
-  var price = p.salePrice || p.price;
-  var detPrice = document.getElementById('detail-price');
-  if (detPrice) detPrice.textContent = price.toLocaleString() + '원';
-  if (p.salePrice && p.salePrice !== p.price) {
-    var discount = Math.round((1 - p.salePrice / p.price) * 100);
-    var origEl = document.getElementById('detail-original-price');
-    var discEl = document.getElementById('detail-discount');
-    if (origEl) { origEl.textContent = p.price.toLocaleString() + '원'; origEl.style.display = 'block'; }
-    if (discEl) { discEl.textContent = discount + '% 할인'; discEl.style.display = 'inline-block'; }
-  }
-  if (price >= 50000) {
-    var feeEl = document.getElementById('delivery-fee');
-    if (feeEl) feeEl.textContent = '무료배송 🎉';
-  }
-
-  // 옵션 색상
-  if (p.colors) {
-    var colors = p.colors.split('|').map(function(s){ return s.trim(); }).filter(Boolean);
-    if (colors.length) {
-      var sec = document.getElementById('option-color-section');
-      var chips = document.getElementById('option-color-chips');
-      if (sec) sec.classList.add('has-options');
-      if (chips) chips.innerHTML = colors.map(function(c){ return '<button class="option-chip" onclick="selectOption(this,\'color\')">' + c + '</button>'; }).join('');
+    .gallery-main img { width:100%; height:100%; object-fit:cover; transition:transform 0.4s ease; display:block; }
+    .gallery-main:hover img { transform:scale(1.06); }
+    .gallery-zoom-overlay {
+      position:absolute; bottom:12px; right:12px;
+      background:rgba(0,0,0,0.45); color:#fff;
+      border-radius:8px; padding:6px 10px; font-size:12px;
+      display:flex; align-items:center; gap:4px; pointer-events:none;
     }
-  }
-
-  // 옵션 사이즈
-  if (p.sizes) {
-    var sizes = p.sizes.split('|').map(function(s){ return s.trim(); }).filter(Boolean);
-    if (sizes.length) {
-      var ssec = document.getElementById('option-size-section');
-      var schips = document.getElementById('option-size-chips');
-      if (ssec) ssec.classList.add('has-options');
-      if (schips) schips.innerHTML = sizes.map(function(s){ return '<button class="option-chip" onclick="selectOption(this,\'size\')">' + s + '</button>'; }).join('');
+    .gallery-nav {
+      position:absolute; top:50%; transform:translateY(-50%);
+      background:rgba(255,255,255,0.9); border:none; border-radius:50%;
+      width:36px; height:36px; display:flex; align-items:center; justify-content:center;
+      font-size:16px; cursor:pointer; box-shadow:0 2px 8px rgba(0,0,0,0.15);
+      transition:all 0.2s; z-index:2;
     }
-  }
-
-  // 재고
-  var stockEl = document.getElementById('detail-stock');
-  if (stockEl) stockEl.textContent = p.stock > 0 ? p.stock + '개 남음' : '품절';
-
-  // 상품 설명
-  var descEl = document.getElementById('detail-description');
-  if (descEl) {
-    var desc = p.description || '';
-    var isHtml = /<[a-z][\s\S]*>/i.test(desc);
-    if (isHtml) {
-      descEl.classList.add('html-mode');
-      descEl.innerHTML = desc || '<p>상품 상세 설명이 없습니다.</p>';
-    } else {
-      descEl.classList.add('text-mode');
-      descEl.textContent = desc || '상품 상세 설명이 없습니다.';
+    .gallery-nav:hover { background:#fff; box-shadow:0 4px 12px rgba(0,0,0,0.2); }
+    .gallery-nav.prev { left:10px; }
+    .gallery-nav.next { right:10px; }
+    .gallery-nav-hidden { display:none !important; }
+    .gallery-badge { position:absolute; top:12px; left:12px; font-size:12px; font-weight:800; padding:4px 10px; border-radius:6px; z-index:2; }
+    .gallery-counter {
+      position:absolute; bottom:12px; left:50%; transform:translateX(-50%);
+      background:rgba(0,0,0,0.45); color:#fff; border-radius:20px;
+      padding:4px 12px; font-size:12px; font-weight:600; pointer-events:none;
     }
-  }
+    .gallery-thumbs { display:flex; gap:8px; overflow-x:auto; scrollbar-width:none; padding-bottom:4px; }
+    .gallery-thumbs::-webkit-scrollbar { display:none; }
+    .gallery-thumb {
+      width:72px; height:72px; flex-shrink:0; border-radius:8px; overflow:hidden;
+      border:2.5px solid transparent; cursor:pointer; transition:all 0.2s; background:#f0f0f0;
+    }
+    .gallery-thumb:hover { border-color:#ccc; }
+    .gallery-thumb.active { border-color:var(--accent); box-shadow:0 0 0 2px var(--accent)22; }
+    .gallery-thumb img { width:100%; height:100%; object-fit:cover; display:block; }
 
-  // 배송 예정일
-  var tomorrow = new Date();
-  tomorrow.setDate(tomorrow.getDate() + 1);
-  var days = ['일','월','화','수','목','금','토'];
-  var dateEl = document.getElementById('delivery-date');
-  if (dateEl) dateEl.textContent = (tomorrow.getMonth()+1) + '/' + tomorrow.getDate() + '(' + days[tomorrow.getDay()] + ') 도착 예정';
+    /* 라이트박스 */
+    .lightbox { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.92); z-index:9999; align-items:center; justify-content:center; flex-direction:column; }
+    .lightbox.open { display:flex; }
+    .lightbox-img { max-width:90vw; max-height:85vh; object-fit:contain; border-radius:8px; }
+    .lightbox-close { position:absolute; top:20px; right:24px; color:#fff; font-size:28px; background:none; border:none; cursor:pointer; opacity:0.7; transition:opacity 0.2s; }
+    .lightbox-close:hover { opacity:1; }
+    .lightbox-counter { color:rgba(255,255,255,0.6); font-size:13px; margin-top:12px; }
+    .lightbox-nav { position:absolute; top:50%; transform:translateY(-50%); background:rgba(255,255,255,0.15); color:#fff; border:none; border-radius:50%; width:44px; height:44px; font-size:20px; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:background 0.2s; }
+    .lightbox-nav:hover { background:rgba(255,255,255,0.3); }
+    .lightbox-nav.prev { left:20px; }
+    .lightbox-nav.next { right:20px; }
 
-  updateTotal();
-}
+    /* 상품 정보 */
+    .product-info-panel { padding:4px 0; }
+    .product-info-category { font-size:12px; color:var(--accent); font-weight:600; margin-bottom:8px; display:flex; align-items:center; gap:6px; }
+    .product-info-name { font-size:24px; font-weight:900; line-height:1.4; margin-bottom:12px; color:var(--black); }
+    .rating-summary { display:flex; align-items:center; gap:10px; padding:12px 0; border-top:1px solid var(--border); border-bottom:1px solid var(--border); margin-bottom:20px; }
+    .stars-display { display:flex; gap:2px; }
+    .star { font-size:18px; }
+    .rating-score { font-size:20px; font-weight:800; color:#FF8C00; }
+    .rating-count { font-size:13px; color:var(--gray); }
+    .sales-count { font-size:13px; color:var(--gray); margin-left:auto; }
 
-function renderGallery() {
-  var mainImg = document.getElementById('main-img');
-  if (!mainImg) return;
-  mainImg.src = images[currentImgIdx];
-  mainImg.onerror = function(){ this.src = 'https://via.placeholder.com/600x600?text=이미지없음'; };
+    /* 가격 */
+    .price-section { margin-bottom:24px; }
+    .price-original-line { font-size:14px; color:var(--gray-light); text-decoration:line-through; margin-bottom:4px; }
+    .price-main-line { display:flex; align-items:baseline; gap:12px; }
+    .price-main { font-size:32px; font-weight:900; color:var(--black); }
+    .price-discount-badge { background:var(--accent); color:#fff; font-size:14px; font-weight:800; padding:4px 10px; border-radius:6px; }
+    .price-note { font-size:12px; color:var(--gray-light); margin-top:6px; }
 
-  var counter = document.getElementById('gallery-counter');
-  if (counter && images.length > 1) {
-    counter.textContent = (currentImgIdx + 1) + ' / ' + images.length;
-    counter.style.display = 'block';
-  }
-  var prev = document.getElementById('gallery-prev');
-  var next = document.getElementById('gallery-next');
-  if (prev) prev.classList.toggle('gallery-nav-hidden', images.length <= 1);
-  if (next) next.classList.toggle('gallery-nav-hidden', images.length <= 1);
+    /* 옵션 */
+    .option-section { margin-bottom:20px; display:none; }
+    .option-section.has-options { display:block; }
+    .option-label { font-size:14px; font-weight:700; margin-bottom:10px; }
+    .option-chips { display:flex; flex-wrap:wrap; gap:8px; }
+    .option-chip { padding:7px 14px; border:1.5px solid var(--border); border-radius:20px; font-size:13px; font-weight:500; cursor:pointer; transition:all 0.2s; background:#fff; }
+    .option-chip:hover { border-color:var(--accent); color:var(--accent); }
+    .option-chip.active { background:var(--accent); color:#fff; border-color:var(--accent); }
 
-  var thumbs = document.getElementById('gallery-thumbs');
-  if (thumbs) {
-    thumbs.innerHTML = images.map(function(img, i) {
-      return '<div class="gallery-thumb ' + (i === currentImgIdx ? 'active' : '') + '" onclick="switchImage(' + i + ')">'
-        + '<img src="' + img + '" alt="이미지' + (i+1) + '" loading="lazy" onerror="this.src=\'https://via.placeholder.com/72x72?text=?\'"></div>';
-    }).join('');
-  }
-}
+    /* 배송 */
+    .delivery-info { background:var(--bg); border-radius:10px; padding:16px; margin-bottom:24px; }
+    .delivery-row { display:flex; gap:12px; font-size:13px; padding:4px 0; }
+    .delivery-label { color:var(--gray); width:70px; flex-shrink:0; }
+    .delivery-value { color:var(--gray-dark); font-weight:500; }
+    .delivery-free { color:var(--accent); font-weight:700; }
 
-function switchImage(idx) { currentImgIdx = idx; renderGallery(); }
+    /* 수량 */
+    .qty-section { margin-bottom:24px; }
+    .qty-label { font-size:14px; font-weight:700; margin-bottom:10px; }
+    .qty-row { display:flex; align-items:center; justify-content:space-between; }
+    .qty-control { display:flex; align-items:center; border:1.5px solid var(--border); border-radius:8px; overflow:hidden; }
+    .qty-control button { padding:10px 16px; background:var(--bg); border:none; font-size:18px; color:var(--gray-dark); cursor:pointer; transition:var(--transition); }
+    .qty-control button:hover { background:var(--border); }
+    .qty-control input { width:56px; text-align:center; border:none; border-left:1.5px solid var(--border); border-right:1.5px solid var(--border); font-size:16px; font-weight:700; padding:10px 0; font-family:var(--font-main); }
+    .qty-total { font-size:18px; font-weight:800; color:var(--accent); }
 
-function galleryNav(dir, e) {
-  if (e) e.stopPropagation();
-  currentImgIdx = (currentImgIdx + dir + images.length) % images.length;
-  renderGallery();
-}
+    /* 버튼 */
+    .buy-buttons { display:grid; grid-template-columns:48px 1fr 1fr; gap:8px; margin-bottom:16px; }
+    .btn-wish-lg { padding:16px; border:1.5px solid var(--border); background:#fff; border-radius:10px; font-size:20px; cursor:pointer; transition:var(--transition); }
+    .btn-wish-lg:hover { border-color:#ff4081; background:#fff5f8; }
+    .btn-cart-lg { padding:16px; border:2px solid var(--accent); background:#fff; color:var(--accent); border-radius:10px; font-size:15px; font-weight:800; cursor:pointer; transition:var(--transition); font-family:var(--font-main); }
+    .btn-cart-lg:hover { background:var(--accent-light); }
+    .btn-buy-lg { padding:16px; background:var(--accent); color:#fff; border:none; border-radius:10px; font-size:15px; font-weight:800; cursor:pointer; transition:var(--transition); font-family:var(--font-main); }
+    .btn-buy-lg:hover { background:var(--accent-dark); transform:translateY(-1px); }
+    .share-row { display:flex; align-items:center; gap:8px; font-size:13px; color:var(--gray); }
+    .share-btn { padding:6px 12px; border:1px solid var(--border); border-radius:16px; background:#fff; font-size:12px; cursor:pointer; transition:var(--transition); }
+    .share-btn:hover { border-color:var(--accent); color:var(--accent); }
 
-document.addEventListener('keydown', function(e) {
-  var lb = document.getElementById('lightbox');
-  if (lb && lb.classList.contains('open')) {
-    if (e.key === 'ArrowLeft') lightboxNav(-1);
-    if (e.key === 'ArrowRight') lightboxNav(1);
-    if (e.key === 'Escape') closeLightboxBtn();
-  } else {
-    if (e.key === 'ArrowLeft') galleryNav(-1);
-    if (e.key === 'ArrowRight') galleryNav(1);
-  }
-});
+    /* 탭 */
+    .detail-tabs { border-bottom:2px solid var(--border); display:flex; gap:0; margin-bottom:32px; }
+    .detail-tab { padding:14px 28px; font-size:15px; font-weight:600; color:var(--gray); background:none; border:none; border-bottom:3px solid transparent; margin-bottom:-2px; cursor:pointer; transition:var(--transition); font-family:var(--font-main); }
+    .detail-tab.active { color:var(--accent); border-bottom-color:var(--accent); }
+    .tab-panel { display:none; }
+    .tab-panel.active { display:block; }
 
-function openLightbox(idx) {
-  currentImgIdx = idx;
-  var lb = document.getElementById('lightbox');
-  if (lb) { lb.classList.add('open'); document.body.style.overflow = 'hidden'; }
-  updateLightbox();
-}
+    /* 상품 설명 */
+    .product-description { font-size:15px; line-height:1.9; color:var(--gray-dark); }
+    .product-description.html-mode img { max-width:100%; border-radius:10px; margin:16px 0; display:block; }
+    .product-description.html-mode h2 { font-size:20px; font-weight:800; margin:28px 0 12px; color:var(--black); padding-bottom:8px; border-bottom:2px solid var(--border); }
+    .product-description.html-mode h3 { font-size:17px; font-weight:700; margin:20px 0 8px; color:var(--gray-dark); }
+    .product-description.html-mode ul, .product-description.html-mode ol { padding-left:20px; margin:12px 0; }
+    .product-description.html-mode li { margin-bottom:6px; }
+    .product-description.html-mode table { width:100%; border-collapse:collapse; margin:16px 0; font-size:14px; }
+    .product-description.html-mode table th, .product-description.html-mode table td { padding:10px 14px; border:1px solid var(--border); text-align:left; }
+    .product-description.html-mode table th { background:var(--bg); font-weight:700; }
+    .product-description.html-mode .highlight-box { background:var(--accent-light,#fff3f0); border-left:4px solid var(--accent); border-radius:0 8px 8px 0; padding:14px 18px; margin:16px 0; }
+    .product-description.text-mode { white-space:pre-line; }
 
-function updateLightbox() {
-  var img = document.getElementById('lightbox-img');
-  var cnt = document.getElementById('lightbox-counter');
-  if (img) img.src = images[currentImgIdx];
-  if (cnt) cnt.textContent = (currentImgIdx + 1) + ' / ' + images.length;
-}
+    /* 배송/반품 탭 */
+    .shipping-info-wrap { max-width:700px; }
+    .shipping-block { margin-bottom:28px; padding-bottom:28px; border-bottom:1px solid var(--border); }
+    .shipping-block:last-child { border-bottom:none; }
+    .shipping-block h3 { font-size:16px; font-weight:800; margin-bottom:14px; display:flex; align-items:center; gap:8px; }
+    .shipping-table { width:100%; border-collapse:collapse; font-size:14px; }
+    .shipping-table tr:nth-child(even) td:first-child { background:#f9f9fb; }
+    .shipping-table td { padding:10px 14px; border:1px solid var(--border); }
+    .shipping-table td:first-child { width:130px; font-weight:700; color:var(--gray-dark); background:var(--bg); }
+    .shipping-notice { background:#fff8f7; border:1px solid #ffd4cc; border-radius:8px; padding:14px 16px; font-size:13px; color:#c0392b; line-height:1.7; margin-top:12px; }
+    .shipping-notice strong { display:block; font-size:14px; margin-bottom:6px; }
 
-function closeLightbox(e) {
-  if (e.target === document.getElementById('lightbox')) closeLightboxBtn();
-}
+    /* Q&A */
+    .qna-write { background:#fff; border:1.5px solid var(--border); border-radius:12px; padding:24px; margin-bottom:28px; }
+    .qna-write h4 { font-size:16px; font-weight:800; margin-bottom:16px; }
+    .qna-type-row { display:flex; gap:8px; margin-bottom:12px; }
+    .qna-type-btn { padding:6px 14px; border:1.5px solid var(--border); border-radius:20px; font-size:13px; cursor:pointer; background:#fff; font-family:var(--font-main); transition:all 0.2s; }
+    .qna-type-btn.active { background:var(--accent); color:#fff; border-color:var(--accent); }
+    .qna-textarea { width:100%; border:1.5px solid var(--border); border-radius:8px; padding:12px; font-size:14px; font-family:var(--font-main); resize:vertical; min-height:100px; outline:none; transition:var(--transition); box-sizing:border-box; }
+    .qna-textarea:focus { border-color:var(--accent); }
+    .qna-secret-row { display:flex; align-items:center; gap:8px; margin-top:10px; font-size:13px; color:var(--gray); }
+    .qna-submit-row { display:flex; justify-content:flex-end; margin-top:12px; }
+    .btn-qna-submit { background:var(--accent); color:#fff; border:none; padding:10px 24px; border-radius:8px; font-size:14px; font-weight:700; cursor:pointer; transition:var(--transition); font-family:var(--font-main); }
+    .btn-qna-submit:hover { background:var(--accent-dark); }
+    .qna-item { padding:18px 0; border-bottom:1px solid var(--border); }
+    .qna-item:last-child { border-bottom:none; }
+    .qna-header { display:flex; align-items:center; gap:10px; margin-bottom:6px; cursor:pointer; }
+    .qna-badge { font-size:11px; font-weight:700; padding:2px 8px; border-radius:4px; }
+    .qna-badge.answered { background:#e8f5e9; color:#2e7d32; }
+    .qna-badge.waiting  { background:#fff3e0; color:#e65100; }
+    .qna-badge.secret   { background:#f3e5f5; color:#6a1b9a; }
+    .qna-title { font-size:14px; font-weight:600; flex:1; }
+    .qna-meta  { font-size:12px; color:var(--gray-light); }
+    .qna-body  { font-size:14px; color:var(--gray-dark); line-height:1.7; padding:12px 0 0 2px; }
+    .qna-answer { background:var(--bg); border-radius:8px; padding:12px 16px; margin-top:10px; font-size:13px; }
+    .qna-answer-label { font-weight:700; color:var(--accent); margin-bottom:4px; font-size:12px; }
+    .qna-empty { text-align:center; padding:60px 20px; color:var(--gray-light); font-size:14px; }
+    .qna-empty .empty-icon { font-size:48px; margin-bottom:12px; }
 
-function closeLightboxBtn() {
-  var lb = document.getElementById('lightbox');
-  if (lb) lb.classList.remove('open');
-  document.body.style.overflow = '';
-}
+    /* 리뷰 */
+    .review-summary { display:grid; grid-template-columns:200px 1fr; gap:32px; padding:32px; background:var(--bg); border-radius:12px; margin-bottom:32px; }
+    .review-score-big { text-align:center; display:flex; flex-direction:column; align-items:center; justify-content:center; }
+    .score-number { font-size:56px; font-weight:900; color:#FF8C00; line-height:1; }
+    .score-stars { display:flex; gap:3px; margin:8px 0; }
+    .score-stars .star { font-size:22px; }
+    .score-total { font-size:13px; color:var(--gray); }
+    .review-bars { display:flex; flex-direction:column; justify-content:center; gap:8px; }
+    .review-bar-row { display:flex; align-items:center; gap:10px; font-size:13px; }
+    .review-bar-label { width:30px; text-align:right; color:var(--gray); }
+    .review-bar-track { flex:1; height:8px; background:var(--border); border-radius:4px; overflow:hidden; }
+    .review-bar-fill  { height:100%; background:#FF8C00; border-radius:4px; transition:width 0.6s ease; }
+    .review-bar-count { width:24px; color:var(--gray); }
+    .review-write { background:#fff; border:1.5px solid var(--border); border-radius:12px; padding:24px; margin-bottom:32px; }
+    .review-write h4 { font-size:16px; font-weight:800; margin-bottom:16px; }
+    .star-input { display:flex; gap:4px; margin-bottom:16px; }
+    .star-btn { font-size:32px; background:none; border:none; cursor:pointer; transition:transform 0.1s; filter:grayscale(1); opacity:0.4; }
+    .star-btn.active { filter:none; opacity:1; transform:scale(1.1); }
+    .review-textarea { width:100%; border:1.5px solid var(--border); border-radius:8px; padding:12px; font-size:14px; font-family:var(--font-main); resize:vertical; min-height:100px; outline:none; transition:var(--transition); box-sizing:border-box; }
+    .review-textarea:focus { border-color:var(--accent); }
+    .review-submit { display:flex; justify-content:space-between; align-items:center; margin-top:12px; }
+    .review-char { font-size:12px; color:var(--gray-light); }
+    .btn-review-submit { background:var(--accent); color:#fff; border:none; padding:10px 24px; border-radius:8px; font-size:14px; font-weight:700; cursor:pointer; transition:var(--transition); font-family:var(--font-main); }
+    .btn-review-submit:hover { background:var(--accent-dark); }
+    .review-filters { display:flex; gap:8px; margin-bottom:20px; }
+    .review-filter-btn { padding:6px 14px; border:1px solid var(--border); border-radius:16px; background:#fff; font-size:13px; cursor:pointer; transition:var(--transition); }
+    .review-filter-btn.active { background:var(--accent); color:#fff; border-color:var(--accent); }
+    .review-item { padding:20px 0; border-bottom:1px solid var(--border); }
+    .review-item:last-child { border-bottom:none; }
+    .review-header { display:flex; align-items:center; gap:10px; margin-bottom:8px; }
+    .review-avatar { width:36px; height:36px; border-radius:50%; background:var(--accent); color:#fff; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:700; flex-shrink:0; }
+    .review-author { font-size:14px; font-weight:700; }
+    .review-date   { font-size:12px; color:var(--gray-light); margin-left:auto; }
+    .review-stars  { display:flex; gap:1px; }
+    .review-stars .star { font-size:14px; }
+    .review-content { font-size:14px; color:var(--gray-dark); line-height:1.7; margin:8px 0; }
+    .review-img { width:80px; height:80px; object-fit:cover; border-radius:8px; border:1px solid var(--border); margin-top:8px; cursor:pointer; }
+    .review-reply { background:var(--bg); border-radius:8px; padding:12px 16px; margin-top:12px; font-size:13px; }
+    .review-reply-label { font-weight:700; color:var(--accent); margin-bottom:4px; font-size:12px; }
+    .review-reply-content { color:var(--gray-dark); line-height:1.6; }
+    .review-empty { text-align:center; padding:60px 20px; color:var(--gray-light); font-size:14px; }
+    .review-empty .empty-icon { font-size:48px; margin-bottom:12px; }
 
-function lightboxNav(dir, e) {
-  if (e) e.stopPropagation();
-  currentImgIdx = (currentImgIdx + dir + images.length) % images.length;
-  updateLightbox(); renderGallery();
-}
+    /* 연관 상품 */
+    .related-section { margin-top:48px; }
 
-function openLightboxUrl(url) {
-  var img = document.getElementById('lightbox-img');
-  var cnt = document.getElementById('lightbox-counter');
-  var lb = document.getElementById('lightbox');
-  if (img) img.src = url;
-  if (cnt) cnt.textContent = '';
-  if (lb) { lb.classList.add('open'); document.body.style.overflow = 'hidden'; }
-}
+    /* 반응형 */
+    @media (max-width:768px) {
+      .product-top { grid-template-columns:1fr; gap:24px; }
+      .gallery-wrap { position:static; }
+      .buy-buttons { grid-template-columns:48px 1fr 1fr; }
+      .review-summary { grid-template-columns:1fr; }
+      .review-score-big { flex-direction:row; gap:16px; }
+      .product-detail-wrap { padding:0 16px; }
+      .product-info-name { font-size:20px; }
+      .price-main { font-size:26px; }
+      .detail-tab { padding:12px 16px; font-size:13px; }
+    }
+  </style>
+</head>
+<body>
 
-function selectOption(el, group) {
-  el.closest('.option-chips').querySelectorAll('.option-chip').forEach(function(c){ c.classList.remove('active'); });
-  el.classList.add('active');
-}
+<!-- HEADER -->
+<header class="header">
+  <div class="header-main">
+    <a href="index.html" class="header-logo">
+      <span>🏪</span><span id="store-name">담누리마켓</span>
+    </a>
+    <div class="header-search">
+      <div class="search-bar" onclick="Search.open()">
+        <input type="text" placeholder="상품을 검색하세요" readonly>
+        <button>🔍</button>
+      </div>
+    </div>
+    <div class="header-icons">
+      <a href="mypage.html" class="header-icon"><span class="icon-emoji">👤</span><span>로그인</span></a>
+      <a href="mypage.html" class="header-icon"><span class="icon-emoji">❤️</span><span>찜목록</span></a>
+      <a href="cart.html" class="header-icon"><span class="icon-emoji">🛒</span><span>장바구니</span><span class="cart-badge">0</span></a>
+    </div>
+  </div>
+</header>
 
-function renderStars(containerId, rating) {
-  var el = document.getElementById(containerId);
-  if (!el) return;
-  el.innerHTML = [1,2,3,4,5].map(function(i) {
-    var filled = i <= Math.floor(rating) || (i - rating < 1 && rating % 1 >= 0.5);
-    return '<span class="star" style="' + (filled ? '' : 'filter:grayscale(1);opacity:0.3') + '">⭐</span>';
-  }).join('');
-}
+<!-- 검색 모달 -->
+<div class="search-modal" id="search-modal">
+  <div class="search-modal-box">
+    <div class="search-modal-header">
+      <span>🔍</span>
+      <input type="text" class="search-modal-input" id="search-input"
+        placeholder="검색어를 입력하세요" oninput="Search.run(this.value)">
+      <button class="search-modal-close" onclick="Search.close()">✕</button>
+    </div>
+    <div id="search-results"><p class="search-empty">검색어를 입력하세요</p></div>
+  </div>
+</div>
 
-function changeQty(delta) {
-  var input = document.getElementById('qty-input');
-  input.value = Math.max(1, parseInt(input.value) + delta);
-  updateTotal();
-}
+<!-- 라이트박스 -->
+<div class="lightbox" id="lightbox" onclick="closeLightbox(event)">
+  <button class="lightbox-close" onclick="closeLightboxBtn()">✕</button>
+  <button class="lightbox-nav prev" onclick="lightboxNav(-1,event)">‹</button>
+  <img class="lightbox-img" id="lightbox-img" src="" alt="상품이미지 확대">
+  <button class="lightbox-nav next" onclick="lightboxNav(1,event)">›</button>
+  <div class="lightbox-counter" id="lightbox-counter"></div>
+</div>
 
-function updateTotal() {
-  var qty = parseInt(document.getElementById('qty-input').value) || 1;
-  var price = currentProduct ? (currentProduct.salePrice || currentProduct.price) : 0;
-  var totalEl = document.getElementById('qty-total');
-  if (totalEl) totalEl.textContent = '총 ' + (price * qty).toLocaleString() + '원';
-}
+<main>
+  <div class="product-detail-wrap">
 
-function addToCart() {
-  if (!currentProduct) return;
-  var qty = parseInt(document.getElementById('qty-input').value) || 1;
-  Cart.add(currentProduct, qty);
-}
+    <!-- 빵부스러기 -->
+    <div class="breadcrumb" id="breadcrumb">
+      <a href="index.html">🏠 홈</a> ›
+      <a href="products.html">상품목록</a> ›
+      <span id="bc-category">카테고리</span> ›
+      <span id="bc-name">상품명</span>
+    </div>
 
-function buyNow() { alert('PG사 연동 후 결제 진행됩니다'); }
+    <!-- 상품 상단 -->
+    <div class="product-top">
 
-function toggleWish() {
-  var btn = document.getElementById('wish-btn');
-  if (btn) btn.textContent = btn.textContent === '🤍' ? '❤️' : '🤍';
-}
+      <!-- 이미지 갤러리 -->
+      <div class="gallery-wrap">
+        <div class="gallery-main" id="gallery-main" onclick="openLightbox(currentImgIdx)">
+          <img id="main-img" src="https://via.placeholder.com/600x600?text=로딩중" alt="상품이미지">
+          <span class="gallery-badge product-badge" id="detail-badge" style="display:none"></span>
+          <button class="gallery-nav prev gallery-nav-hidden" id="gallery-prev" onclick="galleryNav(-1,event)">‹</button>
+          <button class="gallery-nav next gallery-nav-hidden" id="gallery-next" onclick="galleryNav(1,event)">›</button>
+          <div class="gallery-counter" id="gallery-counter" style="display:none"></div>
+          <div class="gallery-zoom-overlay">🔍 클릭하여 확대</div>
+        </div>
+        <div class="gallery-thumbs" id="gallery-thumbs"></div>
+      </div>
 
-function switchTab(tabId, btn) {
-  document.querySelectorAll('.tab-panel').forEach(function(p){ p.classList.remove('active'); });
-  document.querySelectorAll('.detail-tab').forEach(function(b){ b.classList.remove('active'); });
-  var panel = document.getElementById('tab-' + tabId);
-  if (panel) panel.classList.add('active');
-  if (btn) btn.classList.add('active');
-}
+      <!-- 상품 정보 -->
+      <div class="product-info-panel">
+        <div class="product-info-category">
+          <span id="detail-category">카테고리</span>
+          <span id="detail-subcategory-wrap" style="display:none">› <span id="detail-subcategory"></span></span>
+        </div>
+        <h1 class="product-info-name" id="detail-name">상품명 로딩 중...</h1>
 
-function loadReviews(productId) {
-  try {
-    ReviewAPI.getByProduct(productId).then(function(reviews) {
-      allReviews = reviews || [];
-      renderReviews(allReviews);
-      renderReviewSummary(allReviews);
-    }).catch(function(){ allReviews = []; renderReviews([]); renderReviewSummary([]); });
-  } catch(e) { allReviews = []; renderReviews([]); renderReviewSummary([]); }
-}
+        <!-- 별점 -->
+        <div class="rating-summary">
+          <div class="stars-display" id="detail-stars">
+            <span class="star">☆</span><span class="star">☆</span>
+            <span class="star">☆</span><span class="star">☆</span><span class="star">☆</span>
+          </div>
+          <span class="rating-score" id="detail-rating">0.0</span>
+          <span class="rating-count" id="detail-review-count">(리뷰 0개)</span>
+          <span class="sales-count" id="detail-sales">판매 0개</span>
+        </div>
 
-function renderReviewSummary(reviews) {
-  var total = reviews.length;
-  var avg = total ? (reviews.reduce(function(s,r){ return s + r.rating; }, 0) / total) : 0;
-  var avgScore = document.getElementById('avg-score');
-  var avgTotal = document.getElementById('avg-total');
-  if (avgScore) avgScore.textContent = avg.toFixed(1);
-  if (avgTotal) avgTotal.textContent = '총 ' + total + '개 리뷰';
-  renderStars('avg-stars', avg);
+        <!-- 가격 -->
+        <div class="price-section">
+          <div class="price-original-line" id="detail-original-price" style="display:none"></div>
+          <div class="price-main-line">
+            <span class="price-main" id="detail-price">0원</span>
+            <span class="price-discount-badge" id="detail-discount" style="display:none"></span>
+          </div>
+          <div class="price-note">부가세 포함 · 카드 무이자 최대 12개월</div>
+        </div>
 
-  var bars = document.getElementById('review-bars');
-  if (bars) {
-    bars.innerHTML = [5,4,3,2,1].map(function(star) {
-      var count = reviews.filter(function(r){ return r.rating === star; }).length;
-      var pct = total ? (count/total*100) : 0;
-      return '<div class="review-bar-row">'
-        + '<span class="review-bar-label">' + star + '점</span>'
-        + '<div class="review-bar-track"><div class="review-bar-fill" style="width:' + pct + '%"></div></div>'
-        + '<span class="review-bar-count">' + count + '</span></div>';
-    }).join('');
-  }
-}
+        <!-- 색상 옵션 -->
+        <div class="option-section" id="option-color-section">
+          <div class="option-label">색상</div>
+          <div class="option-chips" id="option-color-chips"></div>
+        </div>
 
-function renderReviews(reviews) {
-  var container = document.getElementById('review-list');
-  if (!container) return;
-  if (!reviews.length) {
-    container.innerHTML = '<div class="review-empty"><div class="empty-icon">⭐</div><div>아직 리뷰가 없습니다. 첫 번째 리뷰를 남겨주세요!</div></div>';
-    return;
-  }
-  container.innerHTML = reviews.map(function(r) {
-    return '<div class="review-item">'
-      + '<div class="review-header">'
-      + '<div class="review-avatar">' + (r.author ? r.author[0] : '?') + '</div>'
-      + '<div><div class="review-author">' + (r.author || '익명') + '</div>'
-      + '<div class="review-stars">' + [1,2,3,4,5].map(function(i){ return '<span class="star">' + (i <= r.rating ? '⭐' : '☆') + '</span>'; }).join('') + '</div></div>'
-      + '<div class="review-date">' + (r.date || '') + '</div></div>'
-      + '<div class="review-content">' + (r.content || '') + '</div>'
-      + (r.image ? '<img src="' + r.image + '" class="review-img" alt="리뷰이미지" onclick="openLightboxUrl(\'' + r.image + '\')">' : '')
-      + (r.reply ? '<div class="review-reply"><div class="review-reply-label">🏪 판매자 답글</div><div class="review-reply-content">' + r.reply + '</div></div>' : '')
-      + '</div>';
-  }).join('');
-}
+        <!-- 사이즈 옵션 -->
+        <div class="option-section" id="option-size-section">
+          <div class="option-label">사이즈</div>
+          <div class="option-chips" id="option-size-chips"></div>
+        </div>
 
-function filterReview(filter, btn) {
-  document.querySelectorAll('.review-filter-btn').forEach(function(b){ b.classList.remove('active'); });
-  if (btn) btn.classList.add('active');
-  if (filter === 'all') renderReviews(allReviews);
-  else if (filter === 'photo') renderReviews(allReviews.filter(function(r){ return r.image; }));
-  else if (filter === 3) renderReviews(allReviews.filter(function(r){ return r.rating <= 3; }));
-  else renderReviews(allReviews.filter(function(r){ return r.rating === filter; }));
-}
+        <!-- 배송 정보 -->
+        <div class="delivery-info">
+          <div class="delivery-row">
+            <span class="delivery-label">배송</span>
+            <span class="delivery-value">택배배송 (CJ대한통운)</span>
+          </div>
+          <div class="delivery-row">
+            <span class="delivery-label">배송비</span>
+            <span class="delivery-value delivery-free" id="delivery-fee">3,000원 (5만원 이상 무료)</span>
+          </div>
+          <div class="delivery-row">
+            <span class="delivery-label">도착예정</span>
+            <span class="delivery-value" id="delivery-date">내일 도착 예정</span>
+          </div>
+          <div class="delivery-row">
+            <span class="delivery-label">재고</span>
+            <span class="delivery-value" id="detail-stock">확인 중...</span>
+          </div>
+        </div>
 
-function setRating(val) {
-  currentRating = val;
-  document.querySelectorAll('.star-btn').forEach(function(btn, i){ btn.classList.toggle('active', i < val); });
-}
+        <!-- 수량 -->
+        <div class="qty-section">
+          <div class="qty-label">수량</div>
+          <div class="qty-row">
+            <div class="qty-control">
+              <button onclick="changeQty(-1)">−</button>
+              <input type="number" id="qty-input" value="1" min="1" onchange="updateTotal()">
+              <button onclick="changeQty(1)">+</button>
+            </div>
+            <div class="qty-total" id="qty-total">총 0원</div>
+          </div>
+        </div>
 
-function submitReview() {
-  var text = document.getElementById('review-text').value.trim();
-  if (!currentRating) { alert('별점을 선택해주세요'); return; }
-  if (text.length < 10) { alert('리뷰를 10자 이상 입력해주세요'); return; }
-  var newReview = { id: Date.now(), author: '나', rating: currentRating, content: text, date: new Date().toLocaleDateString('ko-KR'), reply: '', image: '' };
-  allReviews.unshift(newReview);
-  renderReviews(allReviews);
-  renderReviewSummary(allReviews);
-  document.getElementById('review-text').value = '';
-  var charEl = document.getElementById('review-char');
-  if (charEl) charEl.textContent = '0/500';
-  setRating(0); currentRating = 0;
-  alert('리뷰가 등록됐습니다!');
-}
+        <!-- 구매 버튼 -->
+        <div class="buy-buttons">
+          <button class="btn-wish-lg" id="wish-btn" onclick="toggleWish()" title="찜하기">🤍</button>
+          <button class="btn-cart-lg" onclick="addToCart()">🛒 장바구니</button>
+          <button class="btn-buy-lg" onclick="buyNow()">바로 구매</button>
+        </div>
 
-function loadRelated() {
-  ProductAPI.getAll().then(function(products) {
-    var related = products.filter(function(p){ return p.category === currentProduct.category && p.id !== currentProduct.id; }).slice(0, 4);
-    var container = document.getElementById('related-products');
-    if (!container) return;
-    if (!related.length) { container.innerHTML = ''; return; }
-    container.innerHTML = related.map(function(p) {
-      var price = p.salePrice || p.price;
-      var discount = p.salePrice ? Math.round((1-p.salePrice/p.price)*100) : 0;
-      return '<div class="product-card" onclick="location.href=\'product.html?id=' + p.id + '\'">'
-        + '<div class="product-img-wrap"><img src="' + p.image + '" alt="' + p.name + '" loading="lazy">'
-        + (p.badge ? '<span class="product-badge badge-' + p.badge.toLowerCase() + '">' + p.badge + '</span>' : '') + '</div>'
-        + '<div class="product-info"><div class="product-category">' + p.category + '</div>'
-        + '<div class="product-name">' + p.name + '</div>'
-        + '<div class="product-price"><span class="price-sale">' + price.toLocaleString() + '원</span>'
-        + (p.salePrice ? '<span class="price-original">' + p.price.toLocaleString() + '원</span>' : '')
-        + (discount ? '<span class="price-discount">' + discount + '%</span>' : '') + '</div></div></div>';
-    }).join('');
-  }).catch(function(){});
-}
+        <!-- 공유 -->
+        <div class="share-row">
+          <span>공유</span>
+          <button class="share-btn" onclick="shareKakao()">💛 카카오</button>
+          <button class="share-btn" onclick="copyLink()">🔗 링크복사</button>
+        </div>
+      </div>
+    </div>
 
-function copyLink() {
-  navigator.clipboard.writeText(location.href).then(function(){ alert('링크가 복사됐습니다!'); });
-}
-function shareKakao() { alert('카카오 공유는 카카오 SDK 연동 후 사용 가능합니다'); }
+    <!-- 탭 -->
+    <div class="detail-tabs">
+      <button class="detail-tab active" onclick="switchTab('desc',this)">상품 상세</button>
+      <button class="detail-tab" onclick="switchTab('review',this)">리뷰 <span id="tab-review-count">(0)</span></button>
+      <button class="detail-tab" onclick="switchTab('qna',this)">Q&amp;A <span id="tab-qna-count">(0)</span></button>
+      <button class="detail-tab" onclick="switchTab('shipping',this)">배송/반품</button>
+    </div>
 
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', initPage);
-} else {
-  initPage();
-}
+    <!-- 탭: 상품 상세 -->
+    <div class="tab-panel active" id="tab-desc">
+      <div class="product-description" id="detail-description">
+        상품 정보를 불러오는 중입니다...
+      </div>
+    </div>
+
+    <!-- 탭: 리뷰 -->
+    <div class="tab-panel" id="tab-review">
+      <div class="review-summary" id="review-summary">
+        <div class="review-score-big">
+          <div class="score-number" id="avg-score">0.0</div>
+          <div>
+            <div class="score-stars" id="avg-stars"></div>
+            <div class="score-total" id="avg-total">총 0개 리뷰</div>
+          </div>
+        </div>
+        <div class="review-bars" id="review-bars"></div>
+      </div>
+
+      <div class="review-write">
+        <h4>✍️ 리뷰 작성</h4>
+        <div style="font-size:13px;color:var(--gray);margin-bottom:8px;">별점을 선택하세요</div>
+        <div class="star-input" id="star-input">
+          <button class="star-btn" onclick="setRating(1)">⭐</button>
+          <button class="star-btn" onclick="setRating(2)">⭐</button>
+          <button class="star-btn" onclick="setRating(3)">⭐</button>
+          <button class="star-btn" onclick="setRating(4)">⭐</button>
+          <button class="star-btn" onclick="setRating(5)">⭐</button>
+        </div>
+        <textarea class="review-textarea" id="review-text"
+          placeholder="상품을 사용해보신 후기를 남겨주세요 (최소 10자)"
+          maxlength="500"
+          oninput="document.getElementById('review-char').textContent=this.value.length+'/500'"></textarea>
+        <div class="review-submit">
+          <span class="review-char" id="review-char">0/500</span>
+          <button class="btn-review-submit" onclick="submitReview()">리뷰 등록</button>
+        </div>
+      </div>
+
+      <div class="review-filters">
+        <button class="review-filter-btn active" onclick="filterReview('all',this)">전체</button>
+        <button class="review-filter-btn" onclick="filterReview(5,this)">⭐⭐⭐⭐⭐</button>
+        <button class="review-filter-btn" onclick="filterReview(4,this)">⭐⭐⭐⭐</button>
+        <button class="review-filter-btn" onclick="filterReview(3,this)">⭐⭐⭐ 이하</button>
+        <button class="review-filter-btn" onclick="filterReview('photo',this)">📷 포토</button>
+      </div>
+
+      <div id="review-list">
+        <div class="review-empty">
+          <div class="empty-icon">⭐</div>
+          <div>리뷰를 불러오는 중...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 탭: Q&A -->
+    <div class="tab-panel" id="tab-qna">
+      <div class="qna-write">
+        <h4>❓ 상품 문의 작성</h4>
+        <div class="qna-type-row">
+          <button class="qna-type-btn active" onclick="selectQnaType(this,'배송문의')">🚚 배송문의</button>
+          <button class="qna-type-btn" onclick="selectQnaType(this,'상품문의')">📦 상품문의</button>
+          <button class="qna-type-btn" onclick="selectQnaType(this,'교환/반품')">🔄 교환/반품</button>
+          <button class="qna-type-btn" onclick="selectQnaType(this,'기타')">💬 기타</button>
+        </div>
+        <textarea class="qna-textarea" id="qna-text"
+          placeholder="문의 내용을 입력해주세요. 평일 24시간 이내 답변드립니다."
+          maxlength="500"></textarea>
+        <div class="qna-secret-row">
+          <input type="checkbox" id="qna-secret">
+          <label for="qna-secret">🔒 비밀글로 등록</label>
+        </div>
+        <div class="qna-submit-row">
+          <button class="btn-qna-submit" onclick="submitQna()">문의 등록</button>
+        </div>
+      </div>
+
+      <div id="qna-list">
+        <div class="qna-empty">
+          <div class="empty-icon">❓</div>
+          <div>등록된 문의가 없습니다.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 탭: 배송/반품 -->
+    <div class="tab-panel" id="tab-shipping">
+      <div class="shipping-info-wrap">
+
+        <div class="shipping-block">
+          <h3>📦 배송 안내</h3>
+          <table class="shipping-table">
+            <tr><td>배송방법</td><td>택배 (CJ대한통운)</td></tr>
+            <tr><td>배송기간</td><td>결제 완료 후 1~3 영업일 이내 출고</td></tr>
+            <tr><td>배송비</td><td>3,000원 (50,000원 이상 구매 시 무료)</td></tr>
+            <tr><td>도서산간</td><td>추가 배송비 발생 (제주 3,000원 / 도서산간 5,000원)</td></tr>
+            <tr><td>배송조회</td><td>출고 후 문자 발송 (CJ대한통운 1588-1255)</td></tr>
+          </table>
+        </div>
+
+        <div class="shipping-block">
+          <h3>🔄 교환/반품 안내</h3>
+          <table class="shipping-table">
+            <tr><td>신청기간</td><td>상품 수령 후 7일 이내</td></tr>
+            <tr><td>단순변심</td><td>왕복 배송비 6,000원 고객 부담</td></tr>
+            <tr><td>상품하자</td><td>배송비 무료 (판매자 부담)</td></tr>
+            <tr><td>오배송</td><td>배송비 무료 (판매자 부담)</td></tr>
+            <tr><td>처리기간</td><td>접수 후 3~5 영업일</td></tr>
+          </table>
+        </div>
+
+        <div class="shipping-block">
+          <h3>❌ 교환/반품 불가 사유</h3>
+          <div class="shipping-notice">
+            <strong>아래의 경우 교환/반품이 불가합니다.</strong>
+            고객 사용 또는 일부 소비에 의해 상품 가치가 감소한 경우<br>
+            포장을 개봉하여 상품 가치가 현저히 감소한 경우<br>
+            시간이 지나 재판매가 어려울 정도로 상품 가치가 감소한 경우<br>
+            복제가 가능한 상품의 포장을 훼손한 경우<br>
+            고객의 요청으로 맞춤 제작된 상품인 경우
+          </div>
+        </div>
+
+        <div class="shipping-block">
+          <h3>📞 고객센터</h3>
+          <table class="shipping-table">
+            <tr><td>전화</td><td id="shipping-phone">1588-0000</td></tr>
+            <tr><td>운영시간</td><td>평일 09:00 ~ 18:00 (주말·공휴일 휴무)</td></tr>
+            <tr><td>이메일</td><td id="shipping-email">help@damnuri.co.kr</td></tr>
+          </table>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- 연관 상품 -->
+    <div class="related-section section">
+      <div class="section-header">
+        <h2 class="section-title">🔗 연관 상품</h2>
+        <button class="section-more" onclick="location.href='products.html'">전체보기</button>
+      </div>
+      <div class="product-grid" id="related-products">
+        <div class="skeleton skeleton-card"></div>
+        <div class="skeleton skeleton-card"></div>
+        <div class="skeleton skeleton-card"></div>
+        <div class="skeleton skeleton-card"></div>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="footer-inner">
+    <div>
+      <h4 id="footer-store-name">🏪 담누리마켓</h4>
+      <p style="font-size:12px;line-height:1.8;margin-top:8px;color:#aaa;">
+        다양한 상품을 합리적인 가격에<br>고객님께 전달합니다.
+      </p>
+    </div>
+    <div>
+      <h4>고객센터</h4>
+      <ul>
+        <li><a href="#" id="footer-phone">📞 1588-0000</a></li>
+        <li><a href="#">평일 9:00 ~ 18:00</a></li>
+        <li><a href="#" id="footer-email">📧 help@damnuri.co.kr</a></li>
+      </ul>
+    </div>
+    <div>
+      <h4>바로가기</h4>
+      <ul>
+        <li><a href="products.html">상품 목록</a></li>
+        <li><a href="cart.html">장바구니</a></li>
+        <li><a href="mypage.html">마이페이지</a></li>
+      </ul>
+    </div>
+    <div>
+      <h4>SNS</h4>
+      <ul>
+        <li><a href="#">📸 인스타그램</a></li>
+        <li><a href="#">💛 카카오채널</a></li>
+        <li><a href="#">▶ 유튜브</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p id="footer-biz">상호: 담누리마켓 | 사업자번호: 000-00-00000</p>
+    <p id="footer-addr" style="margin-top:4px;">주소: 경기도 의정부시</p>
+    <p id="footer-copy" style="margin-top:4px;">© 2026 담누리마켓. All rights reserved.</p>
+  </div>
+</footer>
+
+<!-- 스크립트 (인라인 없음 - CSP 안전) -->
+<script src="js/config.js"></script>
+<script src="js/sheets.js"></script>
+<script src="js/app.js"></script>
+<script src="js/product-detail.js"></script>
+<script src="js/main.js"></script>
+
+</body>
+</html>
