@@ -66,7 +66,7 @@ const ProductAPI = {
       colors: row['색상'] || '',
       sizes: row['사이즈'] || '',
       supplier: row['공급사'] || '',
-      youtube: row['유튜브'] || '
+      youtube: row['유튜브'] || '',
     }))
     .filter(p => p.isActive && p.name)
     .sort((a, b) => {
