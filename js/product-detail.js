@@ -152,6 +152,9 @@ function renderProduct(p) {
     }
   }
 
+  // 유튜브 영상
+  renderYoutube(p.youtube);
+
   // 배송 예정일
   var tomorrow = new Date();
   tomorrow.setDate(tomorrow.getDate() + 1);
@@ -160,6 +163,38 @@ function renderProduct(p) {
   if (dateEl) dateEl.textContent = (tomorrow.getMonth()+1) + '/' + tomorrow.getDate() + '(' + days[tomorrow.getDay()] + ') 도착 예정';
 
   updateTotal();
+}
+
+function renderYoutube(url) {
+  var wrap = document.getElementById('youtube-wrap');
+  if (!url || !url.trim()) {
+    if (wrap) wrap.style.display = 'none';
+    return;
+  }
+  // URL → embed ID 추출 (shorts, watch, youtu.be 모두 지원)
+  var vid = '';
+  var m = url.match(/shorts\/([^?&\/]+)/) ||
+           url.match(/[?&]v=([^?&\/]+)/) ||
+           url.match(/youtu\.be\/([^?&\/]+)/);
+  if (m) vid = m[1];
+  if (!vid) { if (wrap) wrap.style.display = 'none'; return; }
+
+  if (!wrap) {
+    // 동적으로 섹션 생성
+    var descEl = document.getElementById('detail-description');
+    if (!descEl) return;
+    wrap = document.createElement('div');
+    wrap.id = 'youtube-wrap';
+    descEl.parentNode.insertBefore(wrap, descEl.nextSibling);
+  }
+  wrap.style.display = 'block';
+  wrap.innerHTML = '<div style="margin-top:32px;border-top:1px solid var(--border);padding-top:24px;">'
+    + '<h3 style="font-size:16px;font-weight:800;margin-bottom:16px;">🎬 상품 영상</h3>'
+    + '<div style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;border-radius:12px;background:#000;">'
+    + '<iframe src="https://www.youtube.com/embed/' + vid + '?rel=0" '
+    + 'style="position:absolute;top:0;left:0;width:100%;height:100%;border:none;" '
+    + 'allowfullscreen loading="lazy"></iframe>'
+    + '</div></div>';
 }
 
 function renderGallery() {
