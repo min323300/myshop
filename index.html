@@ -9,39 +9,82 @@
   <link rel="stylesheet" href="css/style.css">
   <style>
     .header-nav { overflow: visible !important; position: relative; z-index: 200; }
-    .nav-inner { overflow: visible !important; }
+    .nav-inner  { overflow: visible !important; }
     .nav-item-wrap { position: relative; display: inline-block; }
-    .nav-dropdown { display:none; position:absolute; top:100%; left:50%; transform:translateX(-50%); background:#fff; border:1px solid #e8e8e8; border-radius:10px; box-shadow:0 8px 24px rgba(0,0,0,0.15); min-width:130px; z-index:9999; padding:6px 0; }
-    .nav-item-wrap:hover .nav-dropdown { display:block; }
-    .nav-dropdown::before { content:''; position:absolute; top:-6px; left:50%; transform:translateX(-50%); border-left:6px solid transparent; border-right:6px solid transparent; border-bottom:6px solid #e8e8e8; }
-    .nav-dropdown::after { content:''; position:absolute; top:-5px; left:50%; transform:translateX(-50%); border-left:6px solid transparent; border-right:6px solid transparent; border-bottom:6px solid #fff; }
-    .nav-dropdown-item { display:block; width:100%; padding:8px 16px; font-size:13px; font-weight:500; color:#333; background:none; border:none; text-align:left; cursor:pointer; white-space:nowrap; font-family:'Noto Sans KR',sans-serif; }
+    .nav-dropdown {
+      display: none; position: absolute; top: 100%; left: 50%;
+      transform: translateX(-50%);
+      background: #fff; border: 1px solid #e8e8e8; border-radius: 10px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+      min-width: 130px; z-index: 9999; padding: 6px 0;
+    }
+    .nav-item-wrap:hover .nav-dropdown { display: block; }
+    .nav-dropdown::before {
+      content:''; position:absolute; top:-6px; left:50%; transform:translateX(-50%);
+      border-left:6px solid transparent; border-right:6px solid transparent;
+      border-bottom:6px solid #e8e8e8;
+    }
+    .nav-dropdown::after {
+      content:''; position:absolute; top:-5px; left:50%; transform:translateX(-50%);
+      border-left:6px solid transparent; border-right:6px solid transparent;
+      border-bottom:6px solid #fff;
+    }
+    .nav-dropdown-item {
+      display:block; width:100%; padding:8px 16px; font-size:13px; font-weight:500;
+      color:#333; background:none; border:none; text-align:left; cursor:pointer;
+      white-space:nowrap; font-family:'Noto Sans KR',sans-serif;
+    }
     .nav-dropdown-item:hover { background:#fff3f0; color:#FF5733; }
     .nav-item.has-sub::after { content:' ▾'; font-size:10px; opacity:0.6; }
-    .flash-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; }
-    .flash-timer { display:flex; align-items:center; gap:4px; background:#FF5733; color:#fff; padding:4px 12px; border-radius:20px; font-size:13px; font-weight:700; }
-    .timer-block { background:rgba(255,255,255,0.25); border-radius:4px; padding:2px 6px; font-size:14px; font-weight:900; min-width:26px; text-align:center; }
-    .group-buy-card { background:#fff; border:1px solid #e8e8e8; border-radius:12px; overflow:hidden; cursor:pointer; transition:transform 0.2s,box-shadow 0.2s; }
-    .group-buy-card:hover { transform:translateY(-3px); box-shadow:0 8px 20px rgba(0,0,0,0.1); }
-    .group-buy-img { width:100%; aspect-ratio:1; object-fit:cover; display:block; }
-    .group-buy-info { padding:12px; }
-    .group-buy-badge { display:inline-block; background:#4CAF50; color:#fff; font-size:11px; font-weight:700; padding:2px 8px; border-radius:4px; margin-bottom:6px; }
-    .group-buy-name { font-size:14px; font-weight:700; margin-bottom:6px; line-height:1.4; }
-    .group-buy-bar { height:6px; background:#f0f0f0; border-radius:3px; overflow:hidden; margin:8px 0 4px; }
-    .group-buy-fill { height:100%; background:linear-gradient(90deg,#4CAF50,#8BC34A); border-radius:3px; }
-    .group-buy-pct { display:flex; justify-content:space-between; font-size:11px; color:#999; }
+    .flash-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 16px;
+    }
+    .flash-timer {
+      display: flex; align-items: center; gap: 4px;
+      background: #FF5733; color: #fff;
+      padding: 4px 12px; border-radius: 20px;
+      font-size: 13px; font-weight: 700;
+    }
+    .timer-block {
+      background: rgba(255,255,255,0.25); border-radius: 4px;
+      padding: 2px 6px; font-size: 14px; font-weight: 900;
+      min-width: 26px; text-align: center;
+    }
+    .group-buy-card {
+      background: #fff; border: 1px solid #e8e8e8; border-radius: 12px;
+      overflow: hidden; cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .group-buy-card:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,0.1); }
+    .group-buy-img  { width:100%; aspect-ratio:1; object-fit:cover; display:block; }
+    .group-buy-info { padding: 12px; }
+    .group-buy-badge {
+      display: inline-block; background: #4CAF50; color: #fff;
+      font-size: 11px; font-weight: 700; padding: 2px 8px;
+      border-radius: 4px; margin-bottom: 6px;
+    }
+    .group-buy-name  { font-size:14px; font-weight:700; margin-bottom:6px; line-height:1.4; }
+    .group-buy-bar   { height:6px; background:#f0f0f0; border-radius:3px; overflow:hidden; margin:8px 0 4px; }
+    .group-buy-fill  { height:100%; background:linear-gradient(90deg,#4CAF50,#8BC34A); border-radius:3px; }
+    .group-buy-pct   { display:flex; justify-content:space-between; font-size:11px; color:#999; }
     .group-buy-price { display:flex; align-items:baseline; gap:6px; margin-top:6px; }
-    .group-buy-sale { font-size:16px; font-weight:900; color:#FF5733; }
+    .group-buy-sale  { font-size:16px; font-weight:900; color:#FF5733; }
     .group-buy-original { font-size:12px; color:#999; text-decoration:line-through; }
     .group-buy-discount { font-size:12px; font-weight:700; color:#FF5733; }
   </style>
 </head>
 <body>
 
+<!-- HEADER -->
 <header class="header">
-  <div class="header-notice">🎉 담누리마켓 오픈 기념! 가입 시 3,000원 적립 &nbsp;|&nbsp; 5만원 이상 무료배송</div>
+  <div class="header-notice">
+    🎉 담누리마켓 오픈 기념! 가입 시 3,000원 적립 &nbsp;|&nbsp; 5만원 이상 무료배송
+  </div>
   <div class="header-main">
-    <a href="index.html" class="header-logo"><span>🏪</span><span id="store-name">담누리마켓</span></a>
+    <a href="index.html" class="header-logo">
+      <span>🏪</span><span id="store-name">담누리마켓</span>
+    </a>
     <div class="header-search">
       <div class="search-bar" onclick="Search.open()">
         <input type="text" placeholder="상품을 검색하세요" readonly>
@@ -50,8 +93,13 @@
     </div>
     <div class="header-icons">
       <a href="mypage.html" class="header-icon"><span class="icon-emoji">👤</span><span>로그인</span></a>
-      <button class="header-icon" onclick="alert('찜목록 기능은 로그인 후 사용 가능합니다')"><span class="icon-emoji">❤️</span><span>찜목록</span></button>
-      <a href="cart.html" class="header-icon"><span class="icon-emoji">🛒</span><span>장바구니</span><span class="cart-badge">0</span></a>
+      <button class="header-icon" onclick="alert('찜목록 기능은 로그인 후 사용 가능합니다')">
+        <span class="icon-emoji">❤️</span><span>찜목록</span>
+      </button>
+      <a href="cart.html" class="header-icon">
+        <span class="icon-emoji">🛒</span><span>장바구니</span>
+        <span class="cart-badge">0</span>
+      </a>
     </div>
   </div>
   <nav class="header-nav">
@@ -63,11 +111,15 @@
   </nav>
 </header>
 
+<!-- 검색 모달 -->
 <div class="search-modal" id="search-modal">
   <div class="search-modal-box">
     <div class="search-modal-header">
       <span>🔍</span>
-      <input type="text" class="search-modal-input" id="search-input" placeholder="어떤 상품을 찾으시나요?" oninput="Search.run(this.value)" onkeydown="if(event.key==='Escape') Search.close()">
+      <input type="text" class="search-modal-input" id="search-input"
+        placeholder="어떤 상품을 찾으시나요?"
+        oninput="Search.run(this.value)"
+        onkeydown="if(event.key==='Escape') Search.close()">
       <button class="search-modal-close" onclick="Search.close()">✕</button>
     </div>
     <div id="search-results"><p class="search-empty">검색어를 입력하세요</p></div>
@@ -92,8 +144,10 @@
         <button class="section-more" onclick="location.href='products.html?filter=best'">더보기</button>
       </div>
       <div class="product-grid" id="best-products">
-        <div class="skeleton skeleton-card"></div><div class="skeleton skeleton-card"></div>
-        <div class="skeleton skeleton-card"></div><div class="skeleton skeleton-card"></div>
+        <div class="skeleton skeleton-card"></div>
+        <div class="skeleton skeleton-card"></div>
+        <div class="skeleton skeleton-card"></div>
+        <div class="skeleton skeleton-card"></div>
       </div>
     </section>
 
@@ -104,8 +158,10 @@
         <button class="section-more" onclick="location.href='products.html?filter=new'">더보기</button>
       </div>
       <div class="product-grid" id="new-products">
-        <div class="skeleton skeleton-card"></div><div class="skeleton skeleton-card"></div>
-        <div class="skeleton skeleton-card"></div><div class="skeleton skeleton-card"></div>
+        <div class="skeleton skeleton-card"></div>
+        <div class="skeleton skeleton-card"></div>
+        <div class="skeleton skeleton-card"></div>
+        <div class="skeleton skeleton-card"></div>
       </div>
     </section>
 
@@ -116,51 +172,65 @@
         <button class="section-more" onclick="location.href='products.html?filter=sale'">더보기</button>
       </div>
       <div class="product-grid" id="sale-products">
-        <div class="skeleton skeleton-card"></div><div class="skeleton skeleton-card"></div>
-        <div class="skeleton skeleton-card"></div><div class="skeleton skeleton-card"></div>
+        <div class="skeleton skeleton-card"></div>
+        <div class="skeleton skeleton-card"></div>
+        <div class="skeleton skeleton-card"></div>
+        <div class="skeleton skeleton-card"></div>
       </div>
     </section>
 
     <!-- 한정 특가 -->
     <section class="section">
       <div class="flash-header">
-        <h2 class="section-title">&#9889; 한정 특가</h2>
-        <div class="flash-timer">&#9200; 종료까지 <span class="timer-block" id="timer-h">00</span>:<span class="timer-block" id="timer-m">00</span>:<span class="timer-block" id="timer-s">00</span></div>
+        <h2 class="section-title">⚡ 한정 특가</h2>
+        <div class="flash-timer">
+          ⏰ 종료까지
+          <span class="timer-block" id="timer-h">00</span>:
+          <span class="timer-block" id="timer-m">00</span>:
+          <span class="timer-block" id="timer-s">00</span>
+        </div>
         <button class="section-more" onclick="location.href='products.html?filter=sale'">더보기</button>
       </div>
       <div class="product-grid" id="flash-products">
-        <div class="skeleton skeleton-card"></div><div class="skeleton skeleton-card"></div>
-        <div class="skeleton skeleton-card"></div><div class="skeleton skeleton-card"></div>
+        <div class="skeleton skeleton-card"></div>
+        <div class="skeleton skeleton-card"></div>
+        <div class="skeleton skeleton-card"></div>
+        <div class="skeleton skeleton-card"></div>
       </div>
     </section>
 
     <!-- 공동구매 -->
     <section class="section">
       <div class="section-header">
-        <h2 class="section-title">&#128101; 공동구매 할인</h2>
+        <h2 class="section-title">👥 공동구매 할인</h2>
         <button class="section-more" onclick="location.href='products.html'">더보기</button>
       </div>
       <div class="product-grid" id="group-products">
-        <div class="skeleton skeleton-card"></div><div class="skeleton skeleton-card"></div>
-        <div class="skeleton skeleton-card"></div><div class="skeleton skeleton-card"></div>
+        <div class="skeleton skeleton-card"></div>
+        <div class="skeleton skeleton-card"></div>
+        <div class="skeleton skeleton-card"></div>
+        <div class="skeleton skeleton-card"></div>
       </div>
     </section>
 
   </div>
 </main>
 
+<!-- FOOTER -->
 <footer class="footer">
   <div class="footer-inner">
     <div>
-      <h4 id="footer-store-name">&#127978; 담누리마켓</h4>
-      <p style="font-size:12px;line-height:1.8;margin-top:8px;">다양한 상품을 합리적인 가격에<br>고객님께 전달합니다.</p>
+      <h4 id="footer-store-name">🏪 담누리마켓</h4>
+      <p style="font-size:12px;line-height:1.8;margin-top:8px;color:#aaa;">
+        다양한 상품을 합리적인 가격에<br>고객님께 전달합니다.
+      </p>
     </div>
     <div>
       <h4>고객센터</h4>
       <ul>
-        <li><a href="#" id="footer-phone">&#128222; 1588-0000</a></li>
+        <li><a href="#" id="footer-phone">📞 1588-0000</a></li>
         <li><a href="#">평일 9:00 ~ 18:00</a></li>
-        <li><a href="#">&#128231; <span class="__cf_email__" data-cfemail="bad2dfd6cafadedbd7d4cfc8d394d9d594d1c8">[email&#160;protected]</span></a></li>
+        <li><a href="#" id="footer-email">📧 help@damnuri.co.kr</a></li>
       </ul>
     </div>
     <div>
@@ -174,17 +244,26 @@
     <div>
       <h4>SNS</h4>
       <ul>
-        <li><a href="#">&#128248; 인스타그램</a></li>
-        <li><a href="#">&#128155; 카카오채널</a></li>
-        <li><a href="#">&#9654; 유튜브</a></li>
+        <li><a href="#">📸 인스타그램</a></li>
+        <li><a href="#">💛 카카오채널</a></li>
+        <li><a href="#">▶ 유튜브</a></li>
       </ul>
     </div>
   </div>
+
+  <!-- 사업자 정보 (구글시트 자동 반영) -->
   <div class="footer-bottom">
     <p id="footer-biz">상호: 담누리마켓 | 사업자번호: 000-00-00000</p>
     <p id="footer-addr" style="margin-top:4px;">주소: 경기도 의정부시</p>
-    <p id="footer-copy" style="margin-top:4px;">&copy; 2026 담누리마켓. All rights reserved.</p>
+    <p id="footer-copy" style="margin-top:4px;">© 2026 담누리마켓. All rights reserved.</p>
   </div>
 </footer>
 
-<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudfl
+<!-- 스크립트 (인라인 없음 - CSP 안전) -->
+<script src="js/config.js"></script>
+<script src="js/sheets.js"></script>
+<script src="js/app.js"></script>
+<script src="js/main.js"></script>
+
+</body>
+</html>
