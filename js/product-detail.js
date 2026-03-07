@@ -11,6 +11,7 @@ function initPage() {
   } catch(e){}
   try { Cart.init(); } catch(e){}
 
+  loadShippingPolicy();
   var params = new URLSearchParams(location.search);
   var productId = params.get('id');
   if (!productId) { alert('상품 정보를 찾을 수 없습니다'); location.href = 'products.html'; return; }
@@ -476,4 +477,60 @@ function updateShippingContact(phone, email) {
   var se = document.getElementById('shipping-email');
   if (sp && phone) sp.textContent = phone;
   if (se && email) se.textContent = email;
+}
+
+// ============================================================
+// 배송정책 구글시트 자동 로드
+// ============================================================
+function loadShippingPolicy() {
+  var SHEET_ID = '1t804fRO8HfQtmOzpDAz2IZfzRDQ7t8LYllFGZr3ftUI';
+  var url = 'https://docs.google.com/spreadsheets/d/' + SHEET_ID
+    + '/gviz/tq?tqx=out:csv&sheet=' + encodeURIComponent('배송정책');
+
+  fetch(url).then(function(r){ return r.text(); }).then(function(csv) {
+    var policy = {};
+    var lines = csv.trim().split('\n');
+    lines.forEach(function(line) {
+      // CSV 파싱 (따옴표 제거)
+      var cols = [];
+      var cur = '', inQ = false;
+      for (var i = 0; i < line.length; i++) {
+        var ch = line[i];
+        if (ch === '"') { inQ = !inQ; }
+        else if (ch === ',' && !inQ) { cols.push(cur.trim()); cur = ''; }
+        else { cur += ch; }
+      }
+      cols.push(cur.trim());
+      if (cols[0] && cols[1]) policy[cols[0]] = cols[1];
+    });
+    applyShippingPolicy(policy);
+  }).catch(function(e){ console.log('배송정책 로드 실패:', e); });
+}
+
+function applyShippingPolicy(p) {
+  var map = {
+    '배송방법':    'ship-method',
+    '배송기간':    'ship-period',
+    '배송비':      'ship-fee',
+    '도서산간':    'ship-island',
+    '배송조회':    'ship-track',
+    '교환반품기간':'ret-period',
+    '단순변심':    'ret-change',
+    '상품하자':    'ret-defect',
+    '오배송':      'ret-wrong',
+    '처리기간':    'ret-process',
+    '반품불가사유':'ret-reject'
+  };
+
+  Object.keys(map).forEach(function(key) {
+    var el = document.getElementById(map[key]);
+    if (el && p[key]) el.textContent = p[key];
+  });
+
+  // 반품불가 사유는 | 구분으로 줄바꿈
+  var rejectEl = document.getElementById('ret-reject');
+  if (rejectEl && p['반품불가사유']) {
+    var items = p['반품불가사유'].split('|');
+    rejectEl.innerHTML = items.map(function(s){ return '• ' + s.trim(); }).join('<br>');
+  }
 }
