@@ -12,6 +12,8 @@
       return products.map(function(p) {
         // 공급사 필드가 없으면 빈값 → '기본' 처리는 loadShippingPolicy에서
         if (!p.supplier && p['공급사']) p.supplier = p['공급사'];
+        // 유튜브 컬럼 매핑
+        if (!p.youtube && p['유튜브']) p.youtube = p['유튜브'];
         return p;
       });
     });
