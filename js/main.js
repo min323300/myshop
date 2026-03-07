@@ -213,3 +213,85 @@ if(document.readyState==='loading') {
 } else {
   runApp();
 }
+
+// ============================================================
+// 사업자정보 로드 (구글시트 → footer 자동 반영)
+// ============================================================
+function loadBizInfo() {
+  var SHEET_ID = '1t804fRO8HfQtmOzpDAz2IZfzRDQ7t8LYllFGZr3ftUI';
+  var url = 'https://docs.google.com/spreadsheets/d/' + SHEET_ID + '/gviz/tq?tqx=out:csv&sheet=' + encodeURIComponent('사업자정보');
+  fetch(url).then(function(r){ return r.text(); }).then(function(csv) {
+    var lines = csv.trim().split('\n');
+    if (lines.length < 2) return;
+    // 2번째 줄 파싱 (헤더 제외)
+    var cols = [];
+    var cur = '', inQ = false;
+    var line = lines[1];
+    for (var i = 0; i < line.length; i++) {
+      var ch = line[i];
+      if (ch === '"') { inQ = !inQ; }
+      else if (ch === ',' && !inQ) { cols.push(cur.trim()); cur = ''; }
+      else { cur += ch; }
+    }
+    cols.push(cur.trim());
+
+    // 컬럼: 상호,사업자번호,대표자,주소,전화,이메일,도메인,저작권연도
+    var biz = {
+      name:    cols[0] || '담누리마켓',
+      regNo:   cols[1] || '000-00-00000',
+      ceo:     cols[2] || '',
+      address: cols[3] || '',
+      phone:   cols[4] || '1588-0000',
+      email:   cols[5] || '',
+      domain:  cols[6] || '',
+      year:    cols[7] || '2026'
+    };
+
+    applyBizInfo(biz);
+  }).catch(function(e){ console.log('사업자정보 로드 실패:', e); });
+}
+
+function applyBizInfo(biz) {
+  // 헤더 전화번호
+  var fp = document.getElementById('footer-phone');
+  if (fp) fp.textContent = '📞 ' + biz.phone;
+
+  // 헤더 스토어명
+  var sn = document.getElementById('store-name');
+  if (sn && sn.textContent === '담누리마켓') sn.textContent = biz.name;
+
+  var fsn = document.getElementById('footer-store-name');
+  if (fsn) fsn.textContent = '🏪 ' + biz.name;
+
+  // footer 이메일
+  var fe = document.getElementById('footer-email');
+  if (fe && biz.email) fe.textContent = '📧 ' + biz.email;
+
+  // footer 사업자정보 (하단)
+  var fb = document.getElementById('footer-biz');
+  if (fb) {
+    var parts = [];
+    if (biz.name)    parts.push('상호: ' + biz.name);
+    if (biz.regNo)   parts.push('사업자번호: ' + biz.regNo);
+    if (biz.ceo)     parts.push('대표: ' + biz.ceo);
+    fb.textContent = parts.join(' | ');
+  }
+
+  var fa = document.getElementById('footer-addr');
+  if (fa) {
+    var aparts = [];
+    if (biz.address) aparts.push('주소: ' + biz.address);
+    if (biz.phone)   aparts.push('TEL: ' + biz.phone);
+    if (biz.email)   aparts.push('EMAIL: ' + biz.email);
+    fa.textContent = aparts.join(' | ');
+  }
+
+  var fc = document.getElementById('footer-copy');
+  if (fc) fc.textContent = '© ' + biz.year + ' ' + biz.name + '. All rights reserved.';
+}
+
+// runApp에서 loadBizInfo 호출 추가
+var _origRunApp = typeof runApp === 'function' ? runApp : null;
+document.addEventListener('DOMContentLoaded', function() {
+  loadBizInfo();
+});
