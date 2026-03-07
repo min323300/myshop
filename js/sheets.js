@@ -61,6 +61,12 @@ const ProductAPI = {
       salesCount: parseInt(row['판매수량']) || 0,
       rating: parseFloat(row['별점평균']) || 0,
       reviewCount: parseInt(row['리뷰수']) || 0,
+      detailImages: row['상세이미지'] || '',
+      detailImages2: row['상세이미지2'] || '',
+      colors: row['색상'] || '',
+      sizes: row['사이즈'] || '',
+      supplier: row['공급사'] || '',
+      youtube: row['유튜브'] || '
     }))
     .filter(p => p.isActive && p.name)
     .sort((a, b) => {
