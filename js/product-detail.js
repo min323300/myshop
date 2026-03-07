@@ -24,6 +24,7 @@ function loadProduct(id) {
     currentProduct = products.find(function(p){ return String(p.id) === String(id); });
     if (!currentProduct) throw new Error('not found');
     renderProduct(currentProduct);
+    loadShippingPolicy();
     loadReviews(id);
     loadRelated();
   }).catch(function() {
@@ -37,6 +38,7 @@ function loadProduct(id) {
       stock: 100, badge: 'NEW', salesCount: 50, rating: 4.5, reviewCount: 12
     };
     renderProduct(currentProduct);
+    loadShippingPolicy();
     loadReviews(id);
     loadRelated();
   });
@@ -44,6 +46,8 @@ function loadProduct(id) {
 
 function renderProduct(p) {
   document.title = p.name + ' - ' + (typeof CONFIG !== 'undefined' ? CONFIG.STORE.NAME : '담누리마켓');
+
+  // 공급사는 sheets.js가 매핑한 값 사용 (없으면 '기본')
 
   var bcCat = document.getElementById('bc-category');
   var bcName = document.getElementById('bc-name');
@@ -480,54 +484,107 @@ function updateShippingContact(phone, email) {
 }
 
 // ============================================================
-// 배송정책 구글시트 자동 로드
+// 배송정책 구글시트 자동 로드 (4단계 우선순위)
+// 우선순위: ①가맹점+공급사 > ②기본+공급사 > ③가맹점+기본 > ④기본+기본
 // ============================================================
 function loadShippingPolicy() {
   var SHEET_ID = '1t804fRO8HfQtmOzpDAz2IZfzRDQ7t8LYllFGZr3ftUI';
   var url = 'https://docs.google.com/spreadsheets/d/' + SHEET_ID
     + '/gviz/tq?tqx=out:csv&sheet=' + encodeURIComponent('배송정책');
 
+  // 현재 가맹점ID (config.js에서 읽기, 없으면 '기본')
+  var myFranchise = '기본';
+  try {
+    if (typeof CONFIG !== 'undefined' && CONFIG.FRANCHISE_ID) {
+      myFranchise = CONFIG.FRANCHISE_ID;
+    }
+  } catch(e){}
+
+  // 현재 상품의 공급사 (상품목록 C열 = supplier)
+  var mySupplier = '기본';
+  if (currentProduct) {
+    // sheets.js가 supplier로 매핑하거나, 직접 col2로 접근
+    mySupplier = currentProduct.supplier || currentProduct['공급사'] || '기본';
+  }
+
   fetch(url).then(function(r){ return r.text(); }).then(function(csv) {
-    var policy = {};
-    var lines = csv.trim().split('\n');
+    // CSV 전체 파싱 → rows 배열
+    var rows = [];
+    var lines = csv.trim().split('\n').slice(1); // 헤더 제외
     lines.forEach(function(line) {
-      // CSV 파싱 (따옴표 제거)
-      var cols = [];
-      var cur = '', inQ = false;
-      for (var i = 0; i < line.length; i++) {
-        var ch = line[i];
-        if (ch === '"') { inQ = !inQ; }
-        else if (ch === ',' && !inQ) { cols.push(cur.trim()); cur = ''; }
-        else { cur += ch; }
+      var cols = parseCSVLine(line);
+      if (cols.length >= 4) {
+        rows.push({ franchise: cols[0], supplier: cols[1], key: cols[2], val: cols[3] });
       }
-      cols.push(cur.trim());
-      if (cols[0] && cols[1]) policy[cols[0]] = cols[1];
     });
+
+    // 4단계 우선순위로 정책 조합
+    var policy = {};
+    var ITEMS = ['택배사','배송비','배송기간','교환반품기간','반품불가사유'];
+
+    ITEMS.forEach(function(item) {
+      var found = null;
+
+      // ① 가맹점 + 공급사 (가장 구체적)
+      if (!found && myFranchise !== '기본' && mySupplier !== '기본') {
+        found = rows.find(function(r){ return r.franchise === myFranchise && r.supplier === mySupplier && r.key === item; });
+      }
+      // ② 기본 + 공급사
+      if (!found && mySupplier !== '기본') {
+        found = rows.find(function(r){ return r.franchise === '기본' && r.supplier === mySupplier && r.key === item; });
+      }
+      // ③ 가맹점 + 기본
+      if (!found && myFranchise !== '기본') {
+        found = rows.find(function(r){ return r.franchise === myFranchise && r.supplier === '기본' && r.key === item; });
+      }
+      // ④ 기본 + 기본 (전체 기본값)
+      if (!found) {
+        found = rows.find(function(r){ return r.franchise === '기본' && r.supplier === '기본' && r.key === item; });
+      }
+
+      if (found) policy[item] = found.val;
+    });
+
     applyShippingPolicy(policy);
   }).catch(function(e){ console.log('배송정책 로드 실패:', e); });
 }
 
+function parseCSVLine(line) {
+  var cols = [], cur = '', inQ = false;
+  for (var i = 0; i < line.length; i++) {
+    var ch = line[i];
+    if (ch === '"') { inQ = !inQ; }
+    else if (ch === ',' && !inQ) { cols.push(cur.trim()); cur = ''; }
+    else { cur += ch; }
+  }
+  cols.push(cur.trim());
+  return cols;
+}
+
 function applyShippingPolicy(p) {
-  var map = {
-    '배송방법':    'ship-method',
-    '배송기간':    'ship-period',
-    '배송비':      'ship-fee',
-    '도서산간':    'ship-island',
-    '배송조회':    'ship-track',
-    '교환반품기간':'ret-period',
-    '단순변심':    'ret-change',
-    '상품하자':    'ret-defect',
-    '오배송':      'ret-wrong',
-    '처리기간':    'ret-process',
-    '반품불가사유':'ret-reject'
-  };
+  // 택배사
+  var methodEl = document.getElementById('ship-method');
+  if (methodEl && p['택배사']) methodEl.textContent = p['택배사'];
 
-  Object.keys(map).forEach(function(key) {
-    var el = document.getElementById(map[key]);
-    if (el && p[key]) el.textContent = p[key];
-  });
+  // 배송비
+  var feeEl = document.getElementById('ship-fee');
+  if (feeEl && p['배송비'] !== undefined) {
+    var fee = parseInt(p['배송비']);
+    feeEl.textContent = fee === 0 ? '무료배송 🎉' : fee.toLocaleString() + '원 (50,000원 이상 무료)';
+    // 상단 배송비 표시도 업데이트
+    var delivFee = document.getElementById('delivery-fee');
+    if (delivFee) delivFee.textContent = fee === 0 ? '무료배송 🎉' : fee.toLocaleString() + '원 (50,000원 이상 무료)';
+  }
 
-  // 반품불가 사유는 | 구분으로 줄바꿈
+  // 배송기간
+  var periodEl = document.getElementById('ship-period');
+  if (periodEl && p['배송기간']) periodEl.textContent = p['배송기간'];
+
+  // 교환반품기간
+  var retPeriodEl = document.getElementById('ret-period');
+  if (retPeriodEl && p['교환반품기간']) retPeriodEl.textContent = '상품 수령 후 ' + p['교환반품기간'] + ' 이내';
+
+  // 반품불가사유 (| 구분 → 줄바꿈)
   var rejectEl = document.getElementById('ret-reject');
   if (rejectEl && p['반품불가사유']) {
     var items = p['반품불가사유'].split('|');
