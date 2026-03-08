@@ -426,7 +426,16 @@ function addToCart() {
 function buyNow() {
   if (!currentProduct) return;
   if (!checkRequiredOptions()) return;
-  alert('PG사 연동 후 결제 진행됩니다');
+  var qty = parseInt(document.getElementById('qty-input').value) || 1;
+  var productWithOptions = Object.assign({}, currentProduct);
+  if (selectedOptions['color']) productWithOptions.selectedColor = selectedOptions['color'];
+  if (selectedOptions['size'])  productWithOptions.selectedSize  = selectedOptions['size'];
+  if (selectedOptions['color'] || selectedOptions['size']) {
+    productWithOptions.optionText = [selectedOptions['color'], selectedOptions['size']].filter(Boolean).join(' / ');
+  }
+  Cart.clear();
+  Cart.add(productWithOptions, qty);
+  location.href = 'order.html';
 }
 
 function toggleWish() {
