@@ -134,32 +134,12 @@
             ⚠️ PG 연동 준비중 · API 키 입력 후 실결제 가능
           </div>
 
-          <div class="pay-methods">
-            <div class="pay-method active" onclick="selectPay(this, 'card')">
-              <span class="pay-icon">💳</span>신용/체크카드
+          <div class="pay-methods" style="grid-template-columns:1fr;">
+            <div class="pay-method active" style="display:flex;align-items:center;justify-content:center;gap:10px;" onclick="selectPay(this, 'card')">
+              <span class="pay-icon" style="margin:0;">💳</span>
+              <span>신용 / 체크카드</span>
+              <span style="font-size:11px;color:var(--gray);font-weight:400;">국내외 모든 카드 가능</span>
             </div>
-            <div class="pay-method" onclick="selectPay(this, 'kakao')">
-              <span class="pay-icon">💛</span>카카오페이
-            </div>
-            <div class="pay-method" onclick="selectPay(this, 'naver')">
-              <span class="pay-icon">🟢</span>네이버페이
-            </div>
-            <div class="pay-method" onclick="selectPay(this, 'bank')">
-              <span class="pay-icon">🏦</span>무통장입금
-            </div>
-            <div class="pay-method" onclick="selectPay(this, 'phone')">
-              <span class="pay-icon">📱</span>휴대폰결제
-            </div>
-            <div class="pay-method" onclick="selectPay(this, 'toss')">
-              <span class="pay-icon">🔵</span>토스페이
-            </div>
-          </div>
-          <div id="bank-info" style="display:none; margin-top:16px; padding:14px; background:var(--bg); border-radius:8px; font-size:13px;">
-            <div style="font-weight:700; margin-bottom:8px;">📌 입금 계좌 안내</div>
-            <div>은행: <b>국민은행</b></div>
-            <div>계좌: <b>000-0000-0000-00</b></div>
-            <div>예금주: <b>담누리마켓</b></div>
-            <div style="margin-top:8px; color:var(--accent);">※ 입금자명을 주문자명과 동일하게 입력해주세요</div>
           </div>
         </div>
 
@@ -239,10 +219,7 @@ var selectedPay = 'card';
 var orderTotalAmount = 0;
 
 function selectPay(el, type) {
-  document.querySelectorAll('.pay-method').forEach(function(m){ m.classList.remove('active'); });
-  el.classList.add('active');
   selectedPay = type;
-  document.getElementById('bank-info').style.display = type === 'bank' ? 'block' : 'none';
 }
 
 function toggleAll(el) {
@@ -280,7 +257,7 @@ function loadOrderItems() {
       + '<img src="' + item.image + '" alt="' + item.name + '" onerror="this.src=\'https://via.placeholder.com/72\'">'
       + '<div class="order-item-info">'
       + '<div class="order-item-name">' + item.name + '</div>'
-      + '<div class="order-item-meta">' + item.category + ' · 수량 ' + (item.qty || 1) + '개'
+      + '<div class="order-item-meta">' + (item.category ? item.category + ' · ' : '') + '수량 ' + (item.qty || 1) + '개'
       + (item.optionText ? ' · ' + item.optionText : '') + '</div>'
       + '</div>'
       + '<div class="order-item-price">' + (price * (item.qty||1)).toLocaleString() + '원</div>'
