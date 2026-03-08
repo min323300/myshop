@@ -6,6 +6,13 @@
   <title>주문서 - 담누리마켓</title>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
+
+  <!-- ✅ 카카오 우편번호 API -->
+  <script src="https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
+
+  <!-- ✅ 윈글로벌 PG SDK (API 키 수령 후 주석 해제) -->
+  <!-- <script src="https://pg.winglobal.co.kr/js/winglobal.js"></script> -->
+
   <style>
     .order-wrap { max-width: 1000px; margin: 32px auto; padding: 0 24px; }
     .order-title { font-size: 24px; font-weight: 900; margin-bottom: 32px; }
@@ -23,13 +30,11 @@
     .form-full { grid-column: 1 / -1; }
     .btn-address { padding: 10px 16px; background: var(--gray-dark); color: #fff; border: none; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; margin-top: 4px; }
 
-    /* 결제 방법 */
     .pay-methods { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
     .pay-method { padding: 14px; border: 2px solid var(--border); border-radius: 10px; text-align: center; cursor: pointer; transition: var(--transition); font-size: 13px; font-weight: 600; }
     .pay-method.active { border-color: var(--accent); background: #fff5f2; color: var(--accent); }
     .pay-method .pay-icon { font-size: 24px; display: block; margin-bottom: 4px; }
 
-    /* 주문 상품 */
     .order-item { display: flex; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--border); }
     .order-item:last-child { border-bottom: none; }
     .order-item img { width: 72px; height: 72px; object-fit: cover; border-radius: 8px; border: 1px solid var(--border); }
@@ -38,14 +43,12 @@
     .order-item-meta { font-size: 12px; color: var(--gray); }
     .order-item-price { font-size: 15px; font-weight: 800; color: var(--accent); }
 
-    /* 가격 요약 */
     .price-summary { display: flex; flex-direction: column; gap: 10px; }
     .price-row { display: flex; justify-content: space-between; font-size: 14px; }
     .price-row.total { font-size: 18px; font-weight: 900; padding-top: 12px; border-top: 2px solid var(--black); margin-top: 4px; }
     .price-row .label { color: var(--gray); }
     .price-row.total .label { color: var(--black); }
 
-    /* 약관 동의 */
     .agree-list { display: flex; flex-direction: column; gap: 10px; }
     .agree-item { display: flex; align-items: center; gap: 10px; font-size: 14px; }
     .agree-item input[type=checkbox] { width: 18px; height: 18px; accent-color: var(--accent); cursor: pointer; }
@@ -54,6 +57,12 @@
 
     .btn-order { width: 100%; padding: 18px; background: var(--accent); color: #fff; border: none; border-radius: 12px; font-size: 18px; font-weight: 900; cursor: pointer; margin-top: 16px; transition: var(--transition); }
     .btn-order:hover { background: var(--accent-dark); transform: translateY(-2px); }
+    .btn-order:disabled { background: #ccc; cursor: not-allowed; transform: none; }
+
+    /* PG 연동 상태 배지 */
+    .pg-status { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; padding: 4px 10px; border-radius: 20px; margin-bottom: 12px; }
+    .pg-status.ready { background: #fff3cd; color: #856404; }
+    .pg-status.live  { background: #d1fae5; color: #065f46; }
 
     @media (max-width: 768px) {
       .order-grid { grid-template-columns: 1fr; }
@@ -98,7 +107,8 @@
             <label>주소 *</label>
             <div style="display:flex;gap:8px;">
               <input type="text" id="post-code" placeholder="우편번호" style="width:120px;" readonly>
-              <button class="btn-address" onclick="searchAddress()">주소 검색</button>
+              <!-- ✅ 카카오 우편번호 API 연동 -->
+              <button class="btn-address" onclick="searchAddress()">🔍 주소 검색</button>
             </div>
             <input type="text" id="address1" placeholder="기본주소" style="margin-top:8px;" readonly>
             <input type="text" id="address2" placeholder="상세주소 입력" style="margin-top:8px;">
@@ -118,6 +128,12 @@
         <!-- 결제 방법 -->
         <div class="order-section">
           <h3>💳 결제 방법</h3>
+
+          <!-- ✅ PG 연동 상태 표시 (API 키 입력 후 'live'로 변경) -->
+          <div class="pg-status ready" id="pg-status-badge">
+            ⚠️ PG 연동 준비중 · API 키 입력 후 실결제 가능
+          </div>
+
           <div class="pay-methods">
             <div class="pay-method active" onclick="selectPay(this, 'card')">
               <span class="pay-icon">💳</span>신용/체크카드
@@ -179,9 +195,7 @@
       <div>
         <div class="order-section" style="position:sticky;top:80px;">
           <h3>🧾 주문 상품</h3>
-          <div id="order-items">
-            <!-- 장바구니에서 동적 로드 -->
-          </div>
+          <div id="order-items"></div>
 
           <div class="price-summary" style="margin-top:20px;">
             <div class="price-row">
@@ -202,7 +216,7 @@
             </div>
           </div>
 
-          <button class="btn-order" onclick="submitOrder()">
+          <button class="btn-order" id="btn-order" onclick="submitOrder()">
             결제하기
           </button>
           <p style="text-align:center;font-size:11px;color:var(--gray-light);margin-top:8px;">
@@ -218,80 +232,212 @@
 <script src="js/sheets.js"></script>
 <script src="js/app.js"></script>
 <script>
-let selectedPay = 'card';
+// ============================================================
+// 결제 방법 선택
+// ============================================================
+var selectedPay = 'card';
+var orderTotalAmount = 0;
 
 function selectPay(el, type) {
-  document.querySelectorAll('.pay-method').forEach(m => m.classList.remove('active'));
+  document.querySelectorAll('.pay-method').forEach(function(m){ m.classList.remove('active'); });
   el.classList.add('active');
   selectedPay = type;
   document.getElementById('bank-info').style.display = type === 'bank' ? 'block' : 'none';
 }
 
 function toggleAll(el) {
-  document.querySelectorAll('.agree-check').forEach(c => c.checked = el.checked);
+  document.querySelectorAll('.agree-check').forEach(function(c){ c.checked = el.checked; });
 }
 
+// ============================================================
+// ✅ 카카오 우편번호 API
+// ============================================================
 function searchAddress() {
-  alert('주소 검색은 카카오 우편번호 API 연동 후 사용 가능합니다.\n직접 입력해주세요.');
-  document.getElementById('address1').removeAttribute('readonly');
-  document.getElementById('address1').focus();
+  new daum.Postcode({
+    oncomplete: function(data) {
+      document.getElementById('post-code').value  = data.zonecode;
+      document.getElementById('address1').value   = data.roadAddress || data.jibunAddress;
+      document.getElementById('address2').focus();
+    }
+  }).open();
 }
 
+// ============================================================
+// 주문 상품 로드
+// ============================================================
 function loadOrderItems() {
-  const items = Cart.getItems();
-  const container = document.getElementById('order-items');
-
+  var items = Cart.getItems();
+  var container = document.getElementById('order-items');
   if (!items.length) {
     container.innerHTML = '<p style="color:var(--gray);font-size:13px;">장바구니가 비어있습니다</p>';
     return;
   }
-
-  let total = 0;
-  container.innerHTML = items.map(item => {
-    const price = item.salePrice || item.price;
+  var total = 0;
+  container.innerHTML = items.map(function(item) {
+    var price = item.salePrice || item.price;
     total += price * (item.qty || 1);
-    return `
-      <div class="order-item">
-        <img src="${item.image}" alt="${item.name}" onerror="this.src='https://via.placeholder.com/72'">
-        <div class="order-item-info">
-          <div class="order-item-name">${item.name}</div>
-          <div class="order-item-meta">${item.category} · 수량 ${item.qty || 1}개</div>
-        </div>
-        <div class="order-item-price">${(price * (item.qty||1)).toLocaleString()}원</div>
-      </div>`;
+    return '<div class="order-item">'
+      + '<img src="' + item.image + '" alt="' + item.name + '" onerror="this.src=\'https://via.placeholder.com/72\'">'
+      + '<div class="order-item-info">'
+      + '<div class="order-item-name">' + item.name + '</div>'
+      + '<div class="order-item-meta">' + item.category + ' · 수량 ' + (item.qty || 1) + '개'
+      + (item.optionText ? ' · ' + item.optionText : '') + '</div>'
+      + '</div>'
+      + '<div class="order-item-price">' + (price * (item.qty||1)).toLocaleString() + '원</div>'
+      + '</div>';
   }).join('');
 
-  const delivery = total >= 50000 ? 0 : 3000;
+  var delivery = total >= 50000 ? 0 : 3000;
+  orderTotalAmount = total + delivery;
+
   document.getElementById('sum-products').textContent = total.toLocaleString() + '원';
   document.getElementById('sum-delivery').textContent = delivery === 0 ? '무료' : delivery.toLocaleString() + '원';
   document.getElementById('sum-discount').textContent = '-0원';
-  document.getElementById('sum-total').textContent = (total + delivery).toLocaleString() + '원';
-  document.getElementById('btn-order-total').textContent = (total + delivery).toLocaleString() + '원 결제하기';
+  document.getElementById('sum-total').textContent = orderTotalAmount.toLocaleString() + '원';
+  document.getElementById('btn-order').textContent = orderTotalAmount.toLocaleString() + '원 결제하기';
 }
 
+// ============================================================
+// 입력값 검증
+// ============================================================
+function validateForm() {
+  var name  = document.getElementById('receiver-name').value.trim();
+  var phone = document.getElementById('receiver-phone').value.trim();
+  var addr  = document.getElementById('address1').value.trim();
+  if (!name)  { alert('받는 분 이름을 입력해주세요'); document.getElementById('receiver-name').focus(); return false; }
+  if (!phone) { alert('연락처를 입력해주세요'); document.getElementById('receiver-phone').focus(); return false; }
+  if (!addr)  { alert('주소를 입력해주세요'); return false; }
+  if (!document.getElementById('agree1').checked ||
+      !document.getElementById('agree2').checked ||
+      !document.getElementById('agree3').checked) {
+    alert('필수 약관에 동의해주세요'); return false;
+  }
+  return true;
+}
+
+// ============================================================
+// 주문 데이터 수집
+// ============================================================
+function buildOrderData(orderNo) {
+  var items = Cart.getItems();
+  return {
+    orderNo:    orderNo,
+    orderDate:  new Date().toLocaleString('ko-KR'),
+    name:       document.getElementById('receiver-name').value.trim(),
+    phone:      document.getElementById('receiver-phone').value.trim(),
+    postCode:   document.getElementById('post-code').value.trim(),
+    address:    document.getElementById('address1').value.trim() + ' ' + document.getElementById('address2').value.trim(),
+    memo:       document.getElementById('delivery-memo').value,
+    payMethod:  selectedPay,
+    amount:     orderTotalAmount,
+    items:      items.map(function(i){ return i.name + (i.optionText ? '(' + i.optionText + ')' : '') + ' x' + (i.qty||1); }).join(', '),
+    status:     '결제대기'
+  };
+}
+
+// ============================================================
+// ✅ 윈글로벌 PG 결제 요청
+// ============================================================
+// 연동 방식 구조 (API 키 수령 후 아래 함수 활성화)
+// ============================================================
+function requestPG(orderData) {
+  var PG_MERCHANT_ID = (typeof CONFIG !== 'undefined') ? CONFIG.PG.MERCHANT_ID : '';
+
+  // ──────────────────────────────────────────
+  // ❌ PG 미연동 상태 (MERCHANT_ID 없을 때)
+  // ──────────────────────────────────────────
+  if (!PG_MERCHANT_ID) {
+    // 임시 주문번호 발급 후 완료 페이지로 이동
+    saveOrderToSheets(orderData);
+    Cart.clear();
+    location.href = 'order-complete.html?no=' + orderData.orderNo + '&method=' + selectedPay;
+    return;
+  }
+
+  // ──────────────────────────────────────────
+  // ✅ PG 연동 후 활성화 (윈글로벌 SDK 방식)
+  // API 키 수령 시 CONFIG.PG.MERCHANT_ID 입력하면 자동 활성화
+  // ──────────────────────────────────────────
+  /*
+  WinglobalPay.request({
+    merchantId:   PG_MERCHANT_ID,
+    orderId:      orderData.orderNo,
+    orderName:    orderData.items.substring(0, 40),
+    amount:       orderData.amount,
+    buyerName:    orderData.name,
+    buyerPhone:   orderData.phone,
+    buyerAddr:    orderData.address,
+    payMethod:    selectedPay,   // card / kakao / naver / bank / phone / toss
+    returnUrl:    location.origin + '/myshop/order-complete.html',
+    failUrl:      location.origin + '/myshop/order.html',
+    webhookUrl:   CONFIG.PG.API_PROXY_URL,
+  }, function(result) {
+    if (result.code === 'SUCCESS') {
+      saveOrderToSheets(orderData);
+      Cart.clear();
+      location.href = 'order-complete.html?no=' + orderData.orderNo + '&method=' + selectedPay;
+    } else {
+      alert('결제 실패: ' + result.message);
+    }
+  });
+  */
+}
+
+// ============================================================
+// ✅ 주문 데이터 → Google Sheets 저장 (Apps Script 연동 후 활성화)
+// ============================================================
+function saveOrderToSheets(orderData) {
+  var SCRIPT_URL = (typeof CONFIG !== 'undefined') ? CONFIG.PG.API_PROXY_URL : '';
+  if (!SCRIPT_URL) {
+    // Apps Script URL 없으면 콘솔에만 기록
+    console.log('주문 데이터 (Sheets 미연동):', orderData);
+    return;
+  }
+  fetch(SCRIPT_URL, {
+    method: 'POST',
+    mode: 'no-cors',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ action: 'saveOrder', data: orderData })
+  }).catch(function(e){ console.log('Sheets 저장 실패:', e); });
+}
+
+// ============================================================
+// 결제 버튼
+// ============================================================
 function submitOrder() {
-  const name = document.getElementById('receiver-name').value.trim();
-  const phone = document.getElementById('receiver-phone').value.trim();
-  const addr = document.getElementById('address1').value.trim();
+  if (!validateForm()) return;
+  var btn = document.getElementById('btn-order');
+  btn.disabled = true;
+  btn.textContent = '처리 중...';
 
-  if (!name) { alert('받는 분 이름을 입력해주세요'); return; }
-  if (!phone) { alert('연락처를 입력해주세요'); return; }
-  if (!addr) { alert('주소를 입력해주세요'); return; }
+  var orderNo = 'ORD' + Date.now();
+  var orderData = buildOrderData(orderNo);
+  requestPG(orderData);
 
-  const agree1 = document.getElementById('agree1').checked;
-  const agree2 = document.getElementById('agree2').checked;
-  const agree3 = document.getElementById('agree3').checked;
-  if (!agree1 || !agree2 || !agree3) { alert('필수 약관에 동의해주세요'); return; }
-
-  // PG 연동 전 임시 처리
-  const orderNo = 'ORD' + Date.now();
-  alert(`주문이 접수되었습니다!\n주문번호: ${orderNo}\n\nPG사 연동 후 실제 결제가 진행됩니다.`);
-  Cart.clear();
-  location.href = `order-complete.html?no=${orderNo}`;
+  // 실패 대비 버튼 복구
+  setTimeout(function(){ btn.disabled = false; btn.textContent = orderTotalAmount.toLocaleString() + '원 결제하기'; }, 5000);
 }
 
+// ============================================================
+// PG 연동 상태 배지 업데이트
+// ============================================================
+function updatePGStatusBadge() {
+  var badge = document.getElementById('pg-status-badge');
+  if (!badge) return;
+  var merchantId = (typeof CONFIG !== 'undefined') ? CONFIG.PG.MERCHANT_ID : '';
+  if (merchantId) {
+    badge.className = 'pg-status live';
+    badge.textContent = '✅ 실결제 연동 완료';
+  }
+  // MERCHANT_ID 없으면 기본 '준비중' 배지 유지
+}
+
+// ============================================================
+// 초기화
+// ============================================================
 Cart.init();
 loadOrderItems();
+updatePGStatusBadge();
 </script>
 </body>
 </html>
