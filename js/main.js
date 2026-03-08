@@ -185,10 +185,15 @@ function runApp() {
   try { Cart.init(); } catch(e){ console.log('Cart err',e); }
   try { BC.load(); } catch(e){ console.log('Banner err',e); try{ BC.build(BC.defaults()); }catch(e2){} }
   try { startTimer(); } catch(e){}
+
+  // ✅ 헤더에 브랜드명 표시 (config.js 기본값, 이후 loadBizInfo가 시트값으로 덮어씀)
   try {
     var sn = document.getElementById('store-name');
-    if(sn && typeof CONFIG !== 'undefined') sn.textContent = CONFIG.STORE.NAME;
+    if (sn && typeof CONFIG !== 'undefined') {
+      sn.textContent = CONFIG.STORE.BRAND || CONFIG.STORE.NAME;
+    }
   } catch(e){}
+
   try { setTimeout(function(){ Popup.loadAndShow(); }, 800); } catch(e){}
 
   ProductAPI.getAll().then(function(products) {
@@ -209,13 +214,20 @@ function runApp() {
 }
 
 if(document.readyState==='loading') {
-  document.addEventListener('DOMContentLoaded', runApp);
+  document.addEventListener('DOMContentLoaded', function() {
+    runApp();
+    loadBizInfo(); // ✅ runApp과 함께 호출
+  });
 } else {
   runApp();
+  loadBizInfo();
 }
 
 // ============================================================
-// 사업자정보 로드 (구글시트 → footer 자동 반영)
+// 사업자정보 로드 (구글시트 → 헤더 브랜드명 + footer 사업자정보 반영)
+// ============================================================
+// ⚠️ 구글시트 '사업자정보' 시트 컬럼 순서:
+// A:상호 | B:사업자번호 | C:대표자 | D:주소 | E:전화 | F:이메일 | G:도메인 | H:저작권연도 | I:브랜드명
 // ============================================================
 function loadBizInfo() {
   var SHEET_ID = '1t804fRO8HfQtmOzpDAz2IZfzRDQ7t8LYllFGZr3ftUI';
@@ -223,6 +235,7 @@ function loadBizInfo() {
   fetch(url).then(function(r){ return r.text(); }).then(function(csv) {
     var lines = csv.trim().split('\n');
     if (lines.length < 2) return;
+
     // 2번째 줄 파싱 (헤더 제외)
     var cols = [];
     var cur = '', inQ = false;
@@ -235,16 +248,18 @@ function loadBizInfo() {
     }
     cols.push(cur.trim());
 
-    // 컬럼: 상호,사업자번호,대표자,주소,전화,이메일,도메인,저작권연도
+    // 컬럼 매핑
+    // A:상호 B:사업자번호 C:대표자 D:주소 E:전화 F:이메일 G:도메인 H:저작권연도 I:브랜드명
     var biz = {
-      name:    cols[0] || '담누리마켓',
-      regNo:   cols[1] || '000-00-00000',
+      name:    cols[0] || '담누리마켓',    // 상호 (푸터에만)
+      regNo:   cols[1] || '',
       ceo:     cols[2] || '',
       address: cols[3] || '',
       phone:   cols[4] || '1588-0000',
       email:   cols[5] || '',
       domain:  cols[6] || '',
-      year:    cols[7] || '2026'
+      year:    cols[7] || new Date().getFullYear(),
+      brand:   cols[8] || cols[0] || '담누리마켓'  // ✅ I열: 브랜드명 (없으면 상호명 사용)
     };
 
     applyBizInfo(biz);
@@ -252,31 +267,33 @@ function loadBizInfo() {
 }
 
 function applyBizInfo(biz) {
-  // 헤더 전화번호
-  var fp = document.getElementById('footer-phone');
-  if (fp) fp.textContent = '📞 ' + biz.phone;
-
-  // 헤더 스토어명
+  // ✅ 헤더 브랜드명 (상호명 아닌 브랜드명!)
   var sn = document.getElementById('store-name');
-  if (sn && sn.textContent === '담누리마켓') sn.textContent = biz.name;
+  if (sn) sn.textContent = biz.brand;
 
+  // ✅ CONFIG 동기화
+  if (typeof CONFIG !== 'undefined') {
+    CONFIG.STORE.BRAND = biz.brand;
+    CONFIG.STORE.NAME  = biz.name;
+    CONFIG.STORE.PHONE = biz.phone;
+    CONFIG.STORE.EMAIL = biz.email;
+  }
+
+  // ✅ 푸터 브랜드명
   var fsn = document.getElementById('footer-store-name');
-  if (fsn) fsn.textContent = '🏪 ' + biz.name;
+  if (fsn) fsn.textContent = '🏪 ' + biz.brand;
 
-  // footer 이메일
-  var fe = document.getElementById('footer-email');
-  if (fe && biz.email) fe.textContent = '📧 ' + biz.email;
-
-  // footer 사업자정보 (하단)
+  // ✅ 푸터 사업자정보 (상호명 표시)
   var fb = document.getElementById('footer-biz');
   if (fb) {
     var parts = [];
-    if (biz.name)    parts.push('상호: ' + biz.name);
-    if (biz.regNo)   parts.push('사업자번호: ' + biz.regNo);
-    if (biz.ceo)     parts.push('대표: ' + biz.ceo);
+    if (biz.name)  parts.push('상호: ' + biz.name);
+    if (biz.regNo) parts.push('사업자번호: ' + biz.regNo);
+    if (biz.ceo)   parts.push('대표: ' + biz.ceo);
     fb.textContent = parts.join(' | ');
   }
 
+  // ✅ 푸터 주소/연락처
   var fa = document.getElementById('footer-addr');
   if (fa) {
     var aparts = [];
@@ -286,12 +303,15 @@ function applyBizInfo(biz) {
     fa.textContent = aparts.join(' | ');
   }
 
-  var fc = document.getElementById('footer-copy');
-  if (fc) fc.textContent = '© ' + biz.year + ' ' + biz.name + '. All rights reserved.';
-}
+  // ✅ 푸터 전화
+  var fp = document.getElementById('footer-phone');
+  if (fp) fp.textContent = '📞 ' + biz.phone;
 
-// runApp에서 loadBizInfo 호출 추가
-var _origRunApp = typeof runApp === 'function' ? runApp : null;
-document.addEventListener('DOMContentLoaded', function() {
-  loadBizInfo();
-});
+  // ✅ 푸터 이메일
+  var fe = document.getElementById('footer-email');
+  if (fe && biz.email) fe.textContent = '📧 ' + biz.email;
+
+  // ✅ 저작권 (브랜드명 사용)
+  var fc = document.getElementById('footer-copy');
+  if (fc) fc.textContent = '© ' + biz.year + ' ' + biz.brand + '. All rights reserved.';
+}
