@@ -47,8 +47,6 @@ function loadProduct(id) {
 function renderProduct(p) {
   document.title = p.name + ' - ' + (typeof CONFIG !== 'undefined' ? CONFIG.STORE.NAME : '담누리마켓');
 
-  // 공급사는 sheets.js가 매핑한 값 사용 (없으면 '기본')
-
   var bcCat = document.getElementById('bc-category');
   var bcName = document.getElementById('bc-name');
   if (bcCat) bcCat.textContent = p.category;
@@ -185,6 +183,9 @@ function renderProduct(p) {
   if (dateEl) dateEl.textContent = (tomorrow.getMonth()+1) + '/' + tomorrow.getDate() + '(' + days[tomorrow.getDay()] + ') 도착 예정';
 
   updateTotal();
+
+  // 스펙/인증/주의사항 렌더링 (renderProduct 마지막에 호출)
+  renderSpecs(p);
 }
 
 function renderSpecs(p) {
@@ -213,12 +214,12 @@ function renderSpecs(p) {
     }
   }
 
-  // 인증이미지
+  // 인증이미지 ← 핵심 수정: 따옴표 이스케이프 처리
   if (p.certImage) {
     var certHtml = '<div style="margin:24px 0;">'
       + '<h4 style="font-size:15px;font-weight:700;margin-bottom:12px;color:#333;">🏅 인증서</h4>'
       + '<img src="' + p.certImage + '" style="max-width:100%;border-radius:8px;border:1px solid #eee;" '
-      + 'onerror="this.style.display='none'" alt="인증서"></div>';
+      + 'onerror="this.style.display=\'none\'" alt="인증서"></div>';
     tab.insertAdjacentHTML('beforeend', certHtml);
   }
 
@@ -237,7 +238,6 @@ function renderYoutube(url) {
     if (wrap) wrap.style.display = 'none';
     return;
   }
-  // URL → embed ID 추출 (shorts, watch, youtu.be 모두 지원)
   var vid = '';
   var m = url.match(/shorts\/([^?&\/]+)/) ||
            url.match(/[?&]v=([^?&\/]+)/) ||
@@ -246,7 +246,6 @@ function renderYoutube(url) {
   if (!vid) { if (wrap) wrap.style.display = 'none'; return; }
 
   if (!wrap) {
-    // 동적으로 섹션 생성
     var descEl = document.getElementById('detail-description');
     if (!descEl) return;
     wrap = document.createElement('div');
@@ -371,9 +370,9 @@ function updateSelectedSummary() {
 }
 
 function checkRequiredOptions() {
-  var hasColorOpt = document.getElementById('option-color-section') && 
+  var hasColorOpt = document.getElementById('option-color-section') &&
                     document.getElementById('option-color-section').classList.contains('has-options');
-  var hasSizeOpt = document.getElementById('option-size-section') && 
+  var hasSizeOpt = document.getElementById('option-size-section') &&
                    document.getElementById('option-size-section').classList.contains('has-options');
   if (hasColorOpt && !selectedOptions['color']) {
     alert('색상을 선택해주세요!');
@@ -417,7 +416,6 @@ function addToCart() {
   var productWithOptions = Object.assign({}, currentProduct);
   if (selectedOptions['color']) productWithOptions.selectedColor = selectedOptions['color'];
   if (selectedOptions['size']) productWithOptions.selectedSize = selectedOptions['size'];
-  // 옵션 포함 상품명
   var optStr = [];
   if (selectedOptions['color']) optStr.push(selectedOptions['color']);
   if (selectedOptions['size']) optStr.push(selectedOptions['size']);
@@ -625,7 +623,6 @@ function toggleQna(id) {
   if (body) body.style.display = body.style.display === 'none' ? 'block' : 'none';
 }
 
-// 배송/반품 탭에 구글시트 전화/이메일 반영
 function updateShippingContact(phone, email) {
   var sp = document.getElementById('shipping-phone');
   var se = document.getElementById('shipping-email');
@@ -635,14 +632,12 @@ function updateShippingContact(phone, email) {
 
 // ============================================================
 // 배송정책 구글시트 자동 로드 (4단계 우선순위)
-// 우선순위: ①가맹점+공급사 > ②기본+공급사 > ③가맹점+기본 > ④기본+기본
 // ============================================================
 function loadShippingPolicy() {
   var SHEET_ID = '1t804fRO8HfQtmOzpDAz2IZfzRDQ7t8LYllFGZr3ftUI';
   var url = 'https://docs.google.com/spreadsheets/d/' + SHEET_ID
     + '/gviz/tq?tqx=out:csv&sheet=' + encodeURIComponent('배송정책');
 
-  // 현재 가맹점ID (config.js에서 읽기, 없으면 '기본')
   var myFranchise = '기본';
   try {
     if (typeof CONFIG !== 'undefined' && CONFIG.FRANCHISE_ID) {
@@ -650,17 +645,14 @@ function loadShippingPolicy() {
     }
   } catch(e){}
 
-  // 현재 상품의 공급사 (상품목록 C열 = supplier)
   var mySupplier = '기본';
   if (currentProduct) {
-    // sheets.js가 supplier로 매핑하거나, 직접 col2로 접근
     mySupplier = currentProduct.supplier || currentProduct['공급사'] || '기본';
   }
 
   fetch(url).then(function(r){ return r.text(); }).then(function(csv) {
-    // CSV 전체 파싱 → rows 배열
     var rows = [];
-    var lines = csv.trim().split('\n').slice(1); // 헤더 제외
+    var lines = csv.trim().split('\n').slice(1);
     lines.forEach(function(line) {
       var cols = parseCSVLine(line);
       if (cols.length >= 4) {
@@ -668,30 +660,23 @@ function loadShippingPolicy() {
       }
     });
 
-    // 4단계 우선순위로 정책 조합
     var policy = {};
     var ITEMS = ['택배사','배송비','배송기간','교환반품기간','반품불가사유'];
 
     ITEMS.forEach(function(item) {
       var found = null;
-
-      // ① 가맹점 + 공급사 (가장 구체적)
       if (!found && myFranchise !== '기본' && mySupplier !== '기본') {
         found = rows.find(function(r){ return r.franchise === myFranchise && r.supplier === mySupplier && r.key === item; });
       }
-      // ② 기본 + 공급사
       if (!found && mySupplier !== '기본') {
         found = rows.find(function(r){ return r.franchise === '기본' && r.supplier === mySupplier && r.key === item; });
       }
-      // ③ 가맹점 + 기본
       if (!found && myFranchise !== '기본') {
         found = rows.find(function(r){ return r.franchise === myFranchise && r.supplier === '기본' && r.key === item; });
       }
-      // ④ 기본 + 기본 (전체 기본값)
       if (!found) {
         found = rows.find(function(r){ return r.franchise === '기본' && r.supplier === '기본' && r.key === item; });
       }
-
       if (found) policy[item] = found.val;
     });
 
@@ -712,29 +697,23 @@ function parseCSVLine(line) {
 }
 
 function applyShippingPolicy(p) {
-  // 택배사
   var methodEl = document.getElementById('ship-method');
   if (methodEl && p['택배사']) methodEl.textContent = p['택배사'];
 
-  // 배송비
   var feeEl = document.getElementById('ship-fee');
   if (feeEl && p['배송비'] !== undefined) {
     var fee = parseInt(p['배송비']);
     feeEl.textContent = fee === 0 ? '무료배송 🎉' : fee.toLocaleString() + '원 (50,000원 이상 무료)';
-    // 상단 배송비 표시도 업데이트
     var delivFee = document.getElementById('delivery-fee');
     if (delivFee) delivFee.textContent = fee === 0 ? '무료배송 🎉' : fee.toLocaleString() + '원 (50,000원 이상 무료)';
   }
 
-  // 배송기간
   var periodEl = document.getElementById('ship-period');
   if (periodEl && p['배송기간']) periodEl.textContent = p['배송기간'];
 
-  // 교환반품기간
   var retPeriodEl = document.getElementById('ret-period');
   if (retPeriodEl && p['교환반품기간']) retPeriodEl.textContent = '상품 수령 후 ' + p['교환반품기간'] + ' 이내';
 
-  // 반품불가사유 (| 구분 → 줄바꿈)
   var rejectEl = document.getElementById('ret-reject');
   if (rejectEl && p['반품불가사유']) {
     var items = p['반품불가사유'].split('|');
