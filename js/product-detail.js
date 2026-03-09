@@ -67,7 +67,8 @@ function renderProduct(p) {
 
   // 이미지 갤러리
   var extraImages = p.detailImages ? p.detailImages.split('|').map(function(s){ return s.trim(); }).filter(Boolean) : [];
-  images = [p.image].concat(extraImages).filter(Boolean);
+  var extraImages2 = p.detailImages2 ? p.detailImages2.split('|').map(function(s){ return s.trim(); }).filter(Boolean) : [];
+  images = [p.image].concat(extraImages).concat(extraImages2).filter(Boolean);
   if (!images.length) images = ['https://picsum.photos/600/600?random=' + p.id];
   currentImgIdx = 0;
   renderGallery();
