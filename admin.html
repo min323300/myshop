@@ -1,880 +1,1235 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>담누리마켓 관리자 대시보드</title>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<style>
-  :root {
-    --primary: #FF5733;
-    --primary-dark: #e04020;
-    --primary-light: #fff3f0;
-    --sidebar-bg: #1a1a2e;
-    --sidebar-hover: #16213e;
-    --sidebar-active: #FF5733;
-    --bg: #f4f6fb;
-    --card: #ffffff;
-    --border: #e8ecf4;
-    --text: #1a1a2e;
-    --text-sub: #6b7280;
-    --success: #10b981;
-    --warning: #f59e0b;
-    --danger: #ef4444;
-    --info: #3b82f6;
-    --font: 'Noto Sans KR', sans-serif;
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: var(--font); background: var(--bg); color: var(--text); min-height: 100vh; }
+  <meta charset="UTF-8">
+  <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests; script-src 'self' 'unsafe-eval' 'unsafe-inline' https:">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>담누리마켓 관리자 패널</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
+  <script src="js/config.js"></script>
+  <script src="js/sheets.js"></script>
+  <style>
+    :root {
+      --accent: #FF5733;
+      --accent-dark: #d94420;
+      --accent-light: #fff0ec;
+      --sb-bg: #1e2336;
+      --sb-hover: #2a3150;
+      --sb-active-bg: rgba(255,87,51,0.15);
+      --sb-text: #8b93b5;
+      --sb-text-active: #ffffff;
+      --bg: #f0f2f5;
+      --white: #ffffff;
+      --border: #e4e8ef;
+      --gray: #8a93b0;
+      --gray-dark: #2d3557;
+      --radius: 10px;
+      --shadow: 0 2px 12px rgba(0,0,0,0.06);
+      --font: 'Noto Sans KR', sans-serif;
+      --sb-w: 210px;
+      --hd-h: 58px;
+      --green: #00c471;
+      --blue: #3b82f6;
+      --orange: #f59e0b;
+      --red: #ef4444;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: var(--font); background: var(--bg); color: var(--gray-dark); font-size: 14px; line-height: 1.5; }
+    a { text-decoration: none; }
 
-  /* ── 로그인 ── */
-  #loginScreen {
-    display: flex; align-items: center; justify-content: center;
-    min-height: 100vh;
-    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
-  }
-  .login-box {
-    background: white; border-radius: 20px; padding: 48px 40px;
-    width: 380px; box-shadow: 0 24px 64px rgba(0,0,0,0.3);
-    text-align: center;
-  }
-  .login-logo { font-size: 40px; margin-bottom: 8px; }
-  .login-title { font-size: 22px; font-weight: 800; color: var(--text); margin-bottom: 4px; }
-  .login-sub { font-size: 13px; color: var(--text-sub); margin-bottom: 32px; }
-  .login-box input {
-    width: 100%; padding: 14px 16px; border: 2px solid var(--border);
-    border-radius: 10px; font-size: 15px; font-family: var(--font);
-    margin-bottom: 12px; transition: border-color .2s; outline: none;
-  }
-  .login-box input:focus { border-color: var(--primary); }
-  .login-btn {
-    width: 100%; padding: 14px; background: var(--primary); color: white;
-    border: none; border-radius: 10px; font-size: 16px; font-weight: 700;
-    font-family: var(--font); cursor: pointer; transition: background .2s;
-  }
-  .login-btn:hover { background: var(--primary-dark); }
-  .login-error { color: var(--danger); font-size: 13px; margin-top: 8px; display: none; }
+    /* ── 로그인 ── */
+    #login-screen {
+      position: fixed; inset: 0;
+      background: linear-gradient(145deg, #0f1629 0%, #1e2336 50%, #141929 100%);
+      display: flex; align-items: center; justify-content: center; z-index: 9999;
+    }
+    .lbox {
+      width: 380px; padding: 50px 42px; text-align: center;
+      background: rgba(255,255,255,0.04); backdrop-filter: blur(20px);
+      border: 1px solid rgba(255,255,255,0.1); border-radius: 20px;
+    }
+    .lbox-logo { font-size: 44px; margin-bottom: 6px; }
+    .lbox-brand { color: #fff; font-size: 22px; font-weight: 900; letter-spacing: -0.5px; }
+    .lbox-sub { color: rgba(255,255,255,0.38); font-size: 12px; margin: 4px 0 32px; }
+    .lbox input {
+      display: block; width: 100%; margin-bottom: 12px; padding: 13px 16px;
+      background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.13);
+      border-radius: 10px; color: #fff; font-size: 14px; font-family: var(--font); outline: none;
+    }
+    .lbox input::placeholder { color: rgba(255,255,255,0.32); }
+    .lbox input:focus { border-color: var(--accent); background: rgba(255,255,255,0.11); }
+    .lbox-btn {
+      width: 100%; padding: 13px; margin-top: 4px; background: var(--accent);
+      border: none; border-radius: 10px; color: #fff; font-size: 15px; font-weight: 700;
+      cursor: pointer; font-family: var(--font); transition: .2s;
+    }
+    .lbox-btn:hover { background: var(--accent-dark); }
+    .lbox-err { color: #ff7070; font-size: 12px; margin-top: 10px; display: none; }
 
-  /* ── 레이아웃 ── */
-  #app { display: none; }
-  .layout { display: flex; min-height: 100vh; }
+    /* ── 레이아웃 ── */
+    #app { display: none; min-height: 100vh; }
 
-  /* ── 사이드바 ── */
-  .sidebar {
-    width: 240px; background: var(--sidebar-bg); color: white;
-    display: flex; flex-direction: column; position: fixed;
-    top: 0; left: 0; height: 100vh; z-index: 100;
-    transition: width .3s;
-  }
-  .sidebar-logo {
-    padding: 24px 20px; border-bottom: 1px solid rgba(255,255,255,.08);
-    display: flex; align-items: center; gap: 10px;
-  }
-  .sidebar-logo-icon { font-size: 28px; }
-  .sidebar-logo-text { font-size: 16px; font-weight: 800; line-height: 1.2; }
-  .sidebar-logo-text span { display: block; font-size: 10px; font-weight: 400; opacity: .5; }
-  .sidebar-nav { flex: 1; padding: 16px 0; overflow-y: auto; }
-  .nav-section { padding: 8px 20px 4px; font-size: 10px; font-weight: 600; opacity: .4; letter-spacing: .08em; text-transform: uppercase; }
-  .nav-item {
-    display: flex; align-items: center; gap: 12px;
-    padding: 11px 20px; cursor: pointer; font-size: 14px; font-weight: 500;
-    transition: all .2s; border-left: 3px solid transparent;
-  }
-  .nav-item:hover { background: var(--sidebar-hover); }
-  .nav-item.active { background: rgba(255,87,51,.15); border-left-color: var(--primary); color: #ff8566; }
-  .nav-item .icon { font-size: 18px; width: 22px; text-align: center; }
-  .sidebar-footer { padding: 16px 20px; border-top: 1px solid rgba(255,255,255,.08); }
-  .logout-btn {
-    display: flex; align-items: center; gap: 10px; padding: 10px 12px;
-    background: rgba(239,68,68,.1); border: 1px solid rgba(239,68,68,.2);
-    border-radius: 8px; color: #fca5a5; font-size: 13px; font-weight: 500;
-    cursor: pointer; transition: all .2s; width: 100%;
-  }
-  .logout-btn:hover { background: rgba(239,68,68,.2); }
+    /* 헤더 */
+    .hd {
+      position: fixed; top: 0; left: 0; right: 0; height: var(--hd-h);
+      background: var(--sb-bg); z-index: 200;
+      display: flex; align-items: center;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+    .hd-brand {
+      width: var(--sb-w); display: flex; align-items: center; gap: 10px;
+      padding: 0 18px; height: 100%; flex-shrink: 0;
+      border-right: 1px solid rgba(255,255,255,0.06);
+    }
+    .hd-logo { font-size: 22px; }
+    .hd-title { color: #fff; font-weight: 800; font-size: 15px; line-height: 1.2; }
+    .hd-panel { color: rgba(255,255,255,0.4); font-size: 10px; }
+    .hd-nav { display: flex; align-items: center; gap: 2px; padding: 0 14px; }
+    .hd-nav a {
+      color: rgba(255,255,255,0.45); font-size: 13px; padding: 6px 12px;
+      border-radius: 7px; transition: .15s;
+    }
+    .hd-nav a:hover { color: #fff; background: rgba(255,255,255,0.08); }
+    .hd-right { margin-left: auto; display: flex; align-items: center; gap: 10px; padding-right: 16px; }
+    .hd-date { color: rgba(255,255,255,0.38); font-size: 12px; }
+    .hd-refresh {
+      background: var(--accent); color: #fff; border: none;
+      padding: 7px 14px; border-radius: 8px; font-size: 12px; font-weight: 700;
+      cursor: pointer; font-family: var(--font);
+    }
+    .hd-logout {
+      background: rgba(255,255,255,0.07); color: rgba(255,255,255,0.6);
+      border: 1px solid rgba(255,255,255,0.1); padding: 6px 14px;
+      border-radius: 7px; cursor: pointer; font-size: 12px; font-family: var(--font);
+    }
 
-  /* ── 메인 콘텐츠 ── */
-  .main { margin-left: 240px; flex: 1; display: flex; flex-direction: column; }
-  .topbar {
-    background: white; border-bottom: 1px solid var(--border);
-    padding: 0 28px; height: 60px; display: flex; align-items: center;
-    justify-content: space-between; position: sticky; top: 0; z-index: 50;
-  }
-  .topbar-title { font-size: 18px; font-weight: 700; }
-  .topbar-right { display: flex; align-items: center; gap: 12px; }
-  .refresh-btn {
-    padding: 8px 16px; background: var(--primary); color: white;
-    border: none; border-radius: 8px; font-size: 13px; font-weight: 600;
-    font-family: var(--font); cursor: pointer; transition: background .2s;
-    display: flex; align-items: center; gap: 6px;
-  }
-  .refresh-btn:hover { background: var(--primary-dark); }
-  .topbar-time { font-size: 12px; color: var(--text-sub); }
-  .content { padding: 28px; }
+    /* 사이드바 */
+    .sb {
+      position: fixed; top: var(--hd-h); left: 0; bottom: 0;
+      width: var(--sb-w); background: var(--sb-bg);
+      overflow-y: auto; overflow-x: hidden;
+      border-right: 1px solid rgba(255,255,255,0.05);
+      display: flex; flex-direction: column;
+    }
+    .sb::-webkit-scrollbar { width: 3px; }
+    .sb::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 2px; }
+    .sb-inner { flex: 1; padding: 10px 0; }
+    .sb-sec { margin-bottom: 2px; }
+    .sb-label {
+      font-size: 10px; font-weight: 700; color: rgba(255,255,255,0.22);
+      text-transform: uppercase; letter-spacing: 1.2px;
+      padding: 10px 18px 4px;
+    }
+    .sb-item {
+      display: flex; align-items: center; gap: 9px;
+      padding: 9px 18px; cursor: pointer;
+      color: var(--sb-text); font-size: 13px;
+      transition: all .15s; position: relative; user-select: none;
+    }
+    .sb-item:hover { color: #dde; background: var(--sb-hover); }
+    .sb-item.active { color: var(--sb-text-active); background: var(--sb-active-bg); font-weight: 600; }
+    .sb-item.active::before {
+      content: ''; position: absolute; left: 0; top: 4px; bottom: 4px;
+      width: 3px; background: var(--accent); border-radius: 0 3px 3px 0;
+    }
+    .sb-item .si { font-size: 15px; width: 20px; text-align: center; flex-shrink: 0; }
+    .sb-item .sbadge {
+      margin-left: auto; background: var(--red); color: #fff;
+      font-size: 9px; padding: 2px 6px; border-radius: 10px; font-weight: 700;
+    }
+    .sb-hr { height: 1px; background: rgba(255,255,255,0.05); margin: 6px 14px; }
+    .sb-logout {
+      padding: 14px 18px; color: rgba(255,255,255,0.35); font-size: 13px;
+      cursor: pointer; display: flex; align-items: center; gap: 9px;
+      transition: .15s; border-top: 1px solid rgba(255,255,255,0.05);
+    }
+    .sb-logout:hover { color: rgba(255,255,255,0.6); }
 
-  /* ── 섹션 ── */
-  .section { display: none; }
-  .section.active { display: block; }
-  .section-title { font-size: 20px; font-weight: 800; margin-bottom: 20px; display: flex; align-items: center; gap: 8px; }
+    /* 메인 */
+    .main { margin-left: var(--sb-w); margin-top: var(--hd-h); padding: 22px; min-height: calc(100vh - var(--hd-h)); }
+    .page { display: none; }
+    .page.active { display: block; }
 
-  /* ── 통계 카드 ── */
-  .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
-  .stat-card {
-    background: white; border-radius: 14px; padding: 20px 22px;
-    border: 1px solid var(--border); position: relative; overflow: hidden;
-    transition: transform .2s, box-shadow .2s;
-  }
-  .stat-card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,.08); }
-  .stat-card::before {
-    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
-  }
-  .stat-card.orange::before { background: var(--primary); }
-  .stat-card.green::before { background: var(--success); }
-  .stat-card.blue::before { background: var(--info); }
-  .stat-card.yellow::before { background: var(--warning); }
-  .stat-label { font-size: 12px; font-weight: 600; color: var(--text-sub); margin-bottom: 8px; }
-  .stat-value { font-size: 26px; font-weight: 800; margin-bottom: 4px; }
-  .stat-sub { font-size: 12px; color: var(--text-sub); }
-  .stat-icon { position: absolute; right: 18px; top: 18px; font-size: 28px; opacity: .15; }
+    /* 페이지 헤더 */
+    .ph { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 18px; }
+    .ph-title { font-size: 20px; font-weight: 700; }
+    .ph-sub { font-size: 12px; color: var(--gray); margin-top: 3px; }
+    .ph-acts { display: flex; gap: 8px; align-items: center; }
 
-  /* ── 카드 ── */
-  .card {
-    background: white; border-radius: 14px; border: 1px solid var(--border);
-    padding: 22px; margin-bottom: 20px;
-  }
-  .card-title { font-size: 15px; font-weight: 700; margin-bottom: 16px; display: flex; align-items: center; gap: 6px; }
+    /* 버튼 */
+    .btn { padding: 9px 18px; border-radius: 8px; border: none; cursor: pointer; font-size: 13px; font-weight: 600; font-family: var(--font); transition: all .15s; display: inline-flex; align-items: center; gap: 5px; }
+    .btn-primary { background: var(--accent); color: #fff; }
+    .btn-primary:hover { background: var(--accent-dark); }
+    .btn-outline { background: var(--white); color: var(--gray-dark); border: 1px solid var(--border); }
+    .btn-outline:hover { background: var(--bg); }
+    .btn-danger { background: var(--red); color: #fff; }
+    .btn-danger:hover { background: #dc2626; }
+    .btn-green { background: var(--green); color: #fff; }
+    .btn-sm { padding: 6px 12px; font-size: 12px; }
+    .btn-xs { padding: 4px 9px; font-size: 11px; border-radius: 6px; }
 
-  /* ── 테이블 ── */
-  .table-wrap { overflow-x: auto; }
-  table { width: 100%; border-collapse: collapse; font-size: 13px; }
-  thead th {
-    background: #f8fafd; padding: 10px 14px; text-align: left;
-    font-size: 12px; font-weight: 600; color: var(--text-sub);
-    border-bottom: 1px solid var(--border); white-space: nowrap;
-  }
-  tbody td { padding: 12px 14px; border-bottom: 1px solid #f0f0f5; vertical-align: middle; }
-  tbody tr:last-child td { border-bottom: none; }
-  tbody tr:hover td { background: #fafbff; }
+    /* 통계 카드 */
+    .stat-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 14px; margin-bottom: 20px; }
+    .sc {
+      background: var(--white); border-radius: var(--radius); padding: 20px 22px;
+      box-shadow: var(--shadow); border-top: 3px solid var(--border); position: relative; overflow: hidden;
+    }
+    .sc.c-blue { border-top-color: var(--blue); }
+    .sc.c-green { border-top-color: var(--green); }
+    .sc.c-orange { border-top-color: var(--orange); }
+    .sc.c-red { border-top-color: var(--accent); }
+    .sc-top { display: flex; justify-content: space-between; align-items: flex-start; }
+    .sc-icon { width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 20px; }
+    .c-blue .sc-icon { background: #eff6ff; }
+    .c-green .sc-icon { background: #f0fdf4; }
+    .c-orange .sc-icon { background: #fffbeb; }
+    .c-red .sc-icon { background: #fff0ec; }
+    .sc-val { font-size: 26px; font-weight: 900; margin-top: 12px; }
+    .sc-label { font-size: 12px; color: var(--gray); margin-top: 2px; }
+    .sc-sub { font-size: 11px; color: #bbb; margin-top: 6px; }
 
-  /* ── 뱃지 ── */
-  .badge {
-    display: inline-block; padding: 3px 8px; border-radius: 20px;
-    font-size: 11px; font-weight: 600;
-  }
-  .badge-success { background: #d1fae5; color: #065f46; }
-  .badge-warning { background: #fef3c7; color: #92400e; }
-  .badge-danger { background: #fee2e2; color: #991b1b; }
-  .badge-info { background: #dbeafe; color: #1e40af; }
-  .badge-gray { background: #f3f4f6; color: #374151; }
-  .badge-orange { background: #fff3f0; color: #c2410c; }
+    /* 카드 */
+    .card { background: var(--white); border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; margin-bottom: 16px; }
+    .card-hd { padding: 14px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .card-title { font-size: 14px; font-weight: 700; }
+    .card-count { font-size: 12px; color: var(--gray); background: var(--bg); padding: 2px 9px; border-radius: 20px; }
+    .card-acts { margin-left: auto; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
 
-  /* ── 그리드 ── */
-  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-  .three-col { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+    /* 검색 */
+    .srch { padding: 8px 13px; border: 1px solid var(--border); border-radius: 8px; font-size: 13px; font-family: var(--font); outline: none; width: 200px; }
+    .srch:focus { border-color: var(--accent); }
+    .sel { padding: 8px 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 13px; font-family: var(--font); outline: none; background: var(--white); cursor: pointer; }
 
-  /* ── 상품 카드 ── */
-  .product-card {
-    background: white; border: 1px solid var(--border); border-radius: 12px;
-    overflow: hidden; transition: all .2s;
-  }
-  .product-card:hover { box-shadow: 0 6px 20px rgba(0,0,0,.08); transform: translateY(-2px); }
-  .product-img { width: 100%; height: 160px; object-fit: cover; background: #f0f0f5; }
-  .product-img-placeholder { width: 100%; height: 160px; background: linear-gradient(135deg, #f0f0f5, #e0e0ea); display: flex; align-items: center; justify-content: center; font-size: 32px; }
-  .product-info { padding: 12px; }
-  .product-name { font-size: 13px; font-weight: 600; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .product-price { font-size: 15px; font-weight: 800; color: var(--primary); }
-  .product-sale { font-size: 11px; color: var(--text-sub); text-decoration: line-through; margin-left: 4px; }
-  .product-meta { display: flex; gap: 6px; margin-top: 6px; flex-wrap: wrap; }
+    /* 테이블 */
+    .tw { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th { padding: 10px 14px; text-align: left; font-size: 11px; font-weight: 700; color: var(--gray); background: #f7f8fb; border-bottom: 1px solid var(--border); white-space: nowrap; }
+    td { padding: 11px 14px; font-size: 13px; border-bottom: 1px solid #f2f3f7; vertical-align: middle; }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: #fafbff; }
+    .thumb { width: 46px; height: 46px; object-fit: cover; border-radius: 8px; border: 1px solid var(--border); display: block; }
+    .pname { font-weight: 600; }
+    .psub { font-size: 11px; color: var(--gray); margin-top: 1px; }
 
-  /* ── 가맹점 카드 ── */
-  .franchise-card {
-    background: white; border: 1px solid var(--border); border-radius: 12px;
-    padding: 16px; display: flex; align-items: center; gap: 14px;
-    transition: all .2s;
-  }
-  .franchise-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,.08); }
-  .franchise-avatar {
-    width: 44px; height: 44px; border-radius: 10px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 20px; flex-shrink: 0;
-  }
-  .franchise-info { flex: 1; min-width: 0; }
-  .franchise-name { font-size: 14px; font-weight: 700; }
-  .franchise-domain { font-size: 11px; color: var(--text-sub); }
+    /* 뱃지 */
+    .bdg { display: inline-block; padding: 3px 9px; border-radius: 20px; font-size: 11px; font-weight: 700; }
+    .bdg-new { background: #e8f5e9; color: #2e7d32; }
+    .bdg-best { background: #fff3e0; color: #e65100; }
+    .bdg-sale { background: #fce4ec; color: #c62828; }
+    .bdg-on { background: #eff6ff; color: #1d4ed8; }
+    .bdg-off { background: #f5f5f5; color: #9e9e9e; }
+    .bdg-green { background: #f0fdf4; color: #166534; }
 
-  /* ── 로딩 ── */
-  .loading {
-    display: flex; align-items: center; justify-content: center;
-    padding: 48px; color: var(--text-sub); font-size: 14px; gap: 10px;
-  }
-  .spinner {
-    width: 20px; height: 20px; border: 2px solid var(--border);
-    border-top-color: var(--primary); border-radius: 50%;
-    animation: spin .7s linear infinite;
-  }
-  @keyframes spin { to { transform: rotate(360deg); } }
+    /* 2단 그리드 */
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
 
-  /* ── 빈 상태 ── */
-  .empty { text-align: center; padding: 48px; color: var(--text-sub); }
-  .empty-icon { font-size: 40px; margin-bottom: 12px; }
+    /* 상태 탭 */
+    .stabs { display: flex; padding: 0 20px; border-bottom: 2px solid var(--border); }
+    .stab { padding: 10px 16px; font-size: 13px; cursor: pointer; color: var(--gray); border-bottom: 2px solid transparent; margin-bottom: -2px; transition: .15s; white-space: nowrap; }
+    .stab:hover { color: var(--gray-dark); }
+    .stab.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 700; }
+    .stab .tc { font-size: 11px; background: var(--bg); padding: 1px 6px; border-radius: 10px; margin-left: 4px; }
 
-  /* ── 알림 토스트 ── */
-  #toast {
-    position: fixed; bottom: 28px; right: 28px; z-index: 9999;
-    background: #1a1a2e; color: white; padding: 14px 20px;
-    border-radius: 10px; font-size: 14px; font-weight: 500;
-    transform: translateY(80px); opacity: 0; transition: all .3s;
-    box-shadow: 0 8px 24px rgba(0,0,0,.2);
-  }
-  #toast.show { transform: translateY(0); opacity: 1; }
+    /* 모달 */
+    .modal-ov { position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 1000; display: none; align-items: flex-start; justify-content: center; padding: 20px; overflow-y: auto; }
+    .modal-ov.open { display: flex; }
+    .modal { background: var(--white); border-radius: 16px; width: 100%; max-width: 920px; margin: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.2); }
+    .m-hd { padding: 20px 24px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+    .m-title { font-size: 17px; font-weight: 700; }
+    .m-close { background: none; border: none; font-size: 22px; cursor: pointer; color: var(--gray); }
+    .m-body { padding: 24px; max-height: 74vh; overflow-y: auto; }
+    .m-ft { padding: 16px 24px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 10px; background: #f9fafb; border-radius: 0 0 16px 16px; }
 
-  /* ── 요약 행 ── */
-  .summary-row {
-    display: flex; gap: 16px; margin-bottom: 20px; flex-wrap: wrap;
-  }
-  .summary-item {
-    background: white; border: 1px solid var(--border); border-radius: 10px;
-    padding: 12px 18px; flex: 1; min-width: 120px;
-  }
-  .summary-item-label { font-size: 11px; color: var(--text-sub); margin-bottom: 2px; }
-  .summary-item-value { font-size: 18px; font-weight: 800; }
+    /* 폼 */
+    .fsec { margin-bottom: 24px; }
+    .fsec-title { font-size: 12px; font-weight: 700; color: var(--accent); border-bottom: 1px solid #fde8e3; padding-bottom: 8px; margin-bottom: 14px; letter-spacing: 0.3px; }
+    .fg { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .fg3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+    .fg4 { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 14px; }
+    .f-full { grid-column: 1 / -1; }
+    .flabel { display: block; font-size: 12px; font-weight: 600; margin-bottom: 5px; color: var(--gray-dark); }
+    .flabel .req { color: var(--accent); }
+    .finput, .fselect, .ftarea {
+      width: 100%; padding: 9px 13px; border: 1px solid var(--border); border-radius: 8px;
+      font-size: 13px; font-family: var(--font); outline: none; transition: border-color .15s; background: var(--white);
+    }
+    .finput:focus, .fselect:focus, .ftarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(255,87,51,0.08); }
+    .ftarea { resize: vertical; min-height: 80px; }
+    .fhint { font-size: 11px; color: var(--gray); margin-top: 4px; }
 
-  /* ── 필터 바 ── */
-  .filter-bar { display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; align-items: center; }
-  .filter-select {
-    padding: 8px 12px; border: 1px solid var(--border); border-radius: 8px;
-    font-size: 13px; font-family: var(--font); outline: none; background: white;
-    cursor: pointer;
-  }
-  .search-input {
-    padding: 8px 14px; border: 1px solid var(--border); border-radius: 8px;
-    font-size: 13px; font-family: var(--font); outline: none; flex: 1; min-width: 200px;
-  }
-  .search-input:focus { border-color: var(--primary); }
+    /* 이미지 미리보기 */
+    .img-pv { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 12px; }
+    .img-pv-item { text-align: center; }
+    .img-pv-item img { width: 80px; height: 80px; object-fit: cover; border-radius: 8px; border: 1px solid var(--border); display: block; }
+    .img-pv-label { font-size: 10px; color: var(--gray); margin-top: 4px; }
 
-  /* ── 반응형 ── */
-  @media (max-width: 1200px) {
-    .stats-grid { grid-template-columns: repeat(2, 1fr); }
-    .three-col { grid-template-columns: repeat(2, 1fr); }
-  }
-  @media (max-width: 768px) {
-    .sidebar { width: 60px; }
-    .sidebar-logo-text, .nav-item span, .nav-section, .sidebar-footer .logout-btn span { display: none; }
-    .main { margin-left: 60px; }
-    .stats-grid { grid-template-columns: 1fr 1fr; }
-    .two-col { grid-template-columns: 1fr; }
-  }
-</style>
+    /* 토글 */
+    .tgl-row { display: flex; align-items: center; gap: 20px; }
+    .tgl-item { display: flex; align-items: center; gap: 8px; }
+    .tgl { position: relative; width: 42px; height: 22px; }
+    .tgl input { opacity: 0; width: 0; height: 0; }
+    .tgl-sl { position: absolute; inset: 0; background: #d0d5e0; border-radius: 22px; cursor: pointer; transition: .2s; }
+    .tgl-sl:before { content: ''; position: absolute; width: 16px; height: 16px; left: 3px; bottom: 3px; background: white; border-radius: 50%; transition: .2s; box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
+    .tgl input:checked + .tgl-sl { background: var(--accent); }
+    .tgl input:checked + .tgl-sl:before { transform: translateX(20px); }
+
+    /* 할인율 미리보기 */
+    .disc-box { background: #fff7f5; border: 1px solid #fdd; border-radius: 8px; padding: 10px 14px; font-size: 13px; display: flex; align-items: center; }
+
+    /* 로딩/빈상태 */
+    .loading { text-align: center; padding: 48px; color: var(--gray); }
+    .lspin { font-size: 28px; animation: spin 1s linear infinite; display: inline-block; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .empty { text-align: center; padding: 52px 20px; color: var(--gray); }
+    .empty-ico { font-size: 44px; margin-bottom: 12px; }
+    .empty-txt { font-size: 14px; }
+    .empty-sub { font-size: 12px; margin-top: 5px; color: #bbb; }
+
+    /* 토스트 */
+    .toast { position: fixed; bottom: 24px; right: 24px; background: #2d3557; color: #fff; padding: 13px 20px; border-radius: 10px; font-size: 13px; z-index: 9999; transform: translateY(80px); opacity: 0; transition: all .3s; box-shadow: 0 4px 20px rgba(0,0,0,0.2); max-width: 320px; }
+    .toast.show { transform: translateY(0); opacity: 1; }
+    .toast.ok { background: var(--green); }
+    .toast.err { background: var(--red); }
+    .toast.warn { background: var(--orange); }
+
+    /* 상품등록 섹션 (스마트스토어 스타일) */
+    .prod-section { border: 1px solid var(--border); border-radius: 10px; margin-bottom: 16px; overflow: hidden; }
+    .prod-sec-hd { display: flex; align-items: center; justify-content: space-between; padding: 14px 18px; background: #fafbfc; border-bottom: 1px solid var(--border); cursor: pointer; }
+    .prod-sec-hd-title { font-size: 14px; font-weight: 700; }
+    .prod-sec-hd .req { color: var(--accent); font-size: 10px; margin-left: 4px; }
+    .prod-sec-body { padding: 18px; }
+    .prod-sec-toggle { font-size: 18px; color: var(--gray); }
+    .prod-sec-hd.collapsed + .prod-sec-body { display: none; }
+
+    /* 정산 섹션 */
+    .settle-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #f2f3f7; font-size: 13px; }
+    .settle-row:last-child { border-bottom: none; }
+    .settle-val { font-weight: 700; color: var(--accent); }
+    .settle-val.green { color: var(--green); }
+
+    /* 반응형 */
+    @media (max-width: 900px) {
+      .stat-grid { grid-template-columns: 1fr 1fr; }
+      .two-col { grid-template-columns: 1fr; }
+      .fg3 { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
 </head>
 <body>
 
-<!-- ── 로그인 화면 ── -->
-<div id="loginScreen">
-  <div class="login-box">
-    <div class="login-logo">🏪</div>
-    <div class="login-title">담누리마켓</div>
-    <div class="login-sub">본사 관리자 대시보드</div>
-    <input type="text" id="loginId" placeholder="관리자 아이디" />
-    <input type="password" id="loginPw" placeholder="비밀번호" onkeydown="if(event.key==='Enter')doLogin()" />
-    <button class="login-btn" onclick="doLogin()">로그인</button>
-    <div class="login-error" id="loginError">아이디 또는 비밀번호가 틀렸습니다.</div>
+<!-- 로그인 -->
+<div id="login-screen">
+  <div class="lbox">
+    <div class="lbox-logo">🏪</div>
+    <div class="lbox-brand">담누리마켓</div>
+    <div class="lbox-sub">관리자 패널</div>
+    <input type="text" id="lid" placeholder="관리자 아이디" autocomplete="off">
+    <input type="password" id="lpw" placeholder="비밀번호">
+    <button class="lbox-btn" onclick="doLogin()">로그인</button>
+    <div class="lbox-err" id="lerr">아이디 또는 비밀번호가 올바르지 않습니다.</div>
   </div>
 </div>
 
-<!-- ── 앱 ── -->
+<!-- 앱 -->
 <div id="app">
-  <div class="layout">
-    <!-- 사이드바 -->
-    <nav class="sidebar">
-      <div class="sidebar-logo">
-        <span class="sidebar-logo-icon">🏪</span>
-        <div class="sidebar-logo-text">
-          담누리마켓
-          <span>관리자 패널</span>
-        </div>
+  <!-- 헤더 -->
+  <header class="hd">
+    <div class="hd-brand">
+      <div class="hd-logo">🏪</div>
+      <div>
+        <div class="hd-title">담누리마켓</div>
+        <div class="hd-panel">관리자 패널</div>
       </div>
-      <div class="sidebar-nav">
-        <div class="nav-section">메인</div>
-        <div class="nav-item active" onclick="showSection('home',this)">
-          <span class="icon">📊</span><span>대시보드 홈</span>
-        </div>
-        <div class="nav-section">운영관리</div>
-        <div class="nav-item" onclick="showSection('orders',this)">
-          <span class="icon">📦</span><span>주문 관리</span>
-        </div>
-        <div class="nav-item" onclick="showSection('products',this)">
-          <span class="icon">🛍️</span><span>상품 관리</span>
-        </div>
-        <div class="nav-item" onclick="showSection('franchise',this)">
-          <span class="icon">🏬</span><span>가맹점 관리</span>
-        </div>
-        <div class="nav-section">콘텐츠</div>
-        <div class="nav-item" onclick="showSection('reviews',this)">
-          <span class="icon">⭐</span><span>리뷰 관리</span>
-        </div>
-        <div class="nav-item" onclick="showSection('banners',this)">
-          <span class="icon">🖼️</span><span>배너/팝업</span>
-        </div>
-        <div class="nav-section">정산</div>
-        <div class="nav-item" onclick="showSection('settlement',this)">
-          <span class="icon">💰</span><span>정산 관리</span>
-        </div>
-      </div>
-      <div class="sidebar-footer">
-        <button class="logout-btn" onclick="doLogout()">
-          <span>🚪</span><span>로그아웃</span>
-        </button>
-      </div>
-    </nav>
+    </div>
+    <div class="hd-nav">
+      <a href="index.html" target="_blank">🌐 쇼핑몰</a>
+      <a href="products.html" target="_blank">📦 상품목록</a>
+      <a href="https://docs.google.com/spreadsheets/d/1t804fRO8HfQtmOzpDAz2IZfzRDQ7t8LYllFGZr3ftUI" target="_blank">📊 구글시트</a>
+    </div>
+    <div class="hd-right">
+      <div class="hd-date" id="hd-date"></div>
+      <button class="hd-refresh" onclick="refresh()">🔄 새로고침</button>
+      <button class="hd-logout" onclick="doLogout()">로그아웃</button>
+    </div>
+  </header>
 
-    <!-- 메인 -->
-    <div class="main">
-      <div class="topbar">
-        <div class="topbar-title" id="topbarTitle">대시보드 홈</div>
-        <div class="topbar-right">
-          <span class="topbar-time" id="topbarTime"></span>
-          <button class="refresh-btn" onclick="loadCurrentSection()">🔄 새로고침</button>
+  <!-- 사이드바 -->
+  <aside class="sb">
+    <div class="sb-inner">
+      <div class="sb-sec">
+        <div class="sb-label">메인</div>
+        <div class="sb-item active" onclick="go('dashboard',this)"><span class="si">📊</span> 대시보드 홈</div>
+      </div>
+      <div class="sb-hr"></div>
+      <div class="sb-sec">
+        <div class="sb-label">상품 관리</div>
+        <div class="sb-item" onclick="go('prod-list',this)"><span class="si">📋</span> 상품 조회/수정</div>
+        <div class="sb-item" onclick="openProdModal()"><span class="si">➕</span> 상품 등록</div>
+        <div class="sb-item" onclick="go('photo-box',this)"><span class="si">🖼️</span> 사진 보관함</div>
+        <div class="sb-item" onclick="go('cat-mgmt',this)"><span class="si">📁</span> 카테고리 관리</div>
+      </div>
+      <div class="sb-hr"></div>
+      <div class="sb-sec">
+        <div class="sb-label">판매 관리</div>
+        <div class="sb-item" onclick="go('orders',this)">
+          <span class="si">🛒</span> 주문 관리
+          <span class="sbadge" id="new-badge" style="display:none">N</span>
+        </div>
+        <div class="sb-item" onclick="go('settlement',this)"><span class="si">💰</span> 정산 관리</div>
+      </div>
+      <div class="sb-hr"></div>
+      <div class="sb-sec">
+        <div class="sb-label">콘텐츠</div>
+        <div class="sb-item" onclick="go('reviews',this)"><span class="si">⭐</span> 리뷰 관리</div>
+        <div class="sb-item" onclick="go('banners',this)"><span class="si">🎨</span> 배너/팝업</div>
+      </div>
+      <div class="sb-hr"></div>
+      <div class="sb-sec">
+        <div class="sb-label">가맹점</div>
+        <div class="sb-item" onclick="go('franchise',this)"><span class="si">🏬</span> 가맹점 관리</div>
+      </div>
+      <div class="sb-hr"></div>
+      <div class="sb-sec">
+        <div class="sb-label">스토어</div>
+        <div class="sb-item" onclick="go('settings',this)"><span class="si">⚙️</span> 스토어 설정</div>
+      </div>
+    </div>
+    <div class="sb-logout" onclick="doLogout()"><span>🚪</span> 로그아웃</div>
+  </aside>
+
+  <!-- 메인 -->
+  <main class="main">
+
+    <!-- ① 대시보드 -->
+    <div id="page-dashboard" class="page active">
+      <div class="ph">
+        <div><div class="ph-title">대시보드 홈</div><div class="ph-sub" id="dash-date"></div></div>
+      </div>
+      <div class="stat-grid" id="stat-grid">
+        <div class="sc c-blue"><div class="lspin">⏳</div></div>
+        <div class="sc c-green"></div><div class="sc c-orange"></div><div class="sc c-red"></div>
+      </div>
+      <div class="two-col">
+        <div class="card">
+          <div class="card-hd"><div class="card-title">📦 인기 상품 TOP 5</div></div>
+          <div id="dash-top5"><div class="loading"><div class="lspin">⏳</div></div></div>
+        </div>
+        <div class="card">
+          <div class="card-hd"><div class="card-title">🏬 가맹점 현황</div></div>
+          <div id="dash-franchise"><div class="loading"><div class="lspin">⏳</div></div></div>
         </div>
       </div>
-
-      <div class="content">
-
-        <!-- ── 홈 ── -->
-        <div class="section active" id="sec-home">
-          <div class="stats-grid" id="homeStats">
-            <div class="loading"><div class="spinner"></div> 데이터 로딩 중...</div>
+      <div class="two-col">
+        <div class="card">
+          <div class="card-hd"><div class="card-title">🛒 최근 주문</div></div>
+          <div id="dash-orders"><div class="loading"><div class="lspin">⏳</div></div></div>
+        </div>
+        <div class="card">
+          <div class="card-hd"><div class="card-title">💰 이번달 정산 요약</div></div>
+          <div id="dash-settle" style="padding:20px;">
+            <div class="settle-row"><span>총 매출</span><span class="settle-val">0원</span></div>
+            <div class="settle-row"><span>PG 수수료 (2.5%)</span><span class="settle-val">0원</span></div>
+            <div class="settle-row"><span>본사 마진 (2%)</span><span class="settle-val">0원</span></div>
+            <div class="settle-row"><span>가맹점 수령액 (95.5%)</span><span class="settle-val green">0원</span></div>
+            <div class="empty" style="padding:28px 0;"><div class="empty-ico">📋</div><div class="empty-sub">정산 데이터 없음</div></div>
           </div>
-          <div class="two-col">
-            <div class="card">
-              <div class="card-title">📦 최근 주문</div>
-              <div id="recentOrders"><div class="loading"><div class="spinner"></div></div></div>
-            </div>
-            <div class="card">
-              <div class="card-title">🏬 가맹점 현황</div>
-              <div id="franchiseSummary"><div class="loading"><div class="spinner"></div></div></div>
-            </div>
-          </div>
-          <div class="two-col">
-            <div class="card">
-              <div class="card-title">🛍️ 인기 상품 TOP 5</div>
-              <div id="topProducts"><div class="loading"><div class="spinner"></div></div></div>
-            </div>
-            <div class="card">
-              <div class="card-title">💰 이번달 정산 요약</div>
-              <div id="settlementSummary"><div class="loading"><div class="spinner"></div></div></div>
-            </div>
-          </div>
         </div>
+      </div>
+    </div>
 
-        <!-- ── 주문 관리 ── -->
-        <div class="section" id="sec-orders">
-          <div class="section-title">📦 주문 관리</div>
-          <div class="filter-bar">
-            <select class="filter-select" id="orderStatusFilter" onchange="filterOrders()">
+    <!-- ② 상품 목록 -->
+    <div id="page-prod-list" class="page">
+      <div class="ph">
+        <div><div class="ph-title">상품 조회/수정</div><div class="ph-sub" id="prod-sub">전체 상품</div></div>
+        <div class="ph-acts">
+          <button class="btn btn-outline" onclick="loadProds()">🔄 새로고침</button>
+          <button class="btn btn-primary" onclick="openProdModal()">➕ 상품 등록</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-hd">
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <input type="text" class="srch" placeholder="상품명, 공급사 검색..." oninput="fProds(this.value)" id="prod-srch">
+            <select class="sel" onchange="fCat(this.value)" id="cat-sel"><option value="">전체 카테고리</option></select>
+            <select class="sel" onchange="fStatus(this.value)">
               <option value="">전체 상태</option>
-              <option value="주문완료">주문완료</option>
-              <option value="결제완료">결제완료</option>
-              <option value="배송중">배송중</option>
-              <option value="배송완료">배송완료</option>
-              <option value="취소">취소</option>
+              <option value="active">판매중</option>
+              <option value="inactive">숨김</option>
+              <option value="featured">추천상품</option>
             </select>
-            <input class="search-input" type="text" id="orderSearch" placeholder="주문번호, 상품명 검색..." oninput="filterOrders()" />
           </div>
-          <div class="card">
-            <div id="ordersTable"><div class="loading"><div class="spinner"></div></div></div>
-          </div>
+          <div class="card-acts"><span class="card-count" id="prod-cnt"></span></div>
         </div>
-
-        <!-- ── 상품 관리 ── -->
-        <div class="section" id="sec-products">
-          <div class="section-title">🛍️ 상품 관리</div>
-          <div class="filter-bar">
-            <select class="filter-select" id="productCategoryFilter" onchange="filterProducts()">
-              <option value="">전체 카테고리</option>
-            </select>
-            <input class="search-input" type="text" id="productSearch" placeholder="상품명 검색..." oninput="filterProducts()" />
-          </div>
-          <div id="productsSummary" class="summary-row"></div>
-          <div id="productsGrid"><div class="loading"><div class="spinner"></div></div></div>
+        <div class="tw" id="prod-tw">
+          <div class="loading"><div class="lspin">⏳</div><div style="margin-top:10px">상품 불러오는 중...</div></div>
         </div>
-
-        <!-- ── 가맹점 관리 ── -->
-        <div class="section" id="sec-franchise">
-          <div class="section-title">🏬 가맹점 관리</div>
-          <div id="franchiseStats" class="stats-grid" style="grid-template-columns:repeat(3,1fr)"></div>
-          <div class="card">
-            <div class="card-title">가맹점 목록</div>
-            <div id="franchiseTable"><div class="loading"><div class="spinner"></div></div></div>
-          </div>
-        </div>
-
-        <!-- ── 리뷰 관리 ── -->
-        <div class="section" id="sec-reviews">
-          <div class="section-title">⭐ 리뷰 관리</div>
-          <div class="card">
-            <div id="reviewsTable"><div class="loading"><div class="spinner"></div></div></div>
-          </div>
-        </div>
-
-        <!-- ── 배너/팝업 ── -->
-        <div class="section" id="sec-banners">
-          <div class="section-title">🖼️ 배너 / 팝업 관리</div>
-          <div class="two-col">
-            <div class="card">
-              <div class="card-title">🖼️ 배너 목록</div>
-              <div id="bannerList"><div class="loading"><div class="spinner"></div></div></div>
-            </div>
-            <div class="card">
-              <div class="card-title">📢 팝업 목록</div>
-              <div id="popupList"><div class="loading"><div class="spinner"></div></div></div>
-            </div>
-          </div>
-        </div>
-
-        <!-- ── 정산 ── -->
-        <div class="section" id="sec-settlement">
-          <div class="section-title">💰 정산 관리</div>
-          <div id="settlementStats" class="stats-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:20px"></div>
-          <div class="card">
-            <div class="card-title">정산 내역</div>
-            <div id="settlementTable"><div class="loading"><div class="spinner"></div></div></div>
-          </div>
-        </div>
-
       </div>
+    </div>
+
+    <!-- ③ 사진 보관함 -->
+    <div id="page-photo-box" class="page">
+      <div class="ph">
+        <div><div class="ph-title">사진 보관함</div><div class="ph-sub">상품에 등록된 이미지 목록</div></div>
+        <div class="ph-acts">
+          <a href="https://github.com/min323300/myshop/tree/main/images" target="_blank" class="btn btn-primary">📤 GitHub 업로드</a>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-hd"><div class="card-title">🖼️ 이미지 목록</div></div>
+        <div id="photo-grid" style="padding:20px;">
+          <div class="loading"><div class="lspin">⏳</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ④ 카테고리 -->
+    <div id="page-cat-mgmt" class="page">
+      <div class="ph">
+        <div><div class="ph-title">카테고리 관리</div><div class="ph-sub">구글시트 카테고리 시트 연동</div></div>
+        <div class="ph-acts">
+          <a href="https://docs.google.com/spreadsheets/d/1t804fRO8HfQtmOzpDAz2IZfzRDQ7t8LYllFGZr3ftUI" target="_blank" class="btn btn-outline">📊 구글시트에서 수정</a>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-hd"><div class="card-title">📁 카테고리 목록</div></div>
+        <div class="tw" id="cat-tw"><div class="loading"><div class="lspin">⏳</div></div></div>
+      </div>
+    </div>
+
+    <!-- ⑤ 주문 관리 -->
+    <div id="page-orders" class="page">
+      <div class="ph">
+        <div><div class="ph-title">주문 관리</div><div class="ph-sub">전체 주문 내역</div></div>
+        <div class="ph-acts"><button class="btn btn-outline" onclick="loadOrders()">🔄 새로고침</button></div>
+      </div>
+      <div class="card">
+        <div class="stabs">
+          <div class="stab active" onclick="fOrder('all',this)">전체 <span class="tc" id="oc-all">0</span></div>
+          <div class="stab" onclick="fOrder('결제완료',this)">결제완료</div>
+          <div class="stab" onclick="fOrder('배송중',this)">배송중</div>
+          <div class="stab" onclick="fOrder('배송완료',this)">배송완료</div>
+          <div class="stab" onclick="fOrder('취소',this)">취소/반품</div>
+        </div>
+        <div class="tw" id="order-tw"><div class="loading"><div class="lspin">⏳</div></div></div>
+      </div>
+    </div>
+
+    <!-- ⑥ 정산 -->
+    <div id="page-settlement" class="page">
+      <div class="ph"><div><div class="ph-title">정산 관리</div></div></div>
+      <div class="stat-grid">
+        <div class="sc c-blue"><div class="sc-top"><div class="sc-icon">💰</div></div><div class="sc-val">0원</div><div class="sc-label">총 매출</div></div>
+        <div class="sc c-orange"><div class="sc-top"><div class="sc-icon">🏦</div></div><div class="sc-val">0원</div><div class="sc-label">PG 수수료 (2.5%)</div></div>
+        <div class="sc c-red"><div class="sc-top"><div class="sc-icon">🏪</div></div><div class="sc-val">0원</div><div class="sc-label">본사 마진 (2%)</div></div>
+        <div class="sc c-green"><div class="sc-top"><div class="sc-icon">💵</div></div><div class="sc-val">0원</div><div class="sc-label">가맹점 수령 (95.5%)</div></div>
+      </div>
+      <div class="card">
+        <div class="card-hd"><div class="card-title">💰 정산 내역</div></div>
+        <div class="tw" id="settle-tw"><div class="loading"><div class="lspin">⏳</div></div></div>
+      </div>
+    </div>
+
+    <!-- ⑦ 리뷰 -->
+    <div id="page-reviews" class="page">
+      <div class="ph">
+        <div><div class="ph-title">리뷰 관리</div></div>
+        <div class="ph-acts"><button class="btn btn-outline" onclick="loadReviews()">🔄 새로고침</button></div>
+      </div>
+      <div class="card">
+        <div class="card-hd"><div class="card-title">⭐ 리뷰 목록</div></div>
+        <div class="tw" id="review-tw"><div class="loading"><div class="lspin">⏳</div></div></div>
+      </div>
+    </div>
+
+    <!-- ⑧ 배너/팝업 -->
+    <div id="page-banners" class="page">
+      <div class="ph">
+        <div><div class="ph-title">배너/팝업 관리</div><div class="ph-sub">구글시트에서 수정 후 새로고침</div></div>
+        <div class="ph-acts">
+          <a href="https://docs.google.com/spreadsheets/d/1t804fRO8HfQtmOzpDAz2IZfzRDQ7t8LYllFGZr3ftUI" target="_blank" class="btn btn-outline">📊 구글시트 열기</a>
+        </div>
+      </div>
+      <div class="two-col">
+        <div class="card">
+          <div class="card-hd"><div class="card-title">🎨 활성 배너</div></div>
+          <div id="banner-wrap" style="padding:16px;"><div class="loading"><div class="lspin">⏳</div></div></div>
+        </div>
+        <div class="card">
+          <div class="card-hd"><div class="card-title">📢 활성 팝업</div></div>
+          <div id="popup-wrap" style="padding:16px;"><div class="loading"><div class="lspin">⏳</div></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ⑨ 가맹점 -->
+    <div id="page-franchise" class="page">
+      <div class="ph">
+        <div><div class="ph-title">가맹점 관리</div></div>
+        <div class="ph-acts">
+          <a href="https://docs.google.com/spreadsheets/d/1t804fRO8HfQtmOzpDAz2IZfzRDQ7t8LYllFGZr3ftUI" target="_blank" class="btn btn-outline">📊 구글시트에서 추가</a>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-hd"><div class="card-title">🏬 가맹점 목록</div></div>
+        <div class="tw" id="fran-tw"><div class="loading"><div class="lspin">⏳</div></div></div>
+      </div>
+    </div>
+
+    <!-- ⑩ 설정 -->
+    <div id="page-settings" class="page">
+      <div class="ph"><div><div class="ph-title">스토어 설정</div></div></div>
+      <div class="two-col">
+        <div class="card">
+          <div class="card-hd"><div class="card-title">⚙️ 현재 설정값</div></div>
+          <div id="settings-wrap" style="padding:20px;"></div>
+        </div>
+        <div class="card">
+          <div class="card-hd"><div class="card-title">🔗 주요 링크</div></div>
+          <div id="links-wrap" style="padding:20px;"></div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- 상품 등록/수정 모달 (스마트스토어 스타일) -->
+<div class="modal-ov" id="prod-modal">
+  <div class="modal">
+    <div class="m-hd">
+      <div class="m-title" id="m-title">📦 상품 등록</div>
+      <button class="m-close" onclick="closeProdModal()">×</button>
+    </div>
+    <div class="m-body">
+
+      <!-- 카테고리 -->
+      <div class="prod-section">
+        <div class="prod-sec-hd">
+          <div class="prod-sec-hd-title">카테고리 <span class="req">●</span></div>
+          <span class="prod-sec-toggle">∧</span>
+        </div>
+        <div class="prod-sec-body">
+          <div class="fg">
+            <div>
+              <label class="flabel">카테고리 <span class="req">*</span></label>
+              <select class="fselect" id="f-cat">
+                <option value="">카테고리를 선택하세요</option>
+                <option>식품</option><option>의류</option><option>뷰티</option>
+                <option>스포츠</option><option>전자</option><option>신발</option>
+                <option>가방</option><option>생활</option><option>액세서리</option>
+                <option>반려동물</option>
+              </select>
+            </div>
+            <div>
+              <label class="flabel">세부카테고리</label>
+              <input type="text" class="finput" id="f-subcat" placeholder="예: 기타">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 상품명 -->
+      <div class="prod-section">
+        <div class="prod-sec-hd">
+          <div class="prod-sec-hd-title">상품명 <span class="req">●</span></div>
+          <span class="prod-sec-toggle">∧</span>
+        </div>
+        <div class="prod-sec-body">
+          <div class="fg">
+            <div>
+              <label class="flabel">번호 <span class="req">*</span></label>
+              <input type="number" class="finput" id="f-id" placeholder="예: 1">
+            </div>
+            <div>
+              <label class="flabel">상품명 <span class="req">*</span></label>
+              <input type="text" class="finput" id="f-name" placeholder="상품명 입력">
+              <div class="fhint">검색 노출에 중요합니다. 명확하게 입력하세요.</div>
+            </div>
+            <div>
+              <label class="flabel">공급사</label>
+              <input type="text" class="finput" id="f-supp" placeholder="공급사명">
+            </div>
+            <div>
+              <label class="flabel">뱃지</label>
+              <select class="fselect" id="f-badge">
+                <option value="">없음</option><option value="NEW">NEW</option>
+                <option value="BEST">BEST</option><option value="SALE">SALE</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 판매가 -->
+      <div class="prod-section">
+        <div class="prod-sec-hd">
+          <div class="prod-sec-hd-title">판매가 <span class="req">●</span></div>
+          <span class="prod-sec-toggle">∧</span>
+        </div>
+        <div class="prod-sec-body">
+          <div class="fg4">
+            <div>
+              <label class="flabel">판매가 <span class="req">*</span></label>
+              <input type="number" class="finput" id="f-price" placeholder="예: 29000" oninput="calcDisc()">
+            </div>
+            <div>
+              <label class="flabel">할인가</label>
+              <input type="number" class="finput" id="f-sale" placeholder="없으면 0" oninput="calcDisc()">
+            </div>
+            <div>
+              <label class="flabel">재고수량</label>
+              <input type="number" class="finput" id="f-stock" placeholder="예: 100">
+            </div>
+            <div>
+              <label class="flabel">할인율</label>
+              <div class="disc-box">할인율: <strong id="disc-val" style="color:var(--accent);margin-left:6px;">-</strong></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 이미지 -->
+      <div class="prod-section">
+        <div class="prod-sec-hd">
+          <div class="prod-sec-hd-title">상품 이미지</div>
+          <span class="prod-sec-toggle">∧</span>
+        </div>
+        <div class="prod-sec-body">
+          <div class="fg3">
+            <div>
+              <label class="flabel">대표이미지 <span class="req">*</span></label>
+              <input type="text" class="finput" id="f-img" placeholder="예: 722202610.png" oninput="pvImg()">
+              <div class="fhint">0번 이미지</div>
+            </div>
+            <div>
+              <label class="flabel">상세이미지1</label>
+              <input type="text" class="finput" id="f-det1" placeholder="예: 722202611.png" oninput="pvImg()">
+              <div class="fhint">1번 이미지</div>
+            </div>
+            <div>
+              <label class="flabel">상세이미지2</label>
+              <input type="text" class="finput" id="f-det2" placeholder="예: 722202612.png" oninput="pvImg()">
+              <div class="fhint">2번 이미지</div>
+            </div>
+          </div>
+          <div style="margin-top:12px;">
+            <label class="flabel">인증이미지</label>
+            <input type="text" class="finput" id="f-cert" placeholder="예: 722202613.png" oninput="pvImg()">
+            <div class="fhint">3번 이미지 - 상품 하단에 표시</div>
+          </div>
+          <div class="img-pv" id="img-pv"></div>
+        </div>
+      </div>
+
+      <!-- 배송 -->
+      <div class="prod-section">
+        <div class="prod-sec-hd">
+          <div class="prod-sec-hd-title">배송 정보</div>
+          <span class="prod-sec-toggle">∧</span>
+        </div>
+        <div class="prod-sec-body">
+          <div class="fg">
+            <div>
+              <label class="flabel">색상 옵션</label>
+              <input type="text" class="finput" id="f-colors" placeholder="화이트|블랙|네이비">
+              <div class="fhint">재고포함: 화이트:10|블랙:0 (0=품절)</div>
+            </div>
+            <div>
+              <label class="flabel">사이즈 옵션</label>
+              <input type="text" class="finput" id="f-sizes" placeholder="S|M|L|XL">
+              <div class="fhint">재고포함: S:10|M:5|L:0</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 상품 정보 -->
+      <div class="prod-section">
+        <div class="prod-sec-hd">
+          <div class="prod-sec-hd-title">상품 정보 제공</div>
+          <span class="prod-sec-toggle">∧</span>
+        </div>
+        <div class="prod-sec-body">
+          <div style="display:flex;flex-direction:column;gap:12px;">
+            <div>
+              <label class="flabel">상품 설명</label>
+              <textarea class="ftarea" id="f-desc" rows="4" placeholder="상품 설명 (HTML 태그 사용 가능)"></textarea>
+            </div>
+            <div>
+              <label class="flabel">상세 스펙</label>
+              <input type="text" class="finput" id="f-specs" placeholder="원산지:국내산|용량:500g|유통기한:제조일로부터 1년">
+              <div class="fhint">항목:값 형식, | 로 구분</div>
+            </div>
+            <div>
+              <label class="flabel">⚠️ 주의사항</label>
+              <input type="text" class="finput" id="f-caution" placeholder="예: 냉장보관 필수">
+            </div>
+            <div>
+              <label class="flabel">🎬 유튜브 URL</label>
+              <input type="text" class="finput" id="f-yt" placeholder="https://youtube.com/shorts/...">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 판매 설정 -->
+      <div class="prod-section">
+        <div class="prod-sec-hd">
+          <div class="prod-sec-hd-title">판매 설정</div>
+          <span class="prod-sec-toggle">∧</span>
+        </div>
+        <div class="prod-sec-body">
+          <div class="tgl-row">
+            <div class="tgl-item">
+              <label class="tgl"><input type="checkbox" id="f-feat"><span class="tgl-sl"></span></label>
+              <span>⭐ 추천 상품 (메인 노출)</span>
+            </div>
+            <div class="tgl-item">
+              <label class="tgl"><input type="checkbox" id="f-active" checked><span class="tgl-sl"></span></label>
+              <span id="f-active-lbl">✅ 판매중</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+    <div class="m-ft">
+      <button class="btn btn-outline" onclick="closeProdModal()">취소</button>
+      <button class="btn btn-primary" onclick="saveProd()">💾 저장하기</button>
     </div>
   </div>
 </div>
 
-<div id="toast"></div>
+<div class="toast" id="toast"></div>
 
 <script>
-// ── CONFIG ──
-const SHEET_ID = '1t804fRO8HfQtmOzpDAz2IZfzRDQ7t8LYllFGZr3ftUI';
-const BASE = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=`;
-const SHEETS = {
-  상품목록: BASE + encodeURIComponent('상품목록'),
-  카테고리: BASE + encodeURIComponent('카테고리'),
-  가맹점: BASE + encodeURIComponent('가맹점'),
-  주문: BASE + encodeURIComponent('주문'),
-  정산: BASE + encodeURIComponent('정산'),
-  리뷰: BASE + encodeURIComponent('리뷰'),
-  배너: BASE + encodeURIComponent('배너'),
-  팝업: BASE + encodeURIComponent('팝업'),
-};
+// ============================================================
+// CONFIG
+// ============================================================
+var ADMIN_ID = 'admin', ADMIN_PW = 'damnuri2026';
+var SCRIPT_URL = (typeof CONFIG!=='undefined') ? CONFIG.PG.API_PROXY_URL : '';
+var IMG_BASE = (typeof CONFIG!=='undefined') ? CONFIG.IMAGE_BASE : 'https://min323300.github.io/myshop/images/';
+var SHEET_URL = 'https://docs.google.com/spreadsheets/d/1t804fRO8HfQtmOzpDAz2IZfzRDQ7t8LYllFGZr3ftUI';
 
-// ── 인증 ──
-const ADMIN_ID = 'admin';
-const ADMIN_PW = 'damnuri2026';
+var allProds=[], allOrders=[], editingId=null, curPage='dashboard';
+var srchQ='', catF='', statusF='', orderF='all';
 
+// ============================================================
+// 로그인
+// ============================================================
 function doLogin() {
-  const id = document.getElementById('loginId').value;
-  const pw = document.getElementById('loginPw').value;
-  if (id === ADMIN_ID && pw === ADMIN_PW) {
-    document.getElementById('loginScreen').style.display = 'none';
-    document.getElementById('app').style.display = 'block';
-    loadSection('home');
-    startClock();
+  if (document.getElementById('lid').value.trim()===ADMIN_ID && document.getElementById('lpw').value.trim()===ADMIN_PW) {
+    document.getElementById('login-screen').style.display='none';
+    document.getElementById('app').style.display='block';
+    var now=new Date();
+    var h=now.getHours(), am=h>=12?'오후':'오전', hh=(h%12)||12;
+    document.getElementById('hd-date').textContent = now.getFullYear()+'. '+(now.getMonth()+1).toString().padStart(2,'0')+'. '+now.getDate().toString().padStart(2,'0')+'. '+am+' '+hh.toString().padStart(2,'0')+':'+now.getMinutes().toString().padStart(2,'0');
+    document.getElementById('dash-date').textContent = now.getFullYear()+'년 '+(now.getMonth()+1)+'월 '+now.getDate()+'일';
+    loadDash();
   } else {
-    document.getElementById('loginError').style.display = 'block';
+    document.getElementById('lerr').style.display='block';
   }
 }
-function doLogout() {
-  document.getElementById('loginScreen').style.display = 'flex';
-  document.getElementById('app').style.display = 'none';
-  document.getElementById('loginId').value = '';
-  document.getElementById('loginPw').value = '';
-}
+function doLogout() { if(!confirm('로그아웃 하시겠습니까?')) return; document.getElementById('login-screen').style.display='flex'; document.getElementById('app').style.display='none'; document.getElementById('lid').value=''; document.getElementById('lpw').value=''; }
+document.getElementById('lpw').addEventListener('keydown', function(e){ if(e.key==='Enter') doLogin(); });
 
-// ── 시계 ──
-function startClock() {
-  const el = document.getElementById('topbarTime');
-  setInterval(() => {
-    el.textContent = new Date().toLocaleString('ko-KR', {year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'});
-  }, 1000);
+// ============================================================
+// 페이지 전환
+// ============================================================
+function go(pid, el) {
+  document.querySelectorAll('.page').forEach(function(p){ p.classList.remove('active'); });
+  document.querySelectorAll('.sb-item').forEach(function(i){ i.classList.remove('active'); });
+  var pg=document.getElementById('page-'+pid);
+  if(pg) pg.classList.add('active');
+  if(el) el.classList.add('active');
+  curPage=pid;
+  var map={'dashboard':loadDash,'prod-list':loadProds,'photo-box':loadPhotos,'cat-mgmt':loadCats,'orders':loadOrders,'settlement':loadSettle,'reviews':loadReviews,'banners':loadBanners,'franchise':loadFran,'settings':loadSettings};
+  if(map[pid]) map[pid]();
 }
+function refresh() { go(curPage, document.querySelector('.sb-item.active')); }
 
-// ── 토스트 ──
-function toast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg; t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 2500);
-}
+// ============================================================
+// 대시보드
+// ============================================================
+function loadDash() {
+  if(typeof ProductAPI==='undefined') return;
+  ProductAPI.getAll().then(function(prods){
+    allProds=prods;
+    var active=prods.filter(function(p){ return p.isActive; }).length;
+    var featured=prods.filter(function(p){ return p.isFeatured; }).length;
+    document.getElementById('stat-grid').innerHTML=
+      mk_sc('c-blue','🛒','0건','총 주문 수','전체 누적 주문')+
+      mk_sc('c-green','💰','0원','총 매출','결제 완료 기준')+
+      mk_sc('c-orange','🏬','0개','운영 가맹점','전체 중 활성')+
+      mk_sc('c-red','📦',active+'개','등록 상품','사용중인 상품');
 
-// ── CSV 파서 ──
-function parseCSV(csv) {
-  const lines = csv.trim().split('\n');
-  if (lines.length < 2) return [];
-  const headers = lines[0].split(',').map(h => h.trim().replace(/"/g,''));
-  return lines.slice(1).map(line => {
-    const values = []; let cur = '', inQ = false;
-    for (let ch of line) {
-      if (ch === '"') inQ = !inQ;
-      else if (ch === ',' && !inQ) { values.push(cur.trim()); cur = ''; }
-      else cur += ch;
+    var top5=prods.slice(0,5);
+    document.getElementById('dash-top5').innerHTML = top5.length
+      ? '<table>'+TH(['순위','상품명','가격','판매수량','별점'])+'<tbody>'+top5.map(function(p,i){
+          return '<tr><td style="color:var(--accent);font-weight:700">'+(i+1)+'위</td><td>'+p.name+'</td><td>'+(p.salePrice||p.price).toLocaleString()+'원</td><td>'+(p.salesCount||0)+'개</td><td>⭐ '+(p.rating||0)+'</td></tr>';
+        }).join('')+'</tbody></table>'
+      : EMPTY('📦','상품이 없습니다');
+
+    if(typeof FranchiseAPI!=='undefined') {
+      FranchiseAPI.getAll().then(function(list){
+        document.getElementById('dash-franchise').innerHTML = list.length
+          ? '<table>'+TH(['가맹점명','도메인','상태'])+'<tbody>'+list.map(function(f){
+              return '<tr><td>'+f.name+'</td><td>'+(f.domain||'-')+'</td><td><span class="bdg bdg-green">'+(f.status||'-')+'</span></td></tr>';
+            }).join('')+'</tbody></table>'
+          : EMPTY('🏬','가맹점 없음');
+      });
     }
-    values.push(cur.trim());
-    const obj = {};
-    headers.forEach((h, i) => obj[h] = (values[i] || '').replace(/"/g,'').trim());
-    return obj;
-  }).filter(row => Object.values(row).some(v => v));
+
+    if(typeof CONFIG!=='undefined') {
+      SheetAPI.fetch(CONFIG.SHEETS.주문).then(function(rows){
+        document.getElementById('dash-orders').innerHTML = rows.length
+          ? '<table>'+TH(Object.keys(rows[0]).slice(0,5))+'<tbody>'+rows.slice(0,5).map(function(row){
+              return '<tr>'+Object.keys(rows[0]).slice(0,5).map(function(k){ return '<td>'+(row[k]||'-')+'</td>'; }).join('')+'</tr>';
+            }).join('')+'</tbody></table>'
+          : EMPTY('🛒','주문 데이터가 없습니다');
+      });
+    }
+  });
 }
 
-const _cache = {};
-async function fetchSheet(url) {
-  if (_cache[url] && Date.now() - _cache[url].time < 120000) return _cache[url].data;
-  try {
-    const res = await fetch(url);
-    const csv = await res.text();
-    const data = parseCSV(csv);
-    _cache[url] = { data, time: Date.now() };
-    return data;
-  } catch(e) { return []; }
+function mk_sc(cls, icon, val, label, sub) {
+  return '<div class="sc '+cls+'"><div class="sc-top"><div class="sc-icon">'+icon+'</div></div>'+
+    '<div class="sc-val">'+val+'</div><div class="sc-label">'+label+'</div><div class="sc-sub">'+sub+'</div></div>';
 }
 
-// ── 섹션 전환 ──
-let currentSection = 'home';
-const sectionTitles = {
-  home:'대시보드 홈', orders:'주문 관리', products:'상품 관리',
-  franchise:'가맹점 관리', reviews:'리뷰 관리', banners:'배너/팝업 관리', settlement:'정산 관리'
-};
-
-function showSection(name, navEl) {
-  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-  document.getElementById('sec-' + name).classList.add('active');
-  if (navEl) navEl.classList.add('active');
-  document.getElementById('topbarTitle').textContent = sectionTitles[name] || name;
-  currentSection = name;
-  loadSection(name);
-}
-function loadCurrentSection() {
-  Object.keys(_cache).forEach(k => delete _cache[k]);
-  loadSection(currentSection);
-  toast('🔄 데이터를 새로 불러왔습니다');
-}
-function loadSection(name) {
-  if (name === 'home') loadHome();
-  else if (name === 'orders') loadOrders();
-  else if (name === 'products') loadProducts();
-  else if (name === 'franchise') loadFranchise();
-  else if (name === 'reviews') loadReviews();
-  else if (name === 'banners') loadBanners();
-  else if (name === 'settlement') loadSettlement();
+// ============================================================
+// 상품 목록
+// ============================================================
+function loadProds() {
+  document.getElementById('prod-tw').innerHTML='<div class="loading"><div class="lspin">⏳</div><div style="margin-top:10px">상품 불러오는 중...</div></div>';
+  if(typeof ProductAPI==='undefined') return;
+  ProductAPI.getAll().then(function(prods){
+    allProds=prods;
+    var cats=[...new Set(prods.map(function(p){ return p.category; }))].filter(Boolean);
+    document.getElementById('cat-sel').innerHTML='<option value="">전체 카테고리</option>'+cats.map(function(c){ return '<option>'+c+'</option>'; }).join('');
+    document.getElementById('prod-sub').textContent='전체 '+prods.length+'개 상품';
+    renderProds(prods);
+  }).catch(function(){ document.getElementById('prod-tw').innerHTML=EMPTY('⚠️','불러오기 실패'); });
 }
 
-// ── 숫자 포맷 ──
-function won(n) { return Number(n||0).toLocaleString('ko-KR') + '원'; }
-function num(n) { return Number(n||0).toLocaleString('ko-KR'); }
+function renderProds(prods) {
+  document.getElementById('prod-cnt').textContent=prods.length+'개';
+  if(!prods.length){ document.getElementById('prod-tw').innerHTML=EMPTY('📦','검색 결과 없음'); return; }
+  document.getElementById('prod-tw').innerHTML=
+    '<table>'+TH(['#','이미지','상품명','카테고리','판매가','할인가','재고','뱃지','추천','상태','관리'])+'<tbody>'+
+    prods.map(function(p){
+      var disc=p.salePrice&&p.price?Math.round((1-p.salePrice/p.price)*100):0;
+      return '<tr>'+
+        '<td style="color:var(--gray);font-size:12px;">'+p.id+'</td>'+
+        '<td><img class="thumb" src="'+p.image+'" onerror="this.style.opacity=\'0.15\'"></td>'+
+        '<td><div class="pname">'+p.name+'</div>'+(p.supplier?'<div class="psub">'+p.supplier+'</div>':'')+'</td>'+
+        '<td>'+p.category+'</td>'+
+        '<td>'+(p.price||0).toLocaleString()+'원</td>'+
+        '<td>'+(p.salePrice?'<strong style="color:var(--accent)">'+(p.salePrice||0).toLocaleString()+'원</strong><br><span style="font-size:11px;color:var(--red)">-'+disc+'%</span>':'-')+'</td>'+
+        '<td>'+(p.stock||0)+'</td>'+
+        '<td>'+(p.badge?'<span class="bdg bdg-'+p.badge.toLowerCase()+'">'+p.badge+'</span>':'-')+'</td>'+
+        '<td>'+(p.isFeatured?'⭐':'-')+'</td>'+
+        '<td>'+(p.isActive?'<span class="bdg bdg-on">판매중</span>':'<span class="bdg bdg-off">숨김</span>')+'</td>'+
+        '<td style="white-space:nowrap;">'+
+          '<button class="btn btn-outline btn-xs" onclick="editProd(\''+p.id+'\')">✏️ 수정</button> '+
+          '<button class="btn '+(p.isActive?'btn-danger':'btn-green')+' btn-xs" onclick="toggleProd(\''+p.id+'\',\''+p.name+'\','+(p.isActive)+')">'+( p.isActive?'숨김':'노출')+'</button>'+
+        '</td></tr>';
+    }).join('')+'</tbody></table>';
+}
 
-// ── 상태 뱃지 ──
-function statusBadge(s) {
-  const map = {
-    '주문완료':'badge-info','결제완료':'badge-warning','배송중':'badge-orange',
-    '배송완료':'badge-success','취소':'badge-danger','해지':'badge-danger',
-    '운영중':'badge-success','모집중':'badge-warning','공개':'badge-success','비공개':'badge-gray'
+function fProds(q){ srchQ=q.toLowerCase(); applyFilters(); }
+function fCat(c){ catF=c; applyFilters(); }
+function fStatus(s){ statusF=s; applyFilters(); }
+function applyFilters(){
+  renderProds(allProds.filter(function(p){
+    return (!srchQ||(p.name+' '+(p.supplier||'')).toLowerCase().includes(srchQ)) &&
+      (!catF||p.category===catF) &&
+      (!statusF||(statusF==='active'&&p.isActive)||(statusF==='inactive'&&!p.isActive)||(statusF==='featured'&&p.isFeatured));
+  }));
+}
+
+// ============================================================
+// 사진 보관함
+// ============================================================
+function loadPhotos(){
+  var imgs=[];
+  allProds.forEach(function(p){
+    ['image','detailImages','detailImages2','certImage'].forEach(function(k){
+      if(p[k]){ var fn=p[k].replace(IMG_BASE,''); if(fn&&fn!==p[k]) imgs.push({name:fn,url:p[k],prod:p.name}); }
+    });
+  });
+  document.getElementById('photo-grid').innerHTML = imgs.length
+    ? '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:12px;">'+
+      imgs.map(function(i){ return '<div style="background:var(--bg);border-radius:10px;overflow:hidden;border:1px solid var(--border);"><img src="'+i.url+'" style="width:100%;height:110px;object-fit:cover;display:block;" onerror="this.style.opacity=\'0.2\'"><div style="padding:8px;"><div style="font-size:11px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+i.name+'</div><div style="font-size:10px;color:var(--gray);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+i.prod+'</div></div></div>'; }).join('')+'</div>'+
+      '<div style="margin-top:14px;padding:12px;background:#fffbeb;border-radius:8px;border:1px solid #fde68a;font-size:12px;color:#92400e;">📌 이미지 추가는 <a href="https://github.com/min323300/myshop/tree/main/images" target="_blank" style="color:var(--accent);font-weight:600">GitHub images/ 폴더</a>에서 업로드하세요</div>'
+    : EMPTY('🖼️','상품에 등록된 이미지가 없습니다','먼저 상품을 등록하거나 GitHub images/ 폴더를 확인하세요');
+}
+
+// ============================================================
+// 카테고리
+// ============================================================
+function loadCats(){
+  if(typeof CategoryAPI==='undefined') return;
+  CategoryAPI.getAll().then(function(cats){
+    document.getElementById('cat-tw').innerHTML = cats.length
+      ? '<table>'+TH(['번호','아이콘','카테고리명','상위','순서'])+'<tbody>'+cats.map(function(c){
+          return '<tr><td>'+c.id+'</td><td>'+c.icon+'</td><td><strong>'+c.name+'</strong></td><td>'+(c.parentId||'-')+'</td><td>'+c.order+'</td></tr>';
+        }).join('')+'</tbody></table>'+
+        '<div style="padding:12px 16px;font-size:12px;color:var(--gray);background:var(--bg);border-top:1px solid var(--border);">📌 추가/수정은 <a href="'+SHEET_URL+'" target="_blank" style="color:var(--accent)">구글시트 카테고리 시트</a>에서 하세요</div>'
+      : EMPTY('📁','카테고리 없음');
+  });
+}
+
+// ============================================================
+// 주문
+// ============================================================
+function loadOrders(){
+  document.getElementById('order-tw').innerHTML='<div class="loading"><div class="lspin">⏳</div></div>';
+  if(typeof CONFIG==='undefined') return;
+  SheetAPI.fetch(CONFIG.SHEETS.주문).then(function(rows){
+    allOrders=rows;
+    document.getElementById('oc-all').textContent=rows.length;
+    renderOrders(rows);
+  }).catch(function(){ document.getElementById('order-tw').innerHTML=EMPTY('🛒','주문 불러오기 실패'); });
+}
+function fOrder(s,el){
+  orderF=s;
+  document.querySelectorAll('.stab').forEach(function(t){ t.classList.remove('active'); });
+  if(el) el.classList.add('active');
+  renderOrders(s==='all'?allOrders:allOrders.filter(function(o){ return (o['주문상태']||'').includes(s); }));
+}
+function renderOrders(rows){
+  if(!rows.length){ document.getElementById('order-tw').innerHTML=EMPTY('🛒','주문 내역 없음'); return; }
+  var keys=Object.keys(rows[0]).slice(0,8);
+  document.getElementById('order-tw').innerHTML='<table>'+TH(keys)+'<tbody>'+rows.slice(0,100).map(function(row){
+    return '<tr>'+keys.map(function(k){ return '<td>'+(row[k]||'-')+'</td>'; }).join('')+'</tr>';
+  }).join('')+'</tbody></table>';
+}
+
+// ============================================================
+// 정산
+// ============================================================
+function loadSettle(){
+  if(typeof CONFIG==='undefined') return;
+  SheetAPI.fetch(CONFIG.SHEETS.정산).then(function(rows){
+    document.getElementById('settle-tw').innerHTML = rows.length
+      ? '<table>'+TH(Object.keys(rows[0]))+'<tbody>'+rows.map(function(row){
+          return '<tr>'+Object.values(row).map(function(v){ return '<td>'+(v||'-')+'</td>'; }).join('')+'</tr>';
+        }).join('')+'</tbody></table>'
+      : EMPTY('💰','정산 데이터 없음');
+  });
+}
+
+// ============================================================
+// 리뷰
+// ============================================================
+function loadReviews(){
+  if(typeof CONFIG==='undefined') return;
+  SheetAPI.fetch(CONFIG.SHEETS.리뷰).then(function(rows){
+    document.getElementById('review-tw').innerHTML = rows.length
+      ? '<table>'+TH(['번호','상품번호','작성자','별점','리뷰내용','공개여부'])+'<tbody>'+rows.map(function(r){
+          return '<tr><td>'+(r['번호']||'-')+'</td><td>'+(r['상품번호']||'-')+'</td><td>'+(r['작성자']||'-')+'</td>'+
+            '<td>'+('⭐'.repeat(Math.min(parseInt(r['별점'])||0,5)))+'</td>'+
+            '<td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+(r['리뷰내용']||'-')+'</td>'+
+            '<td>'+(r['공개여부']==='FALSE'?'<span class="bdg bdg-off">비공개</span>':'<span class="bdg bdg-on">공개</span>')+'</td></tr>';
+        }).join('')+'</tbody></table>'
+      : EMPTY('⭐','리뷰 없음');
+  });
+}
+
+// ============================================================
+// 배너/팝업
+// ============================================================
+function loadBanners(){
+  if(typeof BannerAPI!=='undefined') {
+    BannerAPI.getActive().then(function(banners){
+      document.getElementById('banner-wrap').innerHTML = banners.length
+        ? banners.map(function(b){
+            return '<div style="margin-bottom:12px;border-radius:10px;overflow:hidden;border:1px solid var(--border);">'+
+              '<div style="background:'+(b.bgColor||'#333')+';color:'+(b.textColor||'#fff')+';padding:16px;text-align:center;">'+
+                '<div style="font-weight:700;font-size:15px;">'+b.title+'</div>'+
+                (b.subtitle?'<div style="font-size:12px;opacity:0.8;margin-top:4px;">'+b.subtitle+'</div>':'')+
+              '</div>'+
+              '<div style="padding:10px 14px;font-size:12px;color:var(--gray);">링크: '+(b.link||'-')+' · 버튼: '+(b.btnText||'-')+'</div></div>';
+          }).join('')
+        : EMPTY('🎨','활성 배너 없음','구글시트 배너 시트에서 추가하세요');
+    });
+  }
+  if(typeof PopupAPI!=='undefined') {
+    PopupAPI.getActive().then(function(pops){
+      document.getElementById('popup-wrap').innerHTML = pops.length
+        ? pops.map(function(p){ return '<div style="padding:12px;border:1px solid var(--border);border-radius:8px;margin-bottom:8px;"><strong>'+p.title+'</strong><div style="font-size:12px;color:var(--gray);margin-top:4px;">'+p.content+'</div></div>'; }).join('')
+        : EMPTY('📢','활성 팝업 없음','구글시트 팝업 시트에서 추가하세요');
+    });
+  }
+}
+
+// ============================================================
+// 가맹점
+// ============================================================
+function loadFran(){
+  if(typeof FranchiseAPI==='undefined') return;
+  FranchiseAPI.getAll().then(function(list){
+    document.getElementById('fran-tw').innerHTML = list.length
+      ? '<table>'+TH(['ID','가맹점명','도메인','상태','수수료율'])+'<tbody>'+list.map(function(f){
+          return '<tr><td>'+f.id+'</td><td><strong>'+f.name+'</strong></td><td>'+(f.domain||'-')+'</td>'+
+            '<td><span class="bdg bdg-green">'+(f.status||'-')+'</span></td><td>'+f.commissionRate+'%</td></tr>';
+        }).join('')+'</tbody></table>'
+      : EMPTY('🏬','가맹점 없음');
+  });
+}
+
+// ============================================================
+// 설정
+// ============================================================
+function loadSettings(){
+  if(typeof CONFIG==='undefined') return;
+  var s=CONFIG.STORE;
+  document.getElementById('settings-wrap').innerHTML=
+    [['브랜드명',s.BRAND],['상호',s.NAME],['전화',s.PHONE],['이메일',s.EMAIL],['주소',s.ADDRESS],
+     ['PG사',CONFIG.PG.PROVIDER||'미설정'],['Merchant ID',CONFIG.PG.MERCHANT_ID||'미설정']].map(function(r){
+      return '<div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);font-size:13px;">'+
+        '<span style="color:var(--gray);font-weight:600;">'+r[0]+'</span>'+
+        '<span style="font-weight:500;'+(r[1]==='미설정'?'color:var(--red)':'')+'">'+r[1]+'</span></div>';
+    }).join('');
+  document.getElementById('links-wrap').innerHTML=
+    [['🌐 쇼핑몰','https://gasway.shop'],['📊 구글시트 DB',SHEET_URL],
+     ['📦 GitHub','https://github.com/min323300/myshop'],
+     ['🖼️ 이미지 폴더','https://github.com/min323300/myshop/tree/main/images']].map(function(r){
+      return '<div style="padding:10px 0;border-bottom:1px solid var(--border);">'+
+        '<a href="'+r[1]+'" target="_blank" style="color:var(--accent);font-weight:600;font-size:13px;">'+r[0]+'</a>'+
+        '<div style="font-size:11px;color:var(--gray);margin-top:2px;">'+r[1]+'</div></div>';
+    }).join('');
+}
+
+// ============================================================
+// 상품 등록/수정 모달
+// ============================================================
+function openProdModal(prod){
+  editingId=null; clearForm();
+  document.getElementById('m-title').textContent='📦 상품 등록';
+  if(prod){ editingId=prod.id; document.getElementById('m-title').textContent='✏️ 상품 수정 — '+prod.name; fillForm(prod); }
+  document.getElementById('prod-modal').classList.add('open');
+  pvImg();
+}
+function closeProdModal(){ document.getElementById('prod-modal').classList.remove('open'); }
+document.getElementById('prod-modal').addEventListener('click',function(e){ if(e.target===this) closeProdModal(); });
+
+function clearForm(){
+  ['f-id','f-name','f-supp','f-subcat','f-price','f-sale','f-stock',
+   'f-img','f-det1','f-det2','f-cert','f-yt','f-desc','f-colors','f-sizes','f-caution','f-specs'].forEach(function(id){ document.getElementById(id).value=''; });
+  document.getElementById('f-cat').value='';
+  document.getElementById('f-badge').value='';
+  document.getElementById('f-feat').checked=false;
+  document.getElementById('f-active').checked=true;
+  document.getElementById('f-active-lbl').textContent='✅ 판매중';
+  document.getElementById('img-pv').innerHTML='';
+  document.getElementById('disc-val').textContent='-';
+}
+
+function fillForm(p){
+  var sv=function(id,v){ var el=document.getElementById(id); if(el) el.value=v||''; };
+  sv('f-id',p.id); sv('f-name',p.name); sv('f-supp',p.supplier);
+  sv('f-subcat',p.subCategory); sv('f-price',p.price); sv('f-sale',p.salePrice||'');
+  sv('f-stock',p.stock); sv('f-yt',p.youtube); sv('f-desc',p.description);
+  sv('f-colors',p.colors); sv('f-sizes',p.sizes); sv('f-caution',p.caution); sv('f-specs',p.specs);
+  document.getElementById('f-cat').value=p.category||'';
+  document.getElementById('f-badge').value=p.badge||'';
+  document.getElementById('f-feat').checked=p.isFeatured||false;
+  document.getElementById('f-active').checked=p.isActive!==false;
+  document.getElementById('f-active-lbl').textContent=p.isActive!==false?'✅ 판매중':'🔴 숨김';
+  var fn=function(u){ return u?u.replace(IMG_BASE,''):''; };
+  sv('f-img',fn(p.image)); sv('f-det1',fn(p.detailImages));
+  sv('f-det2',fn(p.detailImages2)); sv('f-cert',fn(p.certImage));
+  calcDisc();
+}
+
+document.getElementById('f-active').addEventListener('change',function(){
+  document.getElementById('f-active-lbl').textContent=this.checked?'✅ 판매중':'🔴 숨김';
+});
+function calcDisc(){
+  var p=parseInt(document.getElementById('f-price').value)||0;
+  var s=parseInt(document.getElementById('f-sale').value)||0;
+  document.getElementById('disc-val').textContent=(p>0&&s>0&&s<p)?Math.round((1-s/p)*100)+'% 할인':'-';
+}
+function pvImg(){
+  var fields=[{id:'f-img',label:'대표'},{id:'f-det1',label:'상세1'},{id:'f-det2',label:'상세2'},{id:'f-cert',label:'인증'}];
+  document.getElementById('img-pv').innerHTML=fields.map(function(f){
+    var v=document.getElementById(f.id).value.trim();
+    if(!v) return '';
+    var url=v.startsWith('http')?v:IMG_BASE+v;
+    return '<div class="img-pv-item"><img src="'+url+'" onerror="this.style.opacity=\'0.15\'"><div class="img-pv-label">'+f.label+'</div></div>';
+  }).join('');
+}
+
+// ============================================================
+// 상품 저장
+// ============================================================
+function saveProd(){
+  var id=document.getElementById('f-id').value.trim();
+  var name=document.getElementById('f-name').value.trim();
+  var cat=document.getElementById('f-cat').value;
+  var price=document.getElementById('f-price').value;
+  if(!id||!name||!cat||!price){ showToast('필수 항목 미입력 (번호/상품명/카테고리/가격)','err'); return; }
+
+  var data={
+    번호:id,상품명:name,공급사:document.getElementById('f-supp').value.trim(),
+    가격:price,할인가:document.getElementById('f-sale').value||'0',
+    카테고리:cat,세부카테고리:document.getElementById('f-subcat').value.trim(),
+    이미지:document.getElementById('f-img').value.trim(),
+    상품설명:document.getElementById('f-desc').value.trim(),
+    재고:document.getElementById('f-stock').value||'0',
+    뱃지:document.getElementById('f-badge').value,
+    추천여부:document.getElementById('f-feat').checked?'TRUE':'FALSE',
+    사용여부:document.getElementById('f-active').checked?'TRUE':'FALSE',
+    판매수량:'0',별점평균:'0',리뷰수:'0',
+    상세이미지:document.getElementById('f-det1').value.trim(),
+    상세이미지2:document.getElementById('f-det2').value.trim(),
+    색상:document.getElementById('f-colors').value.trim(),
+    사이즈:document.getElementById('f-sizes').value.trim(),
+    유튜브:document.getElementById('f-yt').value.trim(),
+    상세스펙:document.getElementById('f-specs').value.trim(),
+    인증이미지:document.getElementById('f-cert').value.trim(),
+    주의사항:document.getElementById('f-caution').value.trim(),
   };
-  return `<span class="badge ${map[s]||'badge-gray'}">${s||'-'}</span>`;
+
+  if(!SCRIPT_URL){ showToast('Apps Script URL 미설정 - 구글시트에 직접 입력해주세요','warn'); closeProdModal(); return; }
+
+  fetch(SCRIPT_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({action:editingId?'updateProduct':'saveProduct',data:data})
+  }).then(function(){
+    showToast((editingId?'상품 수정':'상품 등록')+'됐습니다! 구글시트 확인 후 새로고침하세요.','ok');
+    closeProdModal();
+    setTimeout(loadProds,2000);
+  }).catch(function(e){ showToast('저장 오류: '+e.message,'err'); });
 }
 
-// ────────────────────────────────────────────
-// 🏠 홈 대시보드
-// ────────────────────────────────────────────
-async function loadHome() {
-  const [orders, products, franchises, settlements] = await Promise.all([
-    fetchSheet(SHEETS.주문), fetchSheet(SHEETS.상품목록),
-    fetchSheet(SHEETS.가맹점), fetchSheet(SHEETS.정산)
-  ]);
-
-  const totalRevenue = orders.reduce((s,r) => s + (parseInt(r['결제금액'])||0), 0);
-  const activeProducts = products.filter(p => p['사용여부'] !== 'FALSE' && p['상품명']);
-  const activeFranchises = franchises.filter(f => f['상태'] !== '해지');
-
-  // 통계 카드
-  document.getElementById('homeStats').innerHTML = `
-    <div class="stat-card orange"><div class="stat-icon">📦</div>
-      <div class="stat-label">총 주문 수</div>
-      <div class="stat-value">${num(orders.length)}<span style="font-size:14px;font-weight:500">건</span></div>
-      <div class="stat-sub">전체 누적 주문</div></div>
-    <div class="stat-card green"><div class="stat-icon">💰</div>
-      <div class="stat-label">총 매출</div>
-      <div class="stat-value" style="font-size:20px">${won(totalRevenue)}</div>
-      <div class="stat-sub">결제 완료 기준</div></div>
-    <div class="stat-card blue"><div class="stat-icon">🏬</div>
-      <div class="stat-label">운영 가맹점</div>
-      <div class="stat-value">${num(activeFranchises.length)}<span style="font-size:14px;font-weight:500">개</span></div>
-      <div class="stat-sub">전체 ${franchises.length}개 중 활성</div></div>
-    <div class="stat-card yellow"><div class="stat-icon">🛍️</div>
-      <div class="stat-label">등록 상품</div>
-      <div class="stat-value">${num(activeProducts.length)}<span style="font-size:14px;font-weight:500">개</span></div>
-      <div class="stat-sub">사용중인 상품</div></div>
-  `;
-
-  // 최근 주문
-  const recent = orders.slice(-10).reverse();
-  document.getElementById('recentOrders').innerHTML = recent.length ? `
-    <div class="table-wrap"><table>
-      <thead><tr><th>주문번호</th><th>상품번호</th><th>결제금액</th><th>상태</th></tr></thead>
-      <tbody>${recent.map(o=>`<tr>
-        <td style="font-weight:600">${o['주문번호']||'-'}</td>
-        <td>${o['상품번호']||o['상품명']||'-'}</td>
-        <td style="font-weight:700;color:var(--primary)">${won(o['결제금액'])}</td>
-        <td>${statusBadge(o['주문상태'])}</td>
-      </tr>`).join('')}</tbody>
-    </table></div>` : '<div class="empty"><div class="empty-icon">📭</div>주문 데이터가 없습니다</div>';
-
-  // 가맹점 현황
-  document.getElementById('franchiseSummary').innerHTML = activeFranchises.length ? `
-    <div style="display:flex;flex-direction:column;gap:10px">
-    ${activeFranchises.slice(0,6).map(f=>`
-      <div class="franchise-card">
-        <div class="franchise-avatar" style="background:${f['테마색상']||'#FF5733'}22">${f['테마색상'] ? '🏬' : '🏬'}</div>
-        <div class="franchise-info">
-          <div class="franchise-name">${f['가맹점명']||'-'}</div>
-          <div class="franchise-domain">${f['도메인']||f['가맹점ID']||''}</div>
-        </div>
-        ${statusBadge(f['상태']||'운영중')}
-      </div>`).join('')}
-    </div>` : '<div class="empty"><div class="empty-icon">🏪</div>가맹점 없음</div>';
-
-  // 인기 상품 TOP5
-  const sorted = products.filter(p=>p['상품명']).sort((a,b)=>(parseInt(b['판매수량'])||0)-(parseInt(a['판매수량'])||0)).slice(0,5);
-  document.getElementById('topProducts').innerHTML = sorted.length ? `
-    <div class="table-wrap"><table>
-      <thead><tr><th>순위</th><th>상품명</th><th>가격</th><th>판매수량</th><th>별점</th></tr></thead>
-      <tbody>${sorted.map((p,i)=>`<tr>
-        <td><strong style="color:var(--primary)">${i+1}위</strong></td>
-        <td>${p['상품명']}</td>
-        <td>${won(p['할인가']||p['가격'])}</td>
-        <td>${num(p['판매수량'])}개</td>
-        <td>⭐ ${p['별점평균']||'-'}</td>
-      </tr>`).join('')}</tbody>
-    </table></div>` : '<div class="empty"><div class="empty-icon">📊</div>상품 데이터 없음</div>';
-
-  // 정산 요약
-  const totalSettlement = settlements.reduce((s,r)=>(s + (parseInt(r['총매출'])||0)),0);
-  const totalPG = settlements.reduce((s,r)=>(s + (parseInt(r['PG수수료'])||0)),0);
-  const totalMargin = settlements.reduce((s,r)=>(s + (parseInt(r['본사마진'])||0)),0);
-  const totalFranchise = settlements.reduce((s,r)=>(s + (parseInt(r['가맹점수령액'])||0)),0);
-  document.getElementById('settlementSummary').innerHTML = `
-    <div style="display:flex;flex-direction:column;gap:10px">
-      ${[
-        ['총 매출', totalSettlement, '#FF5733'],
-        ['PG 수수료 (2.5%)', totalPG, '#ef4444'],
-        ['본사 마진 (2%)', totalMargin, '#f59e0b'],
-        ['가맹점 수령액 (95.5%)', totalFranchise, '#10b981'],
-      ].map(([l,v,c])=>`
-        <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:#f8fafd;border-radius:8px">
-          <span style="font-size:13px;color:var(--text-sub)">${l}</span>
-          <span style="font-size:15px;font-weight:800;color:${c}">${won(v)}</span>
-        </div>`).join('')}
-      ${settlements.length === 0 ? '<div class="empty" style="padding:20px"><div class="empty-icon">📋</div>정산 데이터 없음</div>' : ''}
-    </div>`;
+function editProd(id){
+  var p=allProds.find(function(p){ return String(p.id)===String(id); });
+  if(p){ go('prod-list', document.querySelector('[onclick*="prod-list"]')); setTimeout(function(){ openProdModal(p); },100); }
+}
+function toggleProd(id,name,isActive){
+  if(!confirm('['+name+'] 상품을 '+(isActive?'숨김':'판매 재개')+' 처리하시겠습니까?')) return;
+  if(!SCRIPT_URL){ showToast('구글시트에서 사용여부를 직접 수정하세요','warn'); return; }
+  fetch(SCRIPT_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({action:'updateProductStatus',data:{번호:id,사용여부:isActive?'FALSE':'TRUE'}})
+  }).then(function(){ showToast('상태 변경됐습니다. 새로고침하세요.','ok'); setTimeout(loadProds,2000); });
 }
 
-// ────────────────────────────────────────────
-// 📦 주문 관리
-// ────────────────────────────────────────────
-let allOrders = [];
-async function loadOrders() {
-  allOrders = await fetchSheet(SHEETS.주문);
-  renderOrdersTable(allOrders);
-}
-function filterOrders() {
-  const status = document.getElementById('orderStatusFilter').value;
-  const search = document.getElementById('orderSearch').value.toLowerCase();
-  let filtered = allOrders;
-  if (status) filtered = filtered.filter(o => o['주문상태'] === status);
-  if (search) filtered = filtered.filter(o =>
-    (o['주문번호']||'').toLowerCase().includes(search) ||
-    (o['상품번호']||'').toLowerCase().includes(search) ||
-    (o['상품명']||'').toLowerCase().includes(search)
-  );
-  renderOrdersTable(filtered);
-}
-function renderOrdersTable(data) {
-  document.getElementById('ordersTable').innerHTML = data.length ? `
-    <div style="margin-bottom:12px;font-size:13px;color:var(--text-sub)">총 <strong>${num(data.length)}</strong>건</div>
-    <div class="table-wrap"><table>
-      <thead><tr><th>주문번호</th><th>주문일시</th><th>가맹점ID</th><th>상품번호</th><th>결제금액</th><th>주문상태</th></tr></thead>
-      <tbody>${data.slice().reverse().map(o=>`<tr>
-        <td style="font-weight:600">${o['주문번호']||'-'}</td>
-        <td style="font-size:12px;color:var(--text-sub)">${o['주문일시']||'-'}</td>
-        <td>${o['가맹점ID']||'본사'}</td>
-        <td>${o['상품번호']||'-'}</td>
-        <td style="font-weight:700;color:var(--primary)">${won(o['결제금액'])}</td>
-        <td>${statusBadge(o['주문상태'])}</td>
-      </tr>`).join('')}</tbody>
-    </table></div>` : '<div class="empty"><div class="empty-icon">📭</div>주문 내역이 없습니다</div>';
-}
+// ============================================================
+// 유틸
+// ============================================================
+function TH(cols){ return '<thead><tr>'+cols.map(function(c){ return '<th>'+c+'</th>'; }).join('')+'</tr></thead>'; }
+function EMPTY(ico,txt,sub){ return '<div class="empty"><div class="empty-ico">'+ico+'</div><div class="empty-txt">'+txt+'</div>'+(sub?'<div class="empty-sub">'+sub+'</div>':'')+'</div>'; }
+function showToast(msg,type){ var t=document.getElementById('toast'); t.textContent=msg; t.className='toast'+(type?' '+type:''); t.classList.add('show'); setTimeout(function(){ t.classList.remove('show'); },3500); }
 
-// ────────────────────────────────────────────
-// 🛍️ 상품 관리
-// ────────────────────────────────────────────
-let allProducts = [];
-async function loadProducts() {
-  allProducts = await fetchSheet(SHEETS.상품목록);
-  const cats = [...new Set(allProducts.map(p=>p['카테고리']).filter(Boolean))];
-  const sel = document.getElementById('productCategoryFilter');
-  sel.innerHTML = '<option value="">전체 카테고리</option>' + cats.map(c=>`<option value="${c}">${c}</option>`).join('');
-  renderProductsSummary();
-  renderProductsGrid(allProducts);
-}
-function renderProductsSummary() {
-  const active = allProducts.filter(p=>p['사용여부']!=='FALSE'&&p['상품명']).length;
-  const featured = allProducts.filter(p=>p['추천여부']==='TRUE').length;
-  const totalSales = allProducts.reduce((s,p)=>s+(parseInt(p['판매수량'])||0),0);
-  document.getElementById('productsSummary').innerHTML = `
-    <div class="summary-item"><div class="summary-item-label">전체 상품</div><div class="summary-item-value">${num(allProducts.filter(p=>p['상품명']).length)}개</div></div>
-    <div class="summary-item"><div class="summary-item-label">사용중</div><div class="summary-item-value" style="color:var(--success)">${num(active)}개</div></div>
-    <div class="summary-item"><div class="summary-item-label">추천 상품</div><div class="summary-item-value" style="color:var(--warning)">${num(featured)}개</div></div>
-    <div class="summary-item"><div class="summary-item-label">총 판매수량</div><div class="summary-item-value" style="color:var(--primary)">${num(totalSales)}개</div></div>`;
-}
-function filterProducts() {
-  const cat = document.getElementById('productCategoryFilter').value;
-  const search = document.getElementById('productSearch').value.toLowerCase();
-  let filtered = allProducts.filter(p=>p['상품명']);
-  if (cat) filtered = filtered.filter(p=>p['카테고리']===cat);
-  if (search) filtered = filtered.filter(p=>(p['상품명']||'').toLowerCase().includes(search));
-  renderProductsGrid(filtered);
-}
-function renderProductsGrid(data) {
-  if (!data.length) { document.getElementById('productsGrid').innerHTML = '<div class="empty"><div class="empty-icon">📦</div>상품이 없습니다</div>'; return; }
-  document.getElementById('productsGrid').innerHTML = `
-    <div class="three-col">${data.map(p=>`
-      <div class="product-card">
-        ${p['이미지'] ? `<img class="product-img" src="${p['이미지']}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" alt="${p['상품명']}" /><div class="product-img-placeholder" style="display:none">📦</div>` : '<div class="product-img-placeholder">📦</div>'}
-        <div class="product-info">
-          <div class="product-name">${p['상품명']}</div>
-          <div>
-            <span class="product-price">${won(p['할인가']||p['가격'])}</span>
-            ${p['할인가']&&p['할인가']!=='0'?`<span class="product-sale">${won(p['가격'])}</span>`:''}
-          </div>
-          <div class="product-meta">
-            ${p['뱃지']?`<span class="badge badge-orange">${p['뱃지']}</span>`:''}
-            ${p['카테고리']?`<span class="badge badge-gray">${p['카테고리']}</span>`:''}
-            ${p['추천여부']==='TRUE'?`<span class="badge badge-warning">추천</span>`:''}
-            ${p['사용여부']==='FALSE'?`<span class="badge badge-danger">숨김</span>`:`<span class="badge badge-success">활성</span>`}
-          </div>
-          <div style="font-size:11px;color:var(--text-sub);margin-top:6px">판매 ${num(p['판매수량'])}개 | ⭐${p['별점평균']||0} (${p['리뷰수']||0})</div>
-        </div>
-      </div>`).join('')}
-    </div>`;
-}
-
-// ────────────────────────────────────────────
-// 🏬 가맹점 관리
-// ────────────────────────────────────────────
-async function loadFranchise() {
-  const data = await fetchSheet(SHEETS.가맹점);
-  const active = data.filter(f=>f['상태']==='운영중').length;
-  const recruit = data.filter(f=>f['상태']==='모집중').length;
-  const terminated = data.filter(f=>f['상태']==='해지').length;
-  document.getElementById('franchiseStats').innerHTML = `
-    <div class="stat-card green"><div class="stat-icon">✅</div>
-      <div class="stat-label">운영중</div><div class="stat-value">${num(active)}개</div></div>
-    <div class="stat-card yellow"><div class="stat-icon">📢</div>
-      <div class="stat-label">모집중</div><div class="stat-value">${num(recruit)}개</div></div>
-    <div class="stat-card orange"><div class="stat-icon">🔴</div>
-      <div class="stat-label">해지</div><div class="stat-value">${num(terminated)}개</div></div>`;
-  document.getElementById('franchiseTable').innerHTML = data.length ? `
-    <div class="table-wrap"><table>
-      <thead><tr><th>가맹점ID</th><th>가맹점명</th><th>도메인</th><th>대표자</th><th>연락처</th><th>계약일</th><th>수수료율</th><th>상태</th></tr></thead>
-      <tbody>${data.map(f=>`<tr>
-        <td style="font-size:12px;color:var(--text-sub)">${f['가맹점ID']||'-'}</td>
-        <td style="font-weight:600">${f['가맹점명']||'-'}</td>
-        <td style="font-size:12px">${f['도메인']||'-'}</td>
-        <td>${f['대표자명']||'-'}</td>
-        <td>${f['연락처']||'-'}</td>
-        <td style="font-size:12px">${f['계약일']||'-'}</td>
-        <td style="font-weight:700;color:var(--primary)">${f['수수료율']||2}%</td>
-        <td>${statusBadge(f['상태']||'운영중')}</td>
-      </tr>`).join('')}</tbody>
-    </table></div>` : '<div class="empty"><div class="empty-icon">🏪</div>가맹점 데이터가 없습니다</div>';
-}
-
-// ────────────────────────────────────────────
-// ⭐ 리뷰 관리
-// ────────────────────────────────────────────
-async function loadReviews() {
-  const data = await fetchSheet(SHEETS.리뷰);
-  document.getElementById('reviewsTable').innerHTML = data.length ? `
-    <div style="margin-bottom:12px;font-size:13px;color:var(--text-sub)">총 <strong>${num(data.length)}</strong>개 리뷰</div>
-    <div class="table-wrap"><table>
-      <thead><tr><th>번호</th><th>상품번호</th><th>작성자</th><th>별점</th><th>리뷰내용</th><th>작성일</th><th>공개여부</th></tr></thead>
-      <tbody>${data.map(r=>`<tr>
-        <td>${r['번호']||'-'}</td>
-        <td>${r['상품번호']||'-'}</td>
-        <td style="font-weight:600">${r['작성자']||'-'}</td>
-        <td>${'⭐'.repeat(Math.min(parseInt(r['별점'])||0,5))} ${r['별점']||0}</td>
-        <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r['리뷰내용']||'-'}</td>
-        <td style="font-size:12px;color:var(--text-sub)">${r['작성일']||'-'}</td>
-        <td>${statusBadge(r['공개여부']==='FALSE'?'비공개':'공개')}</td>
-      </tr>`).join('')}</tbody>
-    </table></div>` : '<div class="empty"><div class="empty-icon">💬</div>리뷰 데이터가 없습니다</div>';
-}
-
-// ────────────────────────────────────────────
-// 🖼️ 배너 / 팝업
-// ────────────────────────────────────────────
-async function loadBanners() {
-  const [banners, popups] = await Promise.all([fetchSheet(SHEETS.배너), fetchSheet(SHEETS.팝업)]);
-  document.getElementById('bannerList').innerHTML = banners.length ? `
-    <div style="display:flex;flex-direction:column;gap:10px">
-    ${banners.map(b=>`
-      <div style="border:1px solid var(--border);border-radius:10px;overflow:hidden;display:flex;align-items:stretch">
-        <div style="width:6px;background:${b['배경색']||'#FF5733'};flex-shrink:0"></div>
-        <div style="padding:12px 14px;flex:1">
-          <div style="font-weight:700;font-size:14px">${b['제목']||'-'}</div>
-          <div style="font-size:12px;color:var(--text-sub);margin-top:2px">${b['부제목']||''}</div>
-          <div style="margin-top:6px;display:flex;gap:6px">
-            ${statusBadge(b['사용여부']==='TRUE'?'공개':'비공개')}
-            ${b['시작일']?`<span class="badge badge-gray">${b['시작일']} ~ ${b['종료일']||'무기한'}</span>`:''}
-          </div>
-        </div>
-      </div>`).join('')}
-    </div>` : '<div class="empty"><div class="empty-icon">🖼️</div>배너가 없습니다</div>';
-  document.getElementById('popupList').innerHTML = popups.length ? `
-    <div style="display:flex;flex-direction:column;gap:10px">
-    ${popups.map(p=>`
-      <div style="border:1px solid var(--border);border-radius:10px;padding:12px 14px">
-        <div style="font-weight:700;font-size:14px">${p['제목']||'-'}</div>
-        <div style="font-size:12px;color:var(--text-sub);margin-top:4px">${(p['내용']||'').substring(0,60)}${(p['내용']||'').length>60?'...':''}</div>
-        <div style="margin-top:6px;display:flex;gap:6px">
-          ${statusBadge(p['사용여부']==='TRUE'?'공개':'비공개')}
-          ${p['시작일']?`<span class="badge badge-gray">${p['시작일']} ~ ${p['종료일']||'무기한'}</span>`:''}
-        </div>
-      </div>`).join('')}
-    </div>` : '<div class="empty"><div class="empty-icon">📢</div>팝업이 없습니다</div>';
-}
-
-// ────────────────────────────────────────────
-// 💰 정산 관리
-// ────────────────────────────────────────────
-async function loadSettlement() {
-  const data = await fetchSheet(SHEETS.정산);
-  const totalRevenue = data.reduce((s,r)=>s+(parseInt(r['총매출'])||0),0);
-  const totalPG = data.reduce((s,r)=>s+(parseInt(r['PG수수료'])||0),0);
-  const totalMargin = data.reduce((s,r)=>s+(parseInt(r['본사마진'])||0),0);
-  document.getElementById('settlementStats').innerHTML = `
-    <div class="stat-card orange"><div class="stat-icon">📊</div>
-      <div class="stat-label">총 매출</div><div class="stat-value" style="font-size:18px">${won(totalRevenue)}</div></div>
-    <div class="stat-card blue"><div class="stat-icon">💳</div>
-      <div class="stat-label">PG 수수료</div><div class="stat-value" style="font-size:18px;color:var(--danger)">${won(totalPG)}</div></div>
-    <div class="stat-card yellow"><div class="stat-icon">🏦</div>
-      <div class="stat-label">본사 마진</div><div class="stat-value" style="font-size:18px;color:var(--warning)">${won(totalMargin)}</div></div>`;
-  document.getElementById('settlementTable').innerHTML = data.length ? `
-    <div class="table-wrap"><table>
-      <thead><tr><th>정산번호</th><th>가맹점ID</th><th>총매출</th><th>PG수수료</th><th>본사마진</th><th>가맹점수령액</th></tr></thead>
-      <tbody>${data.map(r=>`<tr>
-        <td style="font-weight:600">${r['정산번호']||'-'}</td>
-        <td>${r['가맹점ID']||'-'}</td>
-        <td style="font-weight:700">${won(r['총매출'])}</td>
-        <td style="color:var(--danger)">${won(r['PG수수료'])}</td>
-        <td style="color:var(--warning)">${won(r['본사마진'])}</td>
-        <td style="font-weight:800;color:var(--success)">${won(r['가맹점수령액'])}</td>
-      </tr>`).join('')}</tbody>
-    </table></div>` : '<div class="empty"><div class="empty-icon">📋</div>정산 데이터가 없습니다<br><small style="color:var(--text-sub);margin-top:8px;display:block">정산 시트에 데이터를 입력하면 여기에 표시됩니다</small></div>';
-}
+// 섹션 토글
+document.querySelectorAll('.prod-sec-hd').forEach(function(hd){
+  hd.addEventListener('click',function(){
+    this.classList.toggle('collapsed');
+    this.querySelector('.prod-sec-toggle').textContent=this.classList.contains('collapsed')?'∨':'∧';
+  });
+});
 </script>
 </body>
 </html>
