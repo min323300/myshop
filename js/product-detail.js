@@ -65,10 +65,8 @@ function renderProduct(p) {
   var nameEl = document.getElementById('detail-name');
   if (nameEl) nameEl.textContent = p.name;
 
-  // 이미지 갤러리
-  var extraImages = p.detailImages ? p.detailImages.split('|').map(function(s){ return s.trim(); }).filter(Boolean) : [];
-  var extraImages2 = p.detailImages2 ? p.detailImages2.split('|').map(function(s){ return s.trim(); }).filter(Boolean) : [];
-  images = [p.image].concat(extraImages).concat(extraImages2).filter(Boolean);
+  // 이미지 갤러리 (대표이미지만 - 상세이미지는 탭에 별도 표시)
+  images = [p.image].filter(Boolean);
   if (!images.length) images = ['https://picsum.photos/600/600?random=' + p.id];
   currentImgIdx = 0;
   renderGallery();
@@ -111,7 +109,7 @@ function renderProduct(p) {
     if (feeEl) feeEl.textContent = '무료배송 🎉';
   }
 
-  // 옵션 색상 (형식: 화이트:10|블랙:0|네이비:5 또는 화이트|블랙|네이비)
+  // 옵션 색상
   if (p.colors) {
     var colorItems = p.colors.split('|').map(function(s){ return s.trim(); }).filter(Boolean);
     if (colorItems.length) {
@@ -133,7 +131,7 @@ function renderProduct(p) {
     }
   }
 
-  // 옵션 사이즈 (형식: S:10|M:5|L:0|XL:3 또는 S|M|L|XL)
+  // 옵션 사이즈
   if (p.sizes) {
     var sizeItems = p.sizes.split('|').map(function(s){ return s.trim(); }).filter(Boolean);
     if (sizeItems.length) {
@@ -166,10 +164,10 @@ function renderProduct(p) {
     var isHtml = /<[a-z][\s\S]*>/i.test(desc);
     if (isHtml) {
       descEl.classList.add('html-mode');
-      descEl.innerHTML = desc || '<p>상품 상세 설명이 없습니다.</p>';
+      descEl.innerHTML = desc || '';
     } else {
       descEl.classList.add('text-mode');
-      descEl.textContent = desc || '상품 상세 설명이 없습니다.';
+      descEl.textContent = desc || '';
     }
   }
 
@@ -185,15 +183,55 @@ function renderProduct(p) {
 
   updateTotal();
 
-  // 스펙/인증/주의사항 렌더링 (renderProduct 마지막에 호출)
-  renderSpecs(p);
+  // ✅ 상세이미지 + 스펙 + 인증 + 주의사항 렌더링
+  renderDetailContent(p);
 }
 
-function renderSpecs(p) {
-  var tab = document.getElementById('tab-detail');
+// ============================================================
+// ✅ 핵심 수정: 'tab-detail' → 'tab-desc' 로 변경
+//    + 상세이미지(Q열), 상세이미지2(R열) 세로 긴 이미지 표시 추가
+// ============================================================
+function renderDetailContent(p) {
+  var tab = document.getElementById('tab-desc'); // ✅ 수정된 ID
   if (!tab) return;
 
-  // 상세스펙 테이블
+  // 기존에 추가된 동적 콘텐츠 제거 (중복 방지)
+  var old = tab.querySelectorAll('.dynamic-detail');
+  old.forEach(function(el){ el.remove(); });
+
+  // ── 상세이미지 (Q열) ──────────────────────────────────────
+  if (p.detailImages) {
+    var imgs1 = p.detailImages.split('|').map(function(s){ return s.trim(); }).filter(Boolean);
+    if (imgs1.length) {
+      var div1 = document.createElement('div');
+      div1.className = 'dynamic-detail';
+      div1.style.cssText = 'margin-top:24px;';
+      div1.innerHTML = imgs1.map(function(src){
+        return '<img src="' + src + '" alt="상세이미지" '
+          + 'style="width:100%;display:block;border-radius:10px;margin-bottom:8px;" '
+          + 'onerror="this.style.display=\'none\'">';
+      }).join('');
+      tab.appendChild(div1);
+    }
+  }
+
+  // ── 상세이미지2 (R열) ─────────────────────────────────────
+  if (p.detailImages2) {
+    var imgs2 = p.detailImages2.split('|').map(function(s){ return s.trim(); }).filter(Boolean);
+    if (imgs2.length) {
+      var div2 = document.createElement('div');
+      div2.className = 'dynamic-detail';
+      div2.style.cssText = 'margin-top:8px;';
+      div2.innerHTML = imgs2.map(function(src){
+        return '<img src="' + src + '" alt="상세이미지2" '
+          + 'style="width:100%;display:block;border-radius:10px;margin-bottom:8px;" '
+          + 'onerror="this.style.display=\'none\'">';
+      }).join('');
+      tab.appendChild(div2);
+    }
+  }
+
+  // ── 상세스펙 테이블 (V열) ────────────────────────────────
   if (p.specs) {
     var items = p.specs.split('|').map(function(s){ return s.trim(); }).filter(Boolean);
     if (items.length) {
@@ -201,37 +239,44 @@ function renderSpecs(p) {
         var parts = item.split(':');
         var label = parts[0].trim();
         var value = parts.slice(1).join(':').trim();
-        return '<tr><th style="width:35%;background:#f8f8f8;padding:10px 14px;font-weight:600;font-size:13px;border-bottom:1px solid #eee;white-space:nowrap;">'
-          + label + '</th>'
-          + '<td style="padding:10px 14px;font-size:13px;border-bottom:1px solid #eee;">' + value + '</td></tr>';
+        return '<tr>'
+          + '<td style="width:35%;background:#f8f8f8;padding:10px 14px;font-weight:600;font-size:13px;border-bottom:1px solid #eee;white-space:nowrap;">' + label + '</td>'
+          + '<td style="padding:10px 14px;font-size:13px;border-bottom:1px solid #eee;">' + value + '</td>'
+          + '</tr>';
       }).join('');
-
-      var specHtml = '<div style="margin:24px 0;">'
-        + '<h4 style="font-size:15px;font-weight:700;margin-bottom:12px;color:#333;">📋 상품 정보</h4>'
+      var specDiv = document.createElement('div');
+      specDiv.className = 'dynamic-detail';
+      specDiv.style.cssText = 'margin:28px 0;';
+      specDiv.innerHTML = '<h4 style="font-size:15px;font-weight:700;margin-bottom:12px;color:#333;">📋 상품 정보</h4>'
         + '<table style="width:100%;border-collapse:collapse;border:1px solid #eee;border-radius:8px;overflow:hidden;">'
-        + rows + '</table></div>';
-
-      tab.insertAdjacentHTML('beforeend', specHtml);
+        + rows + '</table>';
+      tab.appendChild(specDiv);
     }
   }
 
-  // 인증이미지 ← 핵심 수정: 따옴표 이스케이프 처리
+  // ── 인증이미지 (W열) ─────────────────────────────────────
   if (p.certImage) {
-    var certHtml = '<div style="margin:24px 0;">'
-      + '<h4 style="font-size:15px;font-weight:700;margin-bottom:12px;color:#333;">🏅 인증서</h4>'
-      + '<img src="' + p.certImage + '" style="max-width:100%;border-radius:8px;border:1px solid #eee;" '
-      + 'onerror="this.style.display=\'none\'" alt="인증서"></div>';
-    tab.insertAdjacentHTML('beforeend', certHtml);
+    var certDiv = document.createElement('div');
+    certDiv.className = 'dynamic-detail';
+    certDiv.style.cssText = 'margin:24px 0;';
+    certDiv.innerHTML = '<h4 style="font-size:15px;font-weight:700;margin-bottom:12px;color:#333;">🏅 인증서</h4>'
+      + '<img src="' + p.certImage + '" style="max-width:100%;border-radius:8px;border:1px solid #eee;display:block;" '
+      + 'onerror="this.style.display=\'none\'" alt="인증서">';
+    tab.appendChild(certDiv);
   }
 
-  // 주의사항
+  // ── 주의사항 (X열) ───────────────────────────────────────
   if (p.caution) {
-    var cautionHtml = '<div style="margin:24px 0;background:#fff8f0;border:1px solid #ffd4a0;border-radius:8px;padding:16px;">'
-      + '<h4 style="font-size:14px;font-weight:700;margin-bottom:8px;color:#e67e00;">⚠️ 주의사항</h4>'
-      + '<p style="font-size:13px;color:#666;line-height:1.7;margin:0;">' + p.caution + '</p></div>';
-    tab.insertAdjacentHTML('beforeend', cautionHtml);
+    var cautionDiv = document.createElement('div');
+    cautionDiv.className = 'dynamic-detail';
+    cautionDiv.style.cssText = 'margin:24px 0;background:#fff8f0;border:1px solid #ffd4a0;border-radius:8px;padding:16px;';
+    cautionDiv.innerHTML = '<h4 style="font-size:14px;font-weight:700;margin-bottom:8px;color:#e67e00;">⚠️ 주의사항</h4>'
+      + '<p style="font-size:13px;color:#666;line-height:1.7;margin:0;">' + p.caution + '</p>';
+    tab.appendChild(cautionDiv);
   }
 }
+
+// 기존 renderSpecs 함수는 renderDetailContent로 대체됨 (삭제)
 
 function renderYoutube(url) {
   var wrap = document.getElementById('youtube-wrap');
@@ -525,22 +570,13 @@ function submitReview() {
   if (text.length < 10) { alert('리뷰를 10자 이상 입력해주세요'); return; }
 
   var newReview = {
-    id: Date.now(),
-    author: '나',
-    rating: currentRating,
-    content: text,
-    date: new Date().toLocaleDateString('ko-KR'),
-    reply: '',
-    image: ''
+    id: Date.now(), author: '나', rating: currentRating,
+    content: text, date: new Date().toLocaleDateString('ko-KR'), reply: '', image: ''
   };
 
-  // ✅ 구글시트에 저장
   saveReviewToSheets({
     productId: currentProduct ? currentProduct.id : '',
-    author:    '익명',
-    rating:    currentRating,
-    content:   text,
-    image:     ''
+    author: '익명', rating: currentRating, content: text, image: ''
   });
 
   allReviews.unshift(newReview);
@@ -553,17 +589,11 @@ function submitReview() {
   alert('리뷰가 등록됐습니다!');
 }
 
-// ✅ 구글시트 리뷰 저장 함수
 function saveReviewToSheets(reviewData) {
-  // CONFIG.PG.API_PROXY_URL 에 Apps Script 웹훅 URL 입력 후 작동
   var SCRIPT_URL = (typeof CONFIG !== 'undefined') ? CONFIG.PG.API_PROXY_URL : '';
-  if (!SCRIPT_URL) {
-    console.log('Apps Script URL 미설정 - config.js의 PG.API_PROXY_URL에 입력하세요');
-    return;
-  }
+  if (!SCRIPT_URL) return;
   fetch(SCRIPT_URL, {
-    method: 'POST',
-    mode: 'no-cors',
+    method: 'POST', mode: 'no-cors',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ action: 'saveReview', data: reviewData })
   }).catch(function(e){ console.log('리뷰 저장 실패:', e); });
@@ -620,14 +650,9 @@ function submitQna() {
   if (content.length < 5) { alert('문의 내용을 5자 이상 입력해주세요'); return; }
   var isSecret = document.getElementById('qna-secret') && document.getElementById('qna-secret').checked;
   var newQna = {
-    id: Date.now(),
-    type: currentQnaType,
-    title: currentQnaType + ' 문의',
-    content: content,
-    author: '고객',
-    date: new Date().toLocaleDateString('ko-KR'),
-    secret: isSecret,
-    answer: ''
+    id: Date.now(), type: currentQnaType, title: currentQnaType + ' 문의',
+    content: content, author: '고객', date: new Date().toLocaleDateString('ko-KR'),
+    secret: isSecret, answer: ''
   };
   allQna.unshift(newQna);
   renderQna(allQna);
@@ -658,8 +683,7 @@ function renderQna(list) {
       + '<div class="qna-body" id="qna-body-' + q.id + '" style="display:none;">'
       + '<div style="padding:12px 0;color:var(--gray-dark);line-height:1.7;">' + q.content + '</div>'
       + (q.answer ? '<div class="qna-answer"><div class="qna-answer-label">🏪 판매자 답변</div><div>' + q.answer + '</div></div>' : '')
-      + '</div>'
-      + '</div>';
+      + '</div></div>';
   }).join('');
 }
 
@@ -676,7 +700,7 @@ function updateShippingContact(phone, email) {
 }
 
 // ============================================================
-// 배송정책 구글시트 자동 로드 (4단계 우선순위)
+// 배송정책 로드
 // ============================================================
 function loadShippingPolicy() {
   var SHEET_ID = '1t804fRO8HfQtmOzpDAz2IZfzRDQ7t8LYllFGZr3ftUI';
@@ -684,47 +708,29 @@ function loadShippingPolicy() {
     + '/gviz/tq?tqx=out:csv&sheet=' + encodeURIComponent('배송정책');
 
   var myFranchise = '기본';
-  try {
-    if (typeof CONFIG !== 'undefined' && CONFIG.FRANCHISE_ID) {
-      myFranchise = CONFIG.FRANCHISE_ID;
-    }
-  } catch(e){}
-
-  var mySupplier = '기본';
-  if (currentProduct) {
-    mySupplier = currentProduct.supplier || currentProduct['공급사'] || '기본';
-  }
+  try { if (typeof CONFIG !== 'undefined' && CONFIG.FRANCHISE_ID) myFranchise = CONFIG.FRANCHISE_ID; } catch(e){}
+  var mySupplier = currentProduct ? (currentProduct.supplier || currentProduct['공급사'] || '기본') : '기본';
 
   fetch(url).then(function(r){ return r.text(); }).then(function(csv) {
     var rows = [];
-    var lines = csv.trim().split('\n').slice(1);
-    lines.forEach(function(line) {
+    csv.trim().split('\n').slice(1).forEach(function(line) {
       var cols = parseCSVLine(line);
-      if (cols.length >= 4) {
-        rows.push({ franchise: cols[0], supplier: cols[1], key: cols[2], val: cols[3] });
-      }
+      if (cols.length >= 4) rows.push({ franchise: cols[0], supplier: cols[1], key: cols[2], val: cols[3] });
     });
 
     var policy = {};
-    var ITEMS = ['택배사','배송비','배송기간','교환반품기간','반품불가사유'];
-
-    ITEMS.forEach(function(item) {
+    ['택배사','배송비','배송기간','교환반품기간','반품불가사유'].forEach(function(item) {
       var found = null;
-      if (!found && myFranchise !== '기본' && mySupplier !== '기본') {
-        found = rows.find(function(r){ return r.franchise === myFranchise && r.supplier === mySupplier && r.key === item; });
-      }
-      if (!found && mySupplier !== '기본') {
-        found = rows.find(function(r){ return r.franchise === '기본' && r.supplier === mySupplier && r.key === item; });
-      }
-      if (!found && myFranchise !== '기본') {
-        found = rows.find(function(r){ return r.franchise === myFranchise && r.supplier === '기본' && r.key === item; });
-      }
-      if (!found) {
-        found = rows.find(function(r){ return r.franchise === '기본' && r.supplier === '기본' && r.key === item; });
-      }
+      if (!found && myFranchise !== '기본' && mySupplier !== '기본')
+        found = rows.find(function(r){ return r.franchise===myFranchise && r.supplier===mySupplier && r.key===item; });
+      if (!found && mySupplier !== '기본')
+        found = rows.find(function(r){ return r.franchise==='기본' && r.supplier===mySupplier && r.key===item; });
+      if (!found && myFranchise !== '기본')
+        found = rows.find(function(r){ return r.franchise===myFranchise && r.supplier==='기본' && r.key===item; });
+      if (!found)
+        found = rows.find(function(r){ return r.franchise==='기본' && r.supplier==='기본' && r.key===item; });
       if (found) policy[item] = found.val;
     });
-
     applyShippingPolicy(policy);
   }).catch(function(e){ console.log('배송정책 로드 실패:', e); });
 }
@@ -744,7 +750,6 @@ function parseCSVLine(line) {
 function applyShippingPolicy(p) {
   var methodEl = document.getElementById('ship-method');
   if (methodEl && p['택배사']) methodEl.textContent = p['택배사'];
-
   var feeEl = document.getElementById('ship-fee');
   if (feeEl && p['배송비'] !== undefined) {
     var fee = parseInt(p['배송비']);
@@ -752,16 +757,12 @@ function applyShippingPolicy(p) {
     var delivFee = document.getElementById('delivery-fee');
     if (delivFee) delivFee.textContent = fee === 0 ? '무료배송 🎉' : fee.toLocaleString() + '원 (50,000원 이상 무료)';
   }
-
   var periodEl = document.getElementById('ship-period');
   if (periodEl && p['배송기간']) periodEl.textContent = p['배송기간'];
-
   var retPeriodEl = document.getElementById('ret-period');
   if (retPeriodEl && p['교환반품기간']) retPeriodEl.textContent = '상품 수령 후 ' + p['교환반품기간'] + ' 이내';
-
   var rejectEl = document.getElementById('ret-reject');
   if (rejectEl && p['반품불가사유']) {
-    var items = p['반품불가사유'].split('|');
-    rejectEl.innerHTML = items.map(function(s){ return '• ' + s.trim(); }).join('<br>');
+    rejectEl.innerHTML = p['반품불가사유'].split('|').map(function(s){ return '• ' + s.trim(); }).join('<br>');
   }
 }
