@@ -249,17 +249,18 @@ function loadBizInfo() {
     cols.push(cur.trim());
 
     // 컬럼 매핑
-    // A:상호 B:사업자번호 C:대표자 D:주소 E:전화 F:이메일 G:도메인 H:저작권연도 I:브랜드명
+    // A:상호 B:사업자번호 C:대표자 D:주소 E:전화 F:이메일 G:도메인 H:저작권연도 I:브랜드명 J:통신판매업번호
     var biz = {
-      name:    cols[0] || '담누리마켓',    // 상호 (푸터에만)
-      regNo:   cols[1] || '',
-      ceo:     cols[2] || '',
-      address: cols[3] || '',
-      phone:   cols[4] || '1588-0000',
-      email:   cols[5] || '',
-      domain:  cols[6] || '',
-      year:    cols[7] || new Date().getFullYear(),
-      brand:   cols[8] || cols[0] || '담누리마켓'  // ✅ I열: 브랜드명 (없으면 상호명 사용)
+      name:       cols[0] || '담누리마켓',
+      regNo:      cols[1] || '',
+      ceo:        cols[2] || '',
+      address:    cols[3] || '',
+      phone:      cols[4] || '1588-0000',
+      email:      cols[5] || '',
+      domain:     cols[6] || '',
+      year:       cols[7] || new Date().getFullYear(),
+      brand:      cols[8] || cols[0] || '담누리마켓',
+      mailOrder:  cols[9] || ''   // ✅ J열: 통신판매업번호
     };
 
     applyBizInfo(biz);
@@ -287,9 +288,10 @@ function applyBizInfo(biz) {
   var fb = document.getElementById('footer-biz');
   if (fb) {
     var parts = [];
-    if (biz.name)  parts.push('상호: ' + biz.name);
-    if (biz.regNo) parts.push('사업자번호: ' + biz.regNo);
-    if (biz.ceo)   parts.push('대표: ' + biz.ceo);
+    if (biz.name)      parts.push('상호: ' + biz.name);
+    if (biz.regNo)     parts.push('사업자번호: ' + biz.regNo);
+    if (biz.ceo)       parts.push('대표: ' + biz.ceo);
+    if (biz.mailOrder) parts.push('통신판매업: ' + biz.mailOrder);
     fb.textContent = parts.join(' | ');
   }
 
