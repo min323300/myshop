@@ -72,6 +72,7 @@ const ProductAPI = {
       reviewCount: parseInt(row['리뷰수']) || 0,
       detailImages: resolveImageUrl(row['상세이미지']),
       detailImages2: resolveImageUrl(row['상세이미지2']),
+      certImage: resolveImageUrl(row['인증이미지']),
       colors: row['색상'] || '',
       sizes: row['사이즈'] || '',
       supplier: row['공급사'] || '',
