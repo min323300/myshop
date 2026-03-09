@@ -77,6 +77,8 @@ const ProductAPI = {
       sizes: row['사이즈'] || '',
       supplier: row['공급사'] || '',
       youtube: row['유튜브'] || '',
+      specs:   row['상세스펙'] || '', 
+      caution: row['주의사항'] || '', 
     }))
     .filter(p => p.isActive && p.name)
     .sort((a, b) => {
