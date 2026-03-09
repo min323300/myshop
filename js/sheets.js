@@ -40,6 +40,15 @@ const SheetAPI = {
 };
 
 // ============================================================
+// 🖼️ 이미지 URL 헬퍼 (파일명만 입력해도 자동으로 전체 URL 생성)
+// ============================================================
+function resolveImageUrl(val) {
+  if (!val) return '';
+  if (val.startsWith('http')) return val; // 이미 전체 URL
+  return CONFIG.IMAGE_BASE + val;          // 파일명만 입력된 경우 자동 변환
+}
+
+// ============================================================
 // 상품 데이터 (한글 헤더 매핑)
 // ============================================================
 const ProductAPI = {
@@ -52,7 +61,7 @@ const ProductAPI = {
       salePrice: parseInt(row['할인가']) || 0,
       category: row['카테고리'] || '',
       subCategory: row['세부카테고리'] || '',
-      image: row['이미지'] || 'https://via.placeholder.com/400x400?text=상품이미지',
+      image: resolveImageUrl(row['이미지']) || 'https://via.placeholder.com/400x400?text=상품이미지',
       description: row['상품설명'] || '',
       stock: parseInt(row['재고']) || 0,
       badge: row['뱃지'] || '',
@@ -61,8 +70,8 @@ const ProductAPI = {
       salesCount: parseInt(row['판매수량']) || 0,
       rating: parseFloat(row['별점평균']) || 0,
       reviewCount: parseInt(row['리뷰수']) || 0,
-      detailImages: row['상세이미지'] || '',
-      detailImages2: row['상세이미지2'] || '',
+      detailImages: resolveImageUrl(row['상세이미지']),
+      detailImages2: resolveImageUrl(row['상세이미지2']),
       colors: row['색상'] || '',
       sizes: row['사이즈'] || '',
       supplier: row['공급사'] || '',
@@ -148,7 +157,7 @@ const ReviewAPI = {
         author: row['작성자'],
         rating: parseInt(row['별점']) || 0,
         content: row['리뷰내용'],
-        image: row['리뷰이미지'],
+        image: resolveImageUrl(row['리뷰이미지']),
         date: row['작성일'],
         reply: row['답글내용'],
         replyAuthor: row['답글작성자'],
@@ -184,7 +193,7 @@ const PopupAPI = {
       id: row['번호'],
       title: row['제목'],
       content: row['내용'],
-      image: row['이미지'],
+      image: resolveImageUrl(row['이미지']),
       link: row['링크'],
       width: row['팝업너비'] || '500px',
     }));
@@ -207,7 +216,7 @@ const BannerAPI = {
       id: row['번호'],
       title: row['제목'],
       subtitle: row['부제목'],
-      image: row['이미지'],
+      image: resolveImageUrl(row['이미지']),
       bgColor: row['배경색'] || '#FF5733',
       textColor: row['글자색'] || '#ffffff',
       link: row['링크'] || '#',
@@ -236,7 +245,7 @@ const FranchiseAPI = {
       address: row['주소'],
       domain: row['도메인'],
       color: row['테마색상'],
-      logo: row['로고이미지'],
+      logo: resolveImageUrl(row['로고이미지']),
       contractStart: row['계약일'],
       contractEnd: row['계약종료일'],
       status: row['상태'],
