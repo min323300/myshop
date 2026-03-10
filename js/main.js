@@ -212,44 +212,51 @@ function showP(id, arr, type) {
 }
 
 // ============================================================
-// 드롭다운 네비
+// 드롭다운 네비 - 카테고리 시트 기준으로 9개 모두 표시
 // ============================================================
 function buildNav(products) {
   try {
     var nav = document.getElementById('main-nav');
     if (!nav) return;
-    var map = {};
-    for (var i=0;i<products.length;i++) {
-      var cat=(products[i].category||'').trim();
-      var sub=(products[i].subCategory||'').trim();
-      if(!cat) continue;
-      if(!map[cat]) map[cat]=[];
-      if(sub&&map[cat].indexOf(sub)===-1) map[cat].push(sub);
-    }
-    var cats=Object.keys(map);
-    for(var c=0;c<cats.length;c++) {
-      var cn=cats[c], subs=map[cn];
-      var wrap=document.createElement('div'); wrap.className='nav-item-wrap';
-      var btn=document.createElement('button');
-      btn.className='nav-item'+(subs.length?' has-sub':'');
-      btn.textContent=cn; btn.setAttribute('data-c',cn);
-      btn.onclick=function(){location.href=dealerUrl('products.html?category='+encodeURIComponent(this.getAttribute('data-c')));};
-      wrap.appendChild(btn);
-      if(subs.length){
-        var dd=document.createElement('div'); dd.className='nav-dropdown';
-        var ab=document.createElement('button'); ab.className='nav-dropdown-item'; ab.textContent='✦ 전체보기'; ab.setAttribute('data-c',cn);
-        ab.onclick=function(e){e.stopPropagation();location.href=dealerUrl('products.html?category='+encodeURIComponent(this.getAttribute('data-c')));};
-        dd.appendChild(ab);
-        for(var s=0;s<subs.length;s++){
-          var sb=document.createElement('button'); sb.className='nav-dropdown-item'; sb.textContent=subs[s];
-          sb.setAttribute('data-c',cn); sb.setAttribute('data-s',subs[s]);
-          sb.onclick=function(e){e.stopPropagation();location.href=dealerUrl('products.html?category='+encodeURIComponent(this.getAttribute('data-c'))+'&sub='+encodeURIComponent(this.getAttribute('data-s')));};
-          dd.appendChild(sb);
-        }
-        wrap.appendChild(dd);
+
+    // ✅ 카테고리 시트에서 전체 목록 로드
+    CategoryAPI.getMain().then(function(categories) {
+      // 상품 기준 서브카테고리 맵 (있으면 드롭다운)
+      var subMap = {};
+      for (var i=0;i<products.length;i++) {
+        var cat=(products[i].category||'').trim();
+        var sub=(products[i].subCategory||'').trim();
+        if(!cat) continue;
+        if(!subMap[cat]) subMap[cat]=[];
+        if(sub&&subMap[cat].indexOf(sub)===-1) subMap[cat].push(sub);
       }
-      nav.appendChild(wrap);
-    }
+
+      categories.forEach(function(c) {
+        var cn = c.name.trim();
+        var icon = c.icon || '';
+        var subs = subMap[cn] || [];
+        var wrap=document.createElement('div'); wrap.className='nav-item-wrap';
+        var btn=document.createElement('button');
+        btn.className='nav-item'+(subs.length?' has-sub':'');
+        btn.textContent=icon+' '+cn; btn.setAttribute('data-c',cn);
+        btn.onclick=function(){location.href=dealerUrl('products.html?category='+encodeURIComponent(this.getAttribute('data-c')));};
+        wrap.appendChild(btn);
+        if(subs.length){
+          var dd=document.createElement('div'); dd.className='nav-dropdown';
+          var ab=document.createElement('button'); ab.className='nav-dropdown-item'; ab.textContent='✦ 전체보기'; ab.setAttribute('data-c',cn);
+          ab.onclick=function(e){e.stopPropagation();location.href=dealerUrl('products.html?category='+encodeURIComponent(this.getAttribute('data-c')));};
+          dd.appendChild(ab);
+          for(var s=0;s<subs.length;s++){
+            var sb=document.createElement('button'); sb.className='nav-dropdown-item'; sb.textContent=subs[s];
+            sb.setAttribute('data-c',cn); sb.setAttribute('data-s',subs[s]);
+            sb.onclick=function(e){e.stopPropagation();location.href=dealerUrl('products.html?category='+encodeURIComponent(this.getAttribute('data-c'))+'&sub='+encodeURIComponent(this.getAttribute('data-s')));};
+            dd.appendChild(sb);
+          }
+          wrap.appendChild(dd);
+        }
+        nav.appendChild(wrap);
+      });
+    }).catch(function(e){ console.log('카테고리 nav 로드 실패:',e); });
   } catch(e){ console.log('nav err:',e); }
 }
 
