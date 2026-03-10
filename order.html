@@ -403,9 +403,11 @@ function requestPG(orderData) {
 function saveOrderToSheets(orderData) {
   var SCRIPT_URL = (typeof CONFIG !== 'undefined') ? CONFIG.PG.API_PROXY_URL : '';
   if (!SCRIPT_URL) { console.log('주문 데이터:', orderData); return; }
+  // ✅ no-cors 환경에서는 Content-Type을 text/plain으로 해야 Apps Script에 전달됨
   fetch(SCRIPT_URL, {
-    method: 'POST', mode: 'no-cors',
-    headers: { 'Content-Type': 'application/json' },
+    method: 'POST',
+    mode: 'no-cors',
+    headers: { 'Content-Type': 'text/plain' },
     body: JSON.stringify({ action: 'saveOrder', data: orderData })
   }).catch(function(e){ console.log('Sheets 저장 실패:', e); });
 }
