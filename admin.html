@@ -1739,8 +1739,8 @@ function loadNotice(){
   });
 }
 
-function openNoticeModal(){ clearNoticeForm(); document.getElementById('nm-title').textContent='📢 공지 등록'; document.getElementById('notice-modal').classList.add('active'); }
-function closeNoticeModal(){ document.getElementById('notice-modal').classList.remove('active'); }
+function openNoticeModal(){ clearNoticeForm(); document.getElementById('nm-title').textContent='📢 공지 등록'; document.getElementById('notice-modal').classList.add('open'); }
+function closeNoticeModal(){ document.getElementById('notice-modal').classList.remove('open'); }
 function clearNoticeForm(){ ['nm-id','nm-title-input','nm-content'].forEach(function(id){ var el=document.getElementById(id); if(el) el.value=''; }); document.getElementById('nm-type').value='공지'; document.getElementById('nm-priority').value='보통'; document.getElementById('nm-active').value='TRUE'; }
 
 function editNotice(btn){ var id=btn.getAttribute('data-id');
@@ -1753,7 +1753,7 @@ function editNotice(btn){ var id=btn.getAttribute('data-id');
   document.getElementById('nm-type').value = n['구분']||'공지';
   document.getElementById('nm-priority').value = n['중요도']||'보통';
   document.getElementById('nm-active').value = n['사용여부']==='FALSE'?'FALSE':'TRUE';
-  document.getElementById('notice-modal').classList.add('active');
+  document.getElementById('notice-modal').classList.add('open');
 }
 
 function saveNotice(){
