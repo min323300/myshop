@@ -742,6 +742,14 @@ function startApp() {
   document.getElementById('hd-brand-name').textContent = DEALER.name || '담누리마켓';
   document.getElementById('hd-dealer-info').textContent = '🏬 ' + DEALER.name;
   document.getElementById('sb-dealer-name').textContent = DEALER.name + ' (' + DEALER.id + ')';
+
+  // 쇼핑몰/상품목록 링크에 dealer 파라미터 설정
+  var did = DEALER.id || '';
+  var shopLink = document.getElementById('shop-link');
+  if (shopLink && did) shopLink.href = 'index.html?dealer=' + did;
+  var prodsLink = document.getElementById('products-link');
+  if (prodsLink && did) prodsLink.href = 'products.html?dealer=' + did;
+
   go('dashboard', document.querySelector('.sb-item.active'));
 }
 
