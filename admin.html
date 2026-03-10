@@ -681,10 +681,51 @@
 
     <!-- ⑩ 설정 -->
     <div id="page-settings" class="page">
-      <div class="ph"><div><div class="ph-title">스토어 설정</div></div></div>
+      <div class="ph"><div><div class="ph-title">⚙️ 시스템 설정</div><div class="ph-sub">PG사, Apps Script URL 등 핵심 설정을 관리합니다</div></div></div>
+
+      <!-- PG 설정 -->
+      <div class="card" style="margin-bottom:16px;">
+        <div class="card-hd">
+          <div class="card-title">💳 PG사 결제 설정</div>
+          <button class="btn btn-primary btn-sm" onclick="savePGSettings()">💾 저장</button>
+        </div>
+        <div style="padding:20px;display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+          <div class="fg">
+            <label class="fl">PG사 <span style="color:var(--red);">*</span></label>
+            <select class="fi" id="pg-provider">
+              <option value="">선택하세요</option>
+              <option value="winglobal">윈글로벌</option>
+              <option value="inicis">KG이니시스</option>
+              <option value="toss">토스페이먼츠</option>
+              <option value="kakaopay">카카오페이</option>
+              <option value="naverpay">네이버페이</option>
+            </select>
+          </div>
+          <div class="fg">
+            <label class="fl">Merchant ID (MID) <span style="color:var(--red);">*</span></label>
+            <input class="fi" id="pg-mid" placeholder="윈글로벌에서 발급받은 MID">
+          </div>
+          <div class="fg">
+            <label class="fl">API 키</label>
+            <input class="fi" id="pg-apikey" placeholder="PG사 API 키" type="password">
+          </div>
+          <div class="fg">
+            <label class="fl">시크릿 키</label>
+            <input class="fi" id="pg-secret" placeholder="PG사 시크릿 키" type="password">
+          </div>
+          <div class="fg" style="grid-column:1/-1;">
+            <label class="fl">Apps Script URL</label>
+            <input class="fi" id="pg-script-url" placeholder="https://script.google.com/macros/s/...">
+            <div style="font-size:11px;color:var(--gray);margin-top:4px;">⚠️ 새 배포 시마다 업데이트 필요</div>
+          </div>
+        </div>
+        <div id="pg-status" style="padding:0 20px 16px;font-size:12px;"></div>
+      </div>
+
+      <!-- 현재 설정값 + 링크 -->
       <div class="two-col">
         <div class="card">
-          <div class="card-hd"><div class="card-title">⚙️ 현재 설정값</div></div>
+          <div class="card-hd"><div class="card-title">📋 현재 설정값</div></div>
           <div id="settings-wrap" style="padding:20px;"></div>
         </div>
         <div class="card">
@@ -1748,6 +1789,17 @@ function openManualModal(){ document.getElementById('nm-type').value='매뉴얼'
 function loadSettings(){
   if(typeof CONFIG==='undefined') return;
   var s=CONFIG.STORE;
+
+  // PG설정 시트에서 현재값 로드
+  fetchSheet('PG설정').then(function(rows){
+    var hq = rows.find(function(r){ return (r['가맹점ID']||r['대리점ID']||'').trim()==='' || r['가맹점ID']==='본사'; }) || rows[0] || {};
+    document.getElementById('pg-provider').value = hq['PG사'] || CONFIG.PG.PROVIDER || '';
+    document.getElementById('pg-mid').value = hq['MID'] || CONFIG.PG.MERCHANT_ID || '';
+    document.getElementById('pg-apikey').value = hq['API키'] || '';
+    document.getElementById('pg-secret').value = hq['시크릿키'] || '';
+    document.getElementById('pg-script-url').value = hq['ScriptURL'] || CONFIG.PG.API_PROXY_URL || '';
+  });
+
   document.getElementById('settings-wrap').innerHTML=
     [['브랜드명',s.BRAND],['상호',s.NAME],['전화',s.PHONE],['이메일',s.EMAIL],['주소',s.ADDRESS],
      ['PG사',CONFIG.PG.PROVIDER||'미설정'],['Merchant ID',CONFIG.PG.MERCHANT_ID||'미설정'],
@@ -1758,11 +1810,56 @@ function loadSettings(){
     }).join('');
   document.getElementById('links-wrap').innerHTML=
     [['🌐 쇼핑몰','https://gasway.shop'],['📦 GitHub','https://github.com/min323300/myshop'],
-     ['☁️ Cloudinary','https://console.cloudinary.com']].map(function(r){
+     ['☁️ Cloudinary','https://console.cloudinary.com'],
+     ['📊 Google Sheets','https://docs.google.com/spreadsheets/d/1t804fRO8HfQtmOzpDAz2IZfzRDQ7t8LYllFGZr3ftUI'],
+     ['⚙️ Apps Script','https://script.google.com']].map(function(r){
       return '<div style="padding:10px 0;border-bottom:1px solid var(--border);">'+
         '<a href="'+r[1]+'" target="_blank" style="color:var(--accent);font-weight:600;font-size:13px;">'+r[0]+'</a>'+
         '<div style="font-size:11px;color:var(--gray);margin-top:2px;">'+r[1]+'</div></div>';
     }).join('');
+}
+
+function savePGSettings(){
+  var provider = document.getElementById('pg-provider').value;
+  var mid = document.getElementById('pg-mid').value.trim();
+  var apikey = document.getElementById('pg-apikey').value.trim();
+  var secret = document.getElementById('pg-secret').value.trim();
+  var scriptUrl = document.getElementById('pg-script-url').value.trim();
+  var statusEl = document.getElementById('pg-status');
+
+  if(!scriptUrl){ showToast('Apps Script URL을 입력하세요','warn'); return; }
+
+  statusEl.innerHTML = '<span style="color:var(--gray);">⏳ 저장 중...</span>';
+
+  var data = {
+    '가맹점ID': '본사',
+    'PG사': provider,
+    'MID': mid,
+    'API키': apikey,
+    '시크릿키': secret,
+    'ScriptURL': scriptUrl
+  };
+
+  fetch(scriptUrl, {
+    method: 'POST', mode: 'no-cors',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({action:'savePGConfig', data:data})
+  }).then(function(){
+    // config.js 없이 런타임에 반영
+    if(typeof CONFIG !== 'undefined'){
+      CONFIG.PG.PROVIDER = provider;
+      CONFIG.PG.MERCHANT_ID = mid;
+      CONFIG.PG.API_PROXY_URL = scriptUrl;
+    }
+    // sessionStorage에도 저장 (페이지 리로드 없이 유지)
+    sessionStorage.setItem('pg_config', JSON.stringify({provider,mid,apikey,secret,scriptUrl}));
+    statusEl.innerHTML = '<span style="color:var(--green);">✅ 저장 완료! (구글시트 PG설정 시트에 반영됨)</span>';
+    showToast('PG 설정이 저장됐습니다!','ok');
+    // 설정값 표시 업데이트
+    setTimeout(loadSettings, 500);
+  }).catch(function(){
+    statusEl.innerHTML = '<span style="color:var(--red);">❌ 저장 실패 - Apps Script URL을 확인하세요</span>';
+  });
 }
 
 // ============================================================
