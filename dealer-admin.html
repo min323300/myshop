@@ -466,34 +466,73 @@
 
       <!-- ② 이미지 -->
       <div style="font-size:12px;font-weight:700;color:var(--accent);border-bottom:1px solid #fde8e3;padding-bottom:6px;margin:18px 0 14px;">② 상품 이미지</div>
-      <div class="fg"><label class="fl">대표 이미지 URL * <span style="font-size:10px;color:var(--gray);">(목록/썸네일에 표시)</span></label>
-        <input class="fi" id="mpm-img" placeholder="https://..." oninput="previewImg('mpm-img','prev-img1')">
+      <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:10px 14px;font-size:12px;color:#166534;margin-bottom:14px;">
+        ☁️ <strong>Cloudinary 자동 업로드</strong> — 📁 버튼으로 파일 선택 시 자동 저장되고 URL이 자동 입력됩니다.
+      </div>
+      <div class="fg">
+        <label class="fl">대표 이미지 * <span style="font-size:10px;color:var(--gray);">(목록/썸네일에 표시)</span></label>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <input class="fi" id="mpm-img" placeholder="URL 자동입력 또는 직접입력" oninput="previewImg('mpm-img','prev-img1')" style="flex:1;">
+          <label title="이미지 업로드" style="cursor:pointer;background:#f1f5f9;border:1px solid #cbd5e1;border-radius:8px;padding:8px 12px;font-size:16px;flex-shrink:0;">
+            📁<input type="file" accept="image/*" style="display:none;" onchange="uploadCloudinary(this,'mpm-img','prev-img1','upl-1')">
+          </label>
+          <span id="upl-1" style="font-size:11px;color:var(--gray);display:none;">업로드중...</span>
+        </div>
         <img id="prev-img1" style="width:80px;height:80px;object-fit:cover;border-radius:8px;border:1px solid var(--border);margin-top:6px;display:none;">
       </div>
       <div class="fg-row">
-        <div class="fg"><label class="fl">추가 이미지 2</label>
-          <input class="fi" id="mpm-img2" placeholder="https://..." oninput="previewImg('mpm-img2','prev-img2')">
+        <div class="fg">
+          <label class="fl">상세이미지 1</label>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <input class="fi" id="mpm-img2" placeholder="URL 자동입력 또는 직접입력" oninput="previewImg('mpm-img2','prev-img2')" style="flex:1;">
+            <label style="cursor:pointer;background:#f1f5f9;border:1px solid #cbd5e1;border-radius:8px;padding:8px 12px;font-size:16px;flex-shrink:0;">
+              📁<input type="file" accept="image/*" style="display:none;" onchange="uploadCloudinary(this,'mpm-img2','prev-img2','upl-2')">
+            </label>
+          </div>
           <img id="prev-img2" style="width:60px;height:60px;object-fit:cover;border-radius:8px;border:1px solid var(--border);margin-top:4px;display:none;">
         </div>
-        <div class="fg"><label class="fl">추가 이미지 3</label>
-          <input class="fi" id="mpm-img3" placeholder="https://..." oninput="previewImg('mpm-img3','prev-img3')">
+        <div class="fg">
+          <label class="fl">상세이미지 2</label>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <input class="fi" id="mpm-img3" placeholder="URL 자동입력 또는 직접입력" oninput="previewImg('mpm-img3','prev-img3')" style="flex:1;">
+            <label style="cursor:pointer;background:#f1f5f9;border:1px solid #cbd5e1;border-radius:8px;padding:8px 12px;font-size:16px;flex-shrink:0;">
+              📁<input type="file" accept="image/*" style="display:none;" onchange="uploadCloudinary(this,'mpm-img3','prev-img3','upl-3')">
+            </label>
+          </div>
           <img id="prev-img3" style="width:60px;height:60px;object-fit:cover;border-radius:8px;border:1px solid var(--border);margin-top:4px;display:none;">
         </div>
       </div>
-      <div class="fg"><label class="fl">추가 이미지 4</label>
-        <input class="fi" id="mpm-img4" placeholder="https://..." oninput="previewImg('mpm-img4','prev-img4')">
+      <div class="fg">
+        <label class="fl">상세이미지 3</label>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <input class="fi" id="mpm-img4" placeholder="URL 자동입력 또는 직접입력" oninput="previewImg('mpm-img4','prev-img4')" style="flex:1;">
+          <label style="cursor:pointer;background:#f1f5f9;border:1px solid #cbd5e1;border-radius:8px;padding:8px 12px;font-size:16px;flex-shrink:0;">
+            📁<input type="file" accept="image/*" style="display:none;" onchange="uploadCloudinary(this,'mpm-img4','prev-img4','upl-4')">
+          </label>
+        </div>
         <img id="prev-img4" style="width:60px;height:60px;object-fit:cover;border-radius:8px;border:1px solid var(--border);margin-top:4px;display:none;">
       </div>
-      <div class="fg"><label class="fl">상세페이지 이미지 URL <span style="font-size:10px;color:var(--gray);">(상품 상세에 표시되는 큰 이미지)</span></label>
-        <textarea class="fi" id="mpm-detail-imgs" rows="2" style="resize:vertical;" placeholder="URL 여러 개는 줄바꿈으로 구분&#10;https://...&#10;https://..."></textarea>
+      <div class="fg">
+        <label class="fl">상세페이지 이미지 <span style="font-size:10px;color:var(--gray);">(상품 상세에 표시되는 긴 이미지, 줄바꿈으로 구분)</span></label>
+        <textarea class="fi" id="mpm-detail-imgs" rows="2" style="resize:vertical;" placeholder="https://...&#10;https://..."></textarea>
       </div>
 
       <!-- ③ 상품 옵션 -->
-      <div style="font-size:12px;font-weight:700;color:var(--accent);border-bottom:1px solid #fde8e3;padding-bottom:6px;margin:18px 0 14px;">③ 상품 옵션 <span style="font-size:10px;color:var(--gray);font-weight:400;">(색상/사이즈 등)</span></div>
-      <div id="options-wrap">
-        <!-- 옵션 행 동적 추가 -->
+      <div style="font-size:12px;font-weight:700;color:var(--accent);border-bottom:1px solid #fde8e3;padding-bottom:6px;margin:18px 0 14px;">③ 배송 정보</div>
+      <div class="fg-row">
+        <div class="fg">
+          <label class="fl">색상 옵션 <span style="font-size:10px;color:var(--gray);">(| 구분)</span></label>
+          <input class="fi" id="mpm-colors" placeholder="예: 화이트|블랙|네이비">
+          <div style="font-size:10px;color:var(--gray);margin-top:3px;">재고포함: 화이트:10|블랙:0 (0=품절)</div>
+        </div>
+        <div class="fg">
+          <label class="fl">사이즈 옵션 <span style="font-size:10px;color:var(--gray);">(| 구분)</span></label>
+          <input class="fi" id="mpm-sizes" placeholder="예: S|M|L|XL">
+          <div style="font-size:10px;color:var(--gray);margin-top:3px;">재고포함: S:10|M:5|L:0</div>
+        </div>
       </div>
-      <button type="button" onclick="addOption()" style="background:#f1f5f9;border:1px dashed #cbd5e1;border-radius:8px;padding:8px 16px;font-size:12px;cursor:pointer;width:100%;color:var(--gray-dark);font-family:var(--font);">+ 옵션 추가 (색상/사이즈/수량 등)</button>
+      <div id="options-wrap" style="margin-top:8px;"></div>
+      <button type="button" onclick="addOption()" style="background:#f1f5f9;border:1px dashed #cbd5e1;border-radius:8px;padding:8px 16px;font-size:12px;cursor:pointer;width:100%;color:var(--gray-dark);font-family:var(--font);margin-top:8px;">+ 추가 옵션 (수량/패키지 등)</button>
 
       <!-- ④ 배송/기타 -->
       <div style="font-size:12px;font-weight:700;color:var(--accent);border-bottom:1px solid #fde8e3;padding-bottom:6px;margin:18px 0 14px;">④ 배송 및 기타</div>
@@ -588,6 +627,8 @@ var SCRIPT_URL = (typeof CONFIG !== 'undefined' && CONFIG.PG && CONFIG.PG.API_PR
   ? CONFIG.PG.API_PROXY_URL : '';
 
 var DEALER = null; // 로그인한 대리점 정보
+var CLOUDINARY_CLOUD = 'dmefdyags';
+var CLOUDINARY_PRESET = 'damnuri_upload';
 var curPage = 'dashboard';
 
 // ============================================================
@@ -869,7 +910,7 @@ function renderMyProducts() {
 // 내 상품 모달
 function openMyProdModal(){ clearMyProdForm(); document.getElementById('mpm-title').textContent='📦 상품 등록'; document.getElementById('my-prod-modal').classList.add('active'); go('my-products', document.querySelector('[onclick="go(\'my-products\',this)"]')); }
 function closeMyProdModal(){ document.getElementById('my-prod-modal').classList.remove('active'); }
-function clearMyProdForm(){ ['mpm-id','mpm-name','mpm-price','mpm-sale','mpm-img','mpm-img2','mpm-img3','mpm-img4','mpm-detail-imgs','mpm-desc','mpm-stock','mpm-delivery-fee'].forEach(function(id){ var el=document.getElementById(id); if(el) el.value=''; }); document.getElementById('mpm-category').value=''; document.getElementById('mpm-badge').value=''; document.getElementById('mpm-featured').value='TRUE'; document.getElementById('mpm-active').value='TRUE'; document.getElementById('mpm-delivery-type').value='무료'; document.getElementById('mpm-delivery-days').value='1~3일'; document.getElementById('discount-preview').style.display='none'; document.getElementById('options-wrap').innerHTML=''; optionCount=0; ['prev-img1','prev-img2','prev-img3','prev-img4'].forEach(function(id){ var el=document.getElementById(id); if(el) el.style.display='none'; }); }
+function clearMyProdForm(){ ['mpm-id','mpm-name','mpm-price','mpm-sale','mpm-img','mpm-img2','mpm-img3','mpm-img4','mpm-detail-imgs','mpm-colors','mpm-sizes','mpm-desc','mpm-stock','mpm-delivery-fee'].forEach(function(id){ var el=document.getElementById(id); if(el) el.value=''; }); document.getElementById('mpm-category').value=''; document.getElementById('mpm-badge').value=''; document.getElementById('mpm-featured').value='TRUE'; document.getElementById('mpm-active').value='TRUE'; document.getElementById('mpm-delivery-type').value='무료'; document.getElementById('mpm-delivery-days').value='1~3일'; document.getElementById('discount-preview').style.display='none'; document.getElementById('options-wrap').innerHTML=''; optionCount=0; ['prev-img1','prev-img2','prev-img3','prev-img4'].forEach(function(id){ var el=document.getElementById(id); if(el) el.style.display='none'; }); }
 
 function editMyProduct(btn){
   var id = btn.getAttribute('data-id');
@@ -895,9 +936,38 @@ function editMyProduct(btn){
   var deliveryFee = p['배송비']||'무료';
   document.getElementById('mpm-delivery-type').value = deliveryFee==='무료'?'무료':'유료';
   if(deliveryFee!=='무료'){ document.getElementById('mpm-delivery-fee').value=deliveryFee.replace('원',''); document.getElementById('mpm-delivery-fee').disabled=false; }
+  document.getElementById('mpm-colors').value = p['색상']||'';
+  document.getElementById('mpm-sizes').value = p['사이즈']||'';
   previewImg('mpm-img','prev-img1');
   calcDiscount();
   document.getElementById('my-prod-modal').classList.add('active');
+}
+
+// ☁️ Cloudinary 이미지 업로드
+function uploadCloudinary(input, targetId, previewId, spinnerId) {
+  var file = input.files[0];
+  if (!file) return;
+  var spinner = document.getElementById(spinnerId);
+  if (spinner) spinner.style.display = 'inline';
+  var fd = new FormData();
+  fd.append('file', file);
+  fd.append('upload_preset', CLOUDINARY_PRESET);
+  fetch('https://api.cloudinary.com/v1_1/' + CLOUDINARY_CLOUD + '/image/upload', {
+    method: 'POST', body: fd
+  }).then(function(r){ return r.json(); }).then(function(d){
+    if (d.secure_url) {
+      var el = document.getElementById(targetId);
+      if (el) { el.value = d.secure_url; previewImg(targetId, previewId); }
+      showToast('이미지 업로드 완료!', 'ok');
+    } else {
+      showToast('업로드 실패: ' + (d.error && d.error.message || '알 수 없는 오류'), '');
+    }
+    if (spinner) spinner.style.display = 'none';
+    input.value = '';
+  }).catch(function(){
+    showToast('업로드 오류가 발생했습니다', '');
+    if (spinner) spinner.style.display = 'none';
+  });
 }
 
 // 이미지 미리보기
@@ -979,6 +1049,8 @@ function saveMyProduct(){
     이미지4: document.getElementById('mpm-img4').value||'',
     상세이미지: document.getElementById('mpm-detail-imgs').value||'',
     상품설명: document.getElementById('mpm-desc').value,
+    색상: document.getElementById('mpm-colors').value||'',
+    사이즈: document.getElementById('mpm-sizes').value||'',
     옵션: getOptions(),
     배송비: document.getElementById('mpm-delivery-type').value==='무료' ? '무료' : document.getElementById('mpm-delivery-fee').value+'원',
     배송일: document.getElementById('mpm-delivery-days').value,
