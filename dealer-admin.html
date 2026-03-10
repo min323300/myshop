@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>담누리마켓 대리점 관리</title>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
-  <script src="js/config.js"></script>
+  <!-- config.js dealer-admin 불필요 -->
   <style>
     :root {
       --accent: #FF5733; --accent-dark: #d94420; --accent-light: #fff0ec;
@@ -617,14 +617,14 @@
 
 <div class="toast" id="toast"></div>
 
-<script src="js/config.js"></script>
+<!-- config.js dealer-admin 불필요 -->
 <script>
 // ============================================================
 // 설정
 // ============================================================
 var SHEET_ID = '1t804fRO8HfQtmOzpDAz2IZfzRDQ7t8LYllFGZr3ftUI';
-var SCRIPT_URL = (typeof CONFIG !== 'undefined' && CONFIG.PG && CONFIG.PG.API_PROXY_URL)
-  ? CONFIG.PG.API_PROXY_URL : '';
+// Apps Script URL (config.js 없이 직접 설정)
+var SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzYDBEmbFoax6BWK4tWXC7Y8likER4_bb2XiT7Xmyj9u5cbUkHE_f6rkOa0ynzsUJ9ieg/exec';
 
 var DEALER = null; // 로그인한 대리점 정보
 var CLOUDINARY_CLOUD = 'dmefdyags';
@@ -812,12 +812,12 @@ function loadDashboard() {
       : EMPTY('🛒','주문 없음');
 
     // 공지
-    var notices = parseCSV(results[3]).filter(function(n){ return n['사용여부']!=='FALSE'&&n['구분']!=='매뉴얼'; }).slice(0,3);
+    var notices = parseCSV(results[3]).filter(function(n){ return n['제목']&&n['사용여부']!=='FALSE'&&n['구분']!=='매뉴얼'; }).slice(0,3);
     document.getElementById('dash-notice').innerHTML = notices.length
       ? notices.map(function(n){
           return '<div style="padding:10px 0;border-bottom:1px solid var(--border);">'
-            +'<div style="font-weight:700;font-size:13px;">'+(n['중요도']==='긴급'?'🚨 ':n['중요도']==='중요'?'🔴 ':'')+n['제목']+'</div>'
-            +'<div style="font-size:11px;color:var(--gray);margin-top:3px;">'+n['작성일']+'</div></div>';
+            +'<div style="font-weight:700;font-size:13px;">'+(n['중요도']==='긴급'?'🚨 ':n['중요도']==='중요'?'🔴 ':'')+(n['제목']||'')+'</div>'
+            +'<div style="font-size:11px;color:var(--gray);margin-top:3px;">'+(n['작성일']||'')+'</div></div>';
         }).join('')
       : EMPTY('📢','공지 없음');
   }).catch(function(){ });
