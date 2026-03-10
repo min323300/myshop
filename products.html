@@ -295,8 +295,8 @@ function filterByNav(categoryName, btn) {
 }
 
 async function initPage() {
-  document.getElementById('store-name').textContent = CONFIG.STORE.NAME;
-  document.getElementById('footer-name').textContent = CONFIG.STORE.NAME;
+  document.getElementById('store-name').textContent = CONFIG.STORE.BRAND || CONFIG.STORE.NAME;
+  document.getElementById('footer-name').textContent = CONFIG.STORE.BRAND || CONFIG.STORE.NAME;
   Cart.init();
 
   const params = new URLSearchParams(location.search);
