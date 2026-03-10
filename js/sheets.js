@@ -75,17 +75,32 @@ const DealerContext = {
   async applyBranding() {
     const dealer = await this.load();
     if (!dealer) return;
-    // 헤더 브랜드명 변경
-    const brandEls = document.querySelectorAll('.brand-name, .header-brand, .logo-text, [data-brand]');
-    brandEls.forEach(el => el.textContent = dealer['가맹점명'] || '');
-    // 테마 색상 변경
+    const name = dealer['가맹점명'] || '';
+    if (!name) return;
+
+    // 1) 헤더 로고 텍스트 (#store-name)
+    const storeName = document.getElementById('store-name');
+    if (storeName) storeName.textContent = name;
+
+    // 2) 푸터 브랜드명 (#footer-store-name)
+    const footerName = document.getElementById('footer-store-name');
+    if (footerName) footerName.textContent = '🏪 ' + name;
+
+    // 3) 헤더 공지바 (.header-notice) → 대리점 환영 메시지로 변경
+    const notice = document.querySelector('.header-notice');
+    if (notice) notice.textContent = '🏬 ' + name + ' 공식 쇼핑몰에 오신 것을 환영합니다!';
+
+    // 4) 페이지 타이틀 변경
+    document.title = document.title.replace('담누리마켓', name);
+
+    // 5) 테마 색상 변경
     if (dealer['테마색상']) {
       document.documentElement.style.setProperty('--primary', dealer['테마색상']);
       document.documentElement.style.setProperty('--accent', dealer['테마색상']);
+      document.documentElement.style.setProperty('--color-primary', dealer['테마색상']);
     }
-    // 페이지 타이틀 변경
-    if (dealer['가맹점명']) document.title = document.title.replace('담누리마켓', dealer['가맹점명']);
-    // 딜러 링크 유지 (모든 내부 링크에 ?dealer=ID 유지)
+
+    // 6) 내부 링크에 dealer 파라미터 유지
     this.keepDealerLinks(dealer['가맹점ID']);
   },
 
@@ -474,15 +489,8 @@ const GroupBuyAPI = {
 document.addEventListener('DOMContentLoaded', async function() {
   const dealerId = DealerContext.getDealerId();
   if (!dealerId) return;
+  // 즉시 적용
   await DealerContext.applyBranding();
-
-  // 대리점 안내 배너 표시 (선택적)
-  const dealer = await DealerContext.load();
-  if (dealer && dealer['가맹점명']) {
-    // 기존 공지바 업데이트
-    const noticeBar = document.querySelector('.notice-bar, .announcement-bar, [class*="notice"]');
-    if (noticeBar) {
-      noticeBar.textContent = '🏬 ' + dealer['가맹점명'] + ' 공식 쇼핑몰에 오신 것을 환영합니다!';
-    }
-  }
+  // 동적 렌더링 완료 후 재적용 (app.js가 DOM 변경할 수 있으므로)
+  setTimeout(() => DealerContext.applyBranding(), 800);
 });
