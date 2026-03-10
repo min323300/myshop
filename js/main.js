@@ -110,21 +110,85 @@ function mkCard(p) {
     +'</div></div></div>';
 }
 
-function mkGroup(p) {
-  var pr = p.salePrice||p.price;
-  var dc = p.salePrice?Math.round((1-p.salePrice/p.price)*100):0;
-  var pct = Math.floor(Math.random()*40+50);
-  return '<div class="group-buy-card" onclick="location.href=\'product.html?id='+p.id+'\'">'
-    +'<img src="'+p.image+'" class="group-buy-img" alt="'+p.name+'" loading="lazy">'
+// ============================================================
+// ✅ 공동구매 카드 (실제 데이터 + 실시간 카운트다운)
+// ============================================================
+function mkGroup(g) {
+  var pr = g.groupPrice || g.salePrice || g.price || g.originalPrice || 0;
+  var orig = g.originalPrice || g.price || 0;
+  var dc = (orig && pr && pr < orig) ? Math.round((1-pr/orig)*100) : 0;
+  var pct = g.pct || 0;
+  var timerId = 'gb-timer-' + g.id;
+
+  // 종료일시 포맷
+  var endStr = '';
+  if (g.endAt) {
+    var ed = g.endAt;
+    endStr = ed.getFullYear() + '-'
+      + String(ed.getMonth()+1).padStart(2,'0') + '-'
+      + String(ed.getDate()).padStart(2,'0') + ' '
+      + String(ed.getHours()).padStart(2,'0') + ':'
+      + String(ed.getMinutes()).padStart(2,'0');
+  }
+
+  // 배송예정일
+  var delivStr = g.deliveryDate ? '📦 ' + g.deliveryDate + ' 배송 예정' : '';
+
+  var html = '<div class="group-buy-card" onclick="location.href=\'product.html?id='+g.productId+'\'">'
+    +'<img src="'+g.image+'" class="group-buy-img" alt="'+g.name+'" loading="lazy" onerror="this.src=\'https://picsum.photos/400/400?random=1\'">'
     +'<div class="group-buy-info">'
     +'<span class="group-buy-badge">👥 공동구매</span>'
-    +'<div class="group-buy-name">'+p.name+'</div>'
+    +'<div class="group-buy-name">'+g.name+'</div>'
+
+    // 달성 바
     +'<div class="group-buy-bar"><div class="group-buy-fill" style="width:'+pct+'%"></div></div>'
-    +'<div class="group-buy-pct"><span style="color:#4CAF50;font-weight:700">'+pct+'% 달성</span><span>목표 100명</span></div>'
-    +'<div class="group-buy-price"><span class="group-buy-sale">'+pr.toLocaleString()+'원</span>'
-    +(p.salePrice?'<span class="group-buy-original">'+p.price.toLocaleString()+'원</span>':'')
-    +(dc?'<span class="group-buy-discount">'+dc+'% 할인</span>':'')
-    +'</div></div></div>';
+    +'<div class="group-buy-pct">'
+    +'<span style="color:#4CAF50;font-weight:700">'+pct+'% 달성</span>'
+    +'<span>목표 '+g.targetQty+'명</span>'
+    +'</div>'
+
+    // 실시간 카운트다운
+    +(endStr ? '<div style="margin-top:6px;font-size:12px;color:#e53935;font-weight:700;display:flex;align-items:center;gap:4px;">'
+      +'⏰ 마감까지 <span id="'+timerId+'" data-end="'+(g.endAt?g.endAt.getTime():0)+'">계산중...</span>'
+      +'</div>' : '')
+
+    // 배송 예정일
+    +(delivStr ? '<div style="font-size:11px;color:#666;margin-top:3px;">'+delivStr+'</div>' : '')
+
+    // 가격
+    +'<div class="group-buy-price">'
+    +'<span class="group-buy-sale">'+pr.toLocaleString()+'원</span>'
+    +(orig && orig !== pr ? '<span class="group-buy-original">'+orig.toLocaleString()+'원</span>' : '')
+    +(dc ? '<span class="group-buy-discount">'+dc+'% 할인</span>' : '')
+    +'</div>'
+    +'</div></div>';
+
+  return html;
+}
+
+// ============================================================
+// 공동구매 카운트다운 타이머 시작
+// ============================================================
+function startGroupTimers() {
+  function tick() {
+    var timers = document.querySelectorAll('[id^="gb-timer-"]');
+    timers.forEach(function(el) {
+      var endMs = parseInt(el.getAttribute('data-end'));
+      if (!endMs) { el.textContent = ''; return; }
+      var diff = endMs - Date.now();
+      if (diff <= 0) { el.textContent = '마감'; el.style.color = '#999'; return; }
+      var d = Math.floor(diff / 86400000);
+      var h = Math.floor((diff % 86400000) / 3600000);
+      var m = Math.floor((diff % 3600000) / 60000);
+      var s = Math.floor((diff % 60000) / 1000);
+      el.textContent = (d > 0 ? d + '일 ' : '')
+        + String(h).padStart(2,'0') + ':'
+        + String(m).padStart(2,'0') + ':'
+        + String(s).padStart(2,'0');
+    });
+  }
+  tick();
+  setInterval(tick, 1000);
 }
 
 function showP(id, arr, type) {
@@ -134,6 +198,7 @@ function showP(id, arr, type) {
   var h='';
   for(var i=0;i<arr.length;i++) h += type==='g' ? mkGroup(arr[i]) : mkCard(arr[i]);
   el.innerHTML = h;
+  if (type === 'g') startGroupTimers();
 }
 
 // ============================================================
@@ -182,52 +247,57 @@ function buildNav(products) {
 // 앱 시작
 // ============================================================
 function runApp() {
-  try { Cart.init(); } catch(e){ console.log('Cart err',e); }
-  try { BC.load(); } catch(e){ console.log('Banner err',e); try{ BC.build(BC.defaults()); }catch(e2){} }
+  try { Cart.init(); } catch(e){}
+  try { BC.load(); } catch(e){ try{ BC.build(BC.defaults()); }catch(e2){} }
   try { startTimer(); } catch(e){}
 
-  // ✅ 헤더에 브랜드명 표시 (config.js 기본값, 이후 loadBizInfo가 시트값으로 덮어씀)
   try {
     var sn = document.getElementById('store-name');
-    if (sn && typeof CONFIG !== 'undefined') {
-      sn.textContent = CONFIG.STORE.BRAND || CONFIG.STORE.NAME;
-    }
+    if (sn && typeof CONFIG !== 'undefined') sn.textContent = CONFIG.STORE.BRAND || CONFIG.STORE.NAME;
   } catch(e){}
 
   try { setTimeout(function(){ Popup.loadAndShow(); }, 800); } catch(e){}
 
+  // 일반 상품 섹션
   ProductAPI.getAll().then(function(products) {
     buildNav(products);
-    var best=products.filter(function(p){return p.badge==='BEST'||p.isFeatured;}).slice(0,4);
-    showP('best-products', best.length?best:products.slice(0,4));
-    var nw=products.filter(function(p){return p.badge==='NEW';}).slice(0,4);
-    showP('new-products', nw.length?nw:products.slice(2,6));
-    var sale=products.filter(function(p){return p.salePrice>0;}).slice(0,4);
-    showP('sale-products', sale.length?sale:products.slice(0,4));
-    var flash=products.filter(function(p){return p.salePrice>0;}).sort(function(a,b){return(1-b.salePrice/b.price)-(1-a.salePrice/a.price);}).slice(0,4);
-    showP('flash-products', flash.length?flash:products.slice(0,4));
-    var grp=products.filter(function(p){return p.isFeatured||p.badge==='BEST';}).slice(0,4);
-    showP('group-products', grp.length?grp:products.slice(0,4),'g');
+    var best = products.filter(function(p){ return p.badge==='BEST'||p.isFeatured; }).slice(0,4);
+    showP('best-products', best.length ? best : products.slice(0,4));
+    var nw = products.filter(function(p){ return p.badge==='NEW'; }).slice(0,4);
+    showP('new-products', nw.length ? nw : products.slice(2,6));
+    var sale = products.filter(function(p){ return p.salePrice>0; }).slice(0,4);
+    showP('sale-products', sale.length ? sale : products.slice(0,4));
+    var flash = products.filter(function(p){ return p.salePrice>0; })
+      .sort(function(a,b){ return (1-b.salePrice/b.price)-(1-a.salePrice/a.price); }).slice(0,4);
+    showP('flash-products', flash.length ? flash : products.slice(0,4));
+  }).catch(function(e){ console.error('상품 로드 실패:',e); });
+
+  // ✅ 공동구매 섹션 (구글시트 실제 데이터)
+  GroupBuyAPI.getActive().then(function(groups) {
+    var el = document.getElementById('group-products');
+    if (!el) return;
+    if (!groups.length) {
+      el.innerHTML = '<p style="color:#999;padding:20px;grid-column:1/-1">진행중인 공동구매가 없습니다</p>';
+      return;
+    }
+    var h = '';
+    groups.slice(0,4).forEach(function(g){ h += mkGroup(g); });
+    el.innerHTML = h;
+    startGroupTimers();
   }).catch(function(e){
-    console.error('상품 로드 실패:',e);
+    console.log('공동구매 로드 실패:', e);
   });
 }
 
 if(document.readyState==='loading') {
-  document.addEventListener('DOMContentLoaded', function() {
-    runApp();
-    loadBizInfo(); // ✅ runApp과 함께 호출
-  });
+  document.addEventListener('DOMContentLoaded', function() { runApp(); loadBizInfo(); });
 } else {
   runApp();
   loadBizInfo();
 }
 
 // ============================================================
-// 사업자정보 로드 (구글시트 → 헤더 브랜드명 + footer 사업자정보 반영)
-// ============================================================
-// ⚠️ 구글시트 '사업자정보' 시트 컬럼 순서:
-// A:상호 | B:사업자번호 | C:대표자 | D:주소 | E:전화 | F:이메일 | G:도메인 | H:저작권연도 | I:브랜드명
+// 사업자정보 로드
 // ============================================================
 function loadBizInfo() {
   var SHEET_ID = '1t804fRO8HfQtmOzpDAz2IZfzRDQ7t8LYllFGZr3ftUI';
@@ -235,8 +305,6 @@ function loadBizInfo() {
   fetch(url).then(function(r){ return r.text(); }).then(function(csv) {
     var lines = csv.trim().split('\n');
     if (lines.length < 2) return;
-
-    // 2번째 줄 파싱 (헤더 제외)
     var cols = [];
     var cur = '', inQ = false;
     var line = lines[1];
@@ -247,73 +315,43 @@ function loadBizInfo() {
       else { cur += ch; }
     }
     cols.push(cur.trim());
-
-    // 컬럼 매핑
-    // A:상호 B:사업자번호 C:대표자 D:주소 E:전화 F:이메일 G:도메인 H:저작권연도 I:브랜드명 J:통신판매업번호
     var biz = {
-      name:       cols[0] || '담누리마켓',
-      regNo:      cols[1] || '',
-      ceo:        cols[2] || '',
-      address:    cols[3] || '',
-      phone:      cols[4] || '1588-0000',
-      email:      cols[5] || '',
-      domain:     cols[6] || '',
-      year:       cols[7] || new Date().getFullYear(),
-      brand:      cols[8] || cols[0] || '담누리마켓',
-      mailOrder:  cols[9] || ''   // ✅ J열: 통신판매업번호
+      name: cols[0]||'담누리마켓', regNo: cols[1]||'', ceo: cols[2]||'',
+      address: cols[3]||'', phone: cols[4]||'1588-0000', email: cols[5]||'',
+      domain: cols[6]||'', year: cols[7]||new Date().getFullYear(),
+      brand: cols[8]||cols[0]||'담누리마켓', mailOrder: cols[9]||''
     };
-
     applyBizInfo(biz);
   }).catch(function(e){ console.log('사업자정보 로드 실패:', e); });
 }
 
 function applyBizInfo(biz) {
-  // ✅ 헤더 브랜드명 (상호명 아닌 브랜드명!)
   var sn = document.getElementById('store-name');
   if (sn) sn.textContent = biz.brand;
-
-  // ✅ CONFIG 동기화
   if (typeof CONFIG !== 'undefined') {
-    CONFIG.STORE.BRAND = biz.brand;
-    CONFIG.STORE.NAME  = biz.name;
-    CONFIG.STORE.PHONE = biz.phone;
-    CONFIG.STORE.EMAIL = biz.email;
+    CONFIG.STORE.BRAND = biz.brand; CONFIG.STORE.NAME = biz.name;
+    CONFIG.STORE.PHONE = biz.phone; CONFIG.STORE.EMAIL = biz.email;
   }
-
-  // ✅ 푸터 브랜드명
   var fsn = document.getElementById('footer-store-name');
   if (fsn) fsn.textContent = '🏪 ' + biz.brand;
-
-  // ✅ 푸터 사업자정보 (상호명 표시)
   var fb = document.getElementById('footer-biz');
   if (fb) {
     var parts = [];
-    if (biz.name)      parts.push('상호: ' + biz.name);
-    if (biz.regNo)     parts.push('사업자번호: ' + biz.regNo);
-    if (biz.ceo)       parts.push('대표: ' + biz.ceo);
-    if (biz.mailOrder) parts.push('통신판매업: ' + biz.mailOrder);
+    if (biz.name) parts.push('상호: '+biz.name);
+    if (biz.regNo) parts.push('사업자번호: '+biz.regNo);
+    if (biz.ceo) parts.push('대표: '+biz.ceo);
+    if (biz.mailOrder) parts.push('통신판매업: '+biz.mailOrder);
     fb.textContent = parts.join(' | ');
   }
-
-  // ✅ 푸터 주소/연락처
   var fa = document.getElementById('footer-addr');
   if (fa) {
-    var aparts = [];
-    if (biz.address) aparts.push('주소: ' + biz.address);
-    if (biz.phone)   aparts.push('TEL: ' + biz.phone);
-    if (biz.email)   aparts.push('EMAIL: ' + biz.email);
-    fa.textContent = aparts.join(' | ');
+    var ap = [];
+    if (biz.address) ap.push('주소: '+biz.address);
+    if (biz.phone) ap.push('TEL: '+biz.phone);
+    if (biz.email) ap.push('EMAIL: '+biz.email);
+    fa.textContent = ap.join(' | ');
   }
-
-  // ✅ 푸터 전화
-  var fp = document.getElementById('footer-phone');
-  if (fp) fp.textContent = '📞 ' + biz.phone;
-
-  // ✅ 푸터 이메일
-  var fe = document.getElementById('footer-email');
-  if (fe && biz.email) fe.textContent = '📧 ' + biz.email;
-
-  // ✅ 저작권 (브랜드명 사용)
-  var fc = document.getElementById('footer-copy');
-  if (fc) fc.textContent = '© ' + biz.year + ' ' + biz.brand + '. All rights reserved.';
+  var fp = document.getElementById('footer-phone'); if (fp) fp.textContent = '📞 '+biz.phone;
+  var fe = document.getElementById('footer-email'); if (fe&&biz.email) fe.textContent = '📧 '+biz.email;
+  var fc = document.getElementById('footer-copy'); if (fc) fc.textContent = '© '+biz.year+' '+biz.brand+'. All rights reserved.';
 }
