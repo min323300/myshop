@@ -1,4 +1,14 @@
 // ============================================================
+// 대리점 URL 헬퍼 - dealer 파라미터 자동 유지
+// ============================================================
+function dealerUrl(url) {
+  var dealerId = new URLSearchParams(window.location.search).get('dealer');
+  if (!dealerId) return url;
+  var sep = url.includes('?') ? '&' : '?';
+  return url + sep + 'dealer=' + dealerId;
+}
+
+// ============================================================
 // 배너 컨트롤러
 // ============================================================
 var BC = {
@@ -29,8 +39,8 @@ var BC = {
   },
   defaults: function() {
     return [
-      { title:'담누리마켓 오픈!', sub:'세상의 모든 것을 담누리마켓에서', bg:'#FF5733', color:'#fff', link:'products.html', btn:'쇼핑 시작하기' },
-      { title:'오늘의 특가 최대 50%', sub:'매일 새로운 특가 상품을 만나보세요', bg:'#2D3561', color:'#fff', link:'products.html?filter=sale', btn:'특가 보기' },
+      { title:'담누리마켓 오픈!', sub:'세상의 모든 것을 담누리마켓에서', bg:'#FF5733', color:'#fff', link:dealerUrl('products.html'), btn:'쇼핑 시작하기' },
+      { title:'오늘의 특가 최대 50%', sub:'매일 새로운 특가 상품을 만나보세요', bg:'#2D3561', color:'#fff', link:dealerUrl('products.html?filter=sale'), btn:'특가 보기' },
       { title:'가맹점 모집 중', sub:'함께 성장하는 파트너를 찾습니다', bg:'#0A7E8C', color:'#fff', link:'#', btn:'가맹 문의' }
     ];
   },
@@ -95,7 +105,7 @@ function mkCard(p) {
   var pr = p.salePrice || p.price;
   var dc = p.salePrice ? Math.round((1-p.salePrice/p.price)*100) : 0;
   var pj = JSON.stringify(p).replace(/"/g,'&quot;');
-  return '<div class="product-card" onclick="location.href=\'product.html?id='+p.id+'\'">'
+  return '<div class="product-card" onclick="location.href=dealerUrl(\'product.html?id='+p.id+'\')">'
     +'<div class="product-img-wrap">'
     +'<img src="'+p.image+'" alt="'+p.name+'" loading="lazy" onerror="this.src=\'https://picsum.photos/400/400?random='+p.id+'\'">'
     +(p.badge?'<span class="product-badge badge-'+p.badge.toLowerCase()+'">'+p.badge+'</span>':'')
@@ -134,7 +144,7 @@ function mkGroup(g) {
   // 배송예정일
   var delivStr = g.deliveryDate ? '📦 ' + g.deliveryDate + ' 배송 예정' : '';
 
-  var html = '<div class="group-buy-card" onclick="location.href=\'product.html?id='+g.productId+'\'">'
+  var html = '<div class="group-buy-card" onclick="location.href=dealerUrl(\'product.html?id='+g.productId+'\')">'
     +'<img src="'+g.image+'" class="group-buy-img" alt="'+g.name+'" loading="lazy" onerror="this.src=\'https://picsum.photos/400/400?random=1\'">'
     +'<div class="group-buy-info">'
     +'<span class="group-buy-badge">👥 공동구매</span>'
@@ -223,17 +233,17 @@ function buildNav(products) {
       var btn=document.createElement('button');
       btn.className='nav-item'+(subs.length?' has-sub':'');
       btn.textContent=cn; btn.setAttribute('data-c',cn);
-      btn.onclick=function(){location.href='products.html?category='+encodeURIComponent(this.getAttribute('data-c'));};
+      btn.onclick=function(){location.href=dealerUrl('products.html?category='+encodeURIComponent(this.getAttribute('data-c')));};
       wrap.appendChild(btn);
       if(subs.length){
         var dd=document.createElement('div'); dd.className='nav-dropdown';
         var ab=document.createElement('button'); ab.className='nav-dropdown-item'; ab.textContent='✦ 전체보기'; ab.setAttribute('data-c',cn);
-        ab.onclick=function(e){e.stopPropagation();location.href='products.html?category='+encodeURIComponent(this.getAttribute('data-c'));};
+        ab.onclick=function(e){e.stopPropagation();location.href=dealerUrl('products.html?category='+encodeURIComponent(this.getAttribute('data-c')));};
         dd.appendChild(ab);
         for(var s=0;s<subs.length;s++){
           var sb=document.createElement('button'); sb.className='nav-dropdown-item'; sb.textContent=subs[s];
           sb.setAttribute('data-c',cn); sb.setAttribute('data-s',subs[s]);
-          sb.onclick=function(e){e.stopPropagation();location.href='products.html?category='+encodeURIComponent(this.getAttribute('data-c'))+'&sub='+encodeURIComponent(this.getAttribute('data-s'));};
+          sb.onclick=function(e){e.stopPropagation();location.href=dealerUrl('products.html?category='+encodeURIComponent(this.getAttribute('data-c'))+'&sub='+encodeURIComponent(this.getAttribute('data-s')));};
           dd.appendChild(sb);
         }
         wrap.appendChild(dd);
