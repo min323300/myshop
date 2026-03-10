@@ -40,16 +40,16 @@ const SheetAPI = {
 };
 
 // ============================================================
-// 🖼️ 이미지 URL 헬퍼 (파일명만 입력해도 자동으로 전체 URL 생성)
+// 🖼️ 이미지 URL 헬퍼
 // ============================================================
 function resolveImageUrl(val) {
   if (!val) return '';
-  if (val.startsWith('http')) return val; // 이미 전체 URL
-  return CONFIG.IMAGE_BASE + val;          // 파일명만 입력된 경우 자동 변환
+  if (val.startsWith('http')) return val;
+  return CONFIG.IMAGE_BASE + val;
 }
 
 // ============================================================
-// 상품 데이터 (한글 헤더 매핑)
+// 상품 데이터
 // ============================================================
 const ProductAPI = {
   async getAll() {
@@ -70,19 +70,18 @@ const ProductAPI = {
       salesCount: parseInt(row['판매수량']) || 0,
       rating: parseFloat(row['별점평균']) || 0,
       reviewCount: parseInt(row['리뷰수']) || 0,
-      detailImages: row['상세이미지'] ? row['상세이미지'].split('|').map(function(s){ return resolveImageUrl(s.trim()); }).join('|') : '',
-      detailImages2: row['상세이미지2'] ? row['상세이미지2'].split('|').map(function(s){ return resolveImageUrl(s.trim()); }).join('|') : '',
+      detailImages: row['상세이미지'] ? row['상세이미지'].split('|').map(s => resolveImageUrl(s.trim())).join('|') : '',
+      detailImages2: row['상세이미지2'] ? row['상세이미지2'].split('|').map(s => resolveImageUrl(s.trim())).join('|') : '',
       certImage: resolveImageUrl(row['인증이미지']),
       colors: row['색상'] || '',
       sizes: row['사이즈'] || '',
       supplier: row['공급사'] || '',
       youtube: row['유튜브'] || '',
-      specs:   row['상세스펙'] || '', 
-      caution: row['주의사항'] || '', 
+      specs: row['상세스펙'] || '',
+      caution: row['주의사항'] || '',
     }))
     .filter(p => p.isActive && p.name)
     .sort((a, b) => {
-      // 랭킹 공식: 판매수량×0.4 + 별점평균×0.4 + 리뷰수×0.2
       const scoreA = (a.salesCount * 0.4) + (a.rating * 20 * 0.4) + (a.reviewCount * 0.2);
       const scoreB = (b.salesCount * 0.4) + (b.rating * 20 * 0.4) + (b.reviewCount * 0.2);
       return scoreB - scoreA;
@@ -156,15 +155,12 @@ const ReviewAPI = {
       .map(row => ({
         id: row['번호'],
         productId: row['상품번호'],
-        orderNo: row['주문번호'],
         author: row['작성자'],
         rating: parseInt(row['별점']) || 0,
         content: row['리뷰내용'],
         image: resolveImageUrl(row['리뷰이미지']),
         date: row['작성일'],
         reply: row['답글내용'],
-        replyAuthor: row['답글작성자'],
-        replyDate: row['답글작성일'],
       }))
       .sort((a, b) => new Date(b.date) - new Date(a.date));
   },
@@ -187,11 +183,7 @@ const PopupAPI = {
       const isActive = row['사용여부'] === 'TRUE';
       const startOk = !row['시작일'] || row['시작일'] <= today;
       const endOk = !row['종료일'] || row['종료일'] >= today;
-      const target = row['대상'] || 'all';
-      const targetOk = target === 'all' ||
-        (CONFIG.IS_FRANCHISE && target === '가맹점') ||
-        (!CONFIG.IS_FRANCHISE && target === '본사');
-      return isActive && startOk && endOk && targetOk;
+      return isActive && startOk && endOk;
     }).map(row => ({
       id: row['번호'],
       title: row['제목'],
@@ -255,5 +247,210 @@ const FranchiseAPI = {
       commissionRate: parseFloat(row['수수료율']) || 2,
       bankAccount: row['정산계좌'],
     })).filter(f => f.status !== '해지');
+  }
+};
+
+// ============================================================
+// 👥 공동구매 API
+// ============================================================
+// 구글시트 "공동구매" 시트 컬럼:
+// 번호 | 상품번호 | 제목 | 공동구매가 | 목표수량 | 현재참여 |
+// 시작일시 | 종료일시 | 배송예정일 | 사용여부 | 설명
+// ============================================================
+const GroupBuyAPI = {
+
+  // 시트 URL
+  _url() {
+    return 'https://docs.google.com/spreadsheets/d/' + CONFIG.SHEETS.SHEET_ID
+      + '/gviz/tq?tqx=out:csv&sheet=' + encodeURIComponent('공동구매');
+  },
+
+  // 날짜+시간 파싱 (예: "2026-03-20 23:59")
+  parseDateTime(str) {
+    if (!str) return null;
+    return new Date(str.replace(' ', 'T'));
+  },
+
+  // 공동구매 상태 계산
+  getStatus(item) {
+    const now = new Date();
+    const start = item.startAt;
+    const end = item.endAt;
+    if (!item.isActive) return 'disabled';
+    if (start && now < start) return 'upcoming';   // 예정
+    if (end && now > end) return 'ended';           // 마감
+    return 'active';                                 // 진행중
+  },
+
+  // 마감까지 남은 시간 텍스트 (실시간)
+  getRemaining(endAt) {
+    if (!endAt) return '';
+    const diff = endAt - new Date();
+    if (diff <= 0) return '마감';
+    const d = Math.floor(diff / 86400000);
+    const h = Math.floor((diff % 86400000) / 3600000);
+    const m = Math.floor((diff % 3600000) / 60000);
+    const s = Math.floor((diff % 60000) / 1000);
+    if (d > 0) return d + '일 ' + String(h).padStart(2,'0') + ':' + String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+    return String(h).padStart(2,'0') + ':' + String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+  },
+
+  // 달성률 계산
+  getPct(current, target) {
+    if (!target) return 0;
+    return Math.min(100, Math.round((current / target) * 100));
+  },
+
+  async getAll() {
+    const SHEET_ID = '1t804fRO8HfQtmOzpDAz2IZfzRDQ7t8LYllFGZr3ftUI';
+    const url = 'https://docs.google.com/spreadsheets/d/' + SHEET_ID
+      + '/gviz/tq?tqx=out:csv&sheet=' + encodeURIComponent('공동구매');
+    const rows = await SheetAPI.fetch(url);
+    return rows.map(row => ({
+      id:          row['번호'] || '',
+      productId:   row['상품번호'] || '',
+      title:       row['제목'] || '',
+      groupPrice:  parseInt(row['공동구매가']) || 0,
+      targetQty:   parseInt(row['목표수량']) || 100,
+      currentQty:  parseInt(row['현재참여']) || 0,
+      startAt:     this.parseDateTime(row['시작일시']),
+      endAt:       this.parseDateTime(row['종료일시']),
+      deliveryDate: row['배송예정일'] || '',
+      isActive:    row['사용여부'] !== 'FALSE',
+      description: row['설명'] || '',
+    }));
+  },
+
+  // 진행중인 공동구매만
+  async getActive() {
+    const all = await this.getAll();
+    // 상품 정보 병합
+    const products = await ProductAPI.getAll();
+    return all
+      .filter(g => this.getStatus(g) === 'active')
+      .map(g => {
+        const product = products.find(p => String(p.id) === String(g.productId)) || {};
+        return Object.assign({}, g, {
+          name: g.title || product.name || '',
+          image: product.image || '',
+          category: product.category || '',
+          originalPrice: product.price || 0,
+          pct: this.getPct(g.currentQty, g.targetQty),
+        });
+      });
+  },
+
+  // 모든 상태 포함 (관리자용) - 상품정보 병합
+  async getAllWithProduct() {
+    const all = await this.getAll();
+    const products = await ProductAPI.getAll();
+    return all.map(g => {
+      const product = products.find(p => String(p.id) === String(g.productId)) || {};
+      return Object.assign({}, g, {
+        name: g.title || product.name || '',
+        image: product.image || '',
+        category: product.category || '',
+        originalPrice: product.price || 0,
+        pct: this.getPct(g.currentQty, g.targetQty),
+        status: this.getStatus(g),
+      });
+    });
+  }
+};
+
+// ============================================================
+// 👥 공동구매 API
+// ============================================================
+// 구글시트 "공동구매" 시트 컬럼:
+// 번호 | 상품번호 | 제목 | 공동구매가 | 목표수량 | 현재참여 |
+// 시작일시 | 종료일시 | 배송예정일 | 사용여부 | 설명
+//
+// 종료일시 입력 형식: "2026-03-20 23:59" (날짜+공백+시간)
+// ============================================================
+const GroupBuyAPI = {
+
+  parseDateTime(str) {
+    if (!str) return null;
+    return new Date(str.replace(' ', 'T'));
+  },
+
+  getStatus(item) {
+    const now = new Date();
+    if (!item.isActive) return 'disabled';
+    if (item.startAt && now < item.startAt) return 'upcoming';
+    if (item.endAt && now > item.endAt) return 'ended';
+    return 'active';
+  },
+
+  getRemaining(endAt) {
+    if (!endAt) return '';
+    const diff = endAt - new Date();
+    if (diff <= 0) return '마감';
+    const d = Math.floor(diff / 86400000);
+    const h = Math.floor((diff % 86400000) / 3600000);
+    const m = Math.floor((diff % 3600000) / 60000);
+    const s = Math.floor((diff % 60000) / 1000);
+    return (d > 0 ? d + '일 ' : '')
+      + String(h).padStart(2,'0') + ':'
+      + String(m).padStart(2,'0') + ':'
+      + String(s).padStart(2,'0');
+  },
+
+  getPct(current, target) {
+    if (!target) return 0;
+    return Math.min(100, Math.round((current / target) * 100));
+  },
+
+  async getAll() {
+    const SHEET_ID = '1t804fRO8HfQtmOzpDAz2IZfzRDQ7t8LYllFGZr3ftUI';
+    const url = 'https://docs.google.com/spreadsheets/d/' + SHEET_ID
+      + '/gviz/tq?tqx=out:csv&sheet=' + encodeURIComponent('공동구매');
+    const rows = await SheetAPI.fetch(url);
+    return rows.map(row => ({
+      id:           row['번호'] || '',
+      productId:    row['상품번호'] || '',
+      title:        row['제목'] || '',
+      groupPrice:   parseInt(row['공동구매가']) || 0,
+      targetQty:    parseInt(row['목표수량']) || 100,
+      currentQty:   parseInt(row['현재참여']) || 0,
+      startAt:      this.parseDateTime(row['시작일시']),
+      endAt:        this.parseDateTime(row['종료일시']),
+      deliveryDate: row['배송예정일'] || '',
+      isActive:     row['사용여부'] !== 'FALSE',
+      description:  row['설명'] || '',
+    }));
+  },
+
+  // 진행중인 공동구매 + 상품정보 병합 (쇼핑몰 메인용)
+  async getActive() {
+    const [all, products] = await Promise.all([this.getAll(), ProductAPI.getAll()]);
+    return all
+      .filter(g => this.getStatus(g) === 'active')
+      .map(g => {
+        const prod = products.find(p => String(p.id) === String(g.productId)) || {};
+        return Object.assign({}, g, {
+          name:          g.title || prod.name || '',
+          image:         prod.image || '',
+          category:      prod.category || '',
+          originalPrice: prod.price || 0,
+          pct:           this.getPct(g.currentQty, g.targetQty),
+        });
+      });
+  },
+
+  // 전체 상태 포함 + 상품정보 병합 (관리자용)
+  async getAllWithProduct() {
+    const [all, products] = await Promise.all([this.getAll(), ProductAPI.getAll()]);
+    return all.map(g => {
+      const prod = products.find(p => String(p.id) === String(g.productId)) || {};
+      return Object.assign({}, g, {
+        name:          g.title || prod.name || '',
+        image:         prod.image || '',
+        category:      prod.category || '',
+        originalPrice: prod.price || 0,
+        pct:           this.getPct(g.currentQty, g.targetQty),
+        status:        this.getStatus(g),
+      });
+    });
   }
 };
