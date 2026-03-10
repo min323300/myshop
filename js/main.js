@@ -326,14 +326,24 @@ function loadBizInfo() {
 }
 
 function applyBizInfo(biz) {
-  var sn = document.getElementById('store-name');
-  if (sn) sn.textContent = biz.brand;
+  // 대리점 URL 파라미터가 있으면 브랜드명 관련 요소는 건드리지 않음
+  var isDealer = !!(new URLSearchParams(window.location.search).get('dealer'));
+
+  if (!isDealer) {
+    var sn = document.getElementById('store-name');
+    if (sn) sn.textContent = biz.brand;
+    var fsn = document.getElementById('footer-store-name');
+    if (fsn) fsn.textContent = '🏪 ' + biz.brand;
+    var fc = document.getElementById('footer-copy');
+    if (fc) fc.textContent = '© '+biz.year+' '+biz.brand+'. All rights reserved.';
+  }
+
   if (typeof CONFIG !== 'undefined') {
     CONFIG.STORE.BRAND = biz.brand; CONFIG.STORE.NAME = biz.name;
     CONFIG.STORE.PHONE = biz.phone; CONFIG.STORE.EMAIL = biz.email;
   }
-  var fsn = document.getElementById('footer-store-name');
-  if (fsn) fsn.textContent = '🏪 ' + biz.brand;
+
+  // 사업자 정보(주소, 대표, 사업자번호)는 대리점도 본사 것 그대로 표시
   var fb = document.getElementById('footer-biz');
   if (fb) {
     var parts = [];
@@ -353,5 +363,4 @@ function applyBizInfo(biz) {
   }
   var fp = document.getElementById('footer-phone'); if (fp) fp.textContent = '📞 '+biz.phone;
   var fe = document.getElementById('footer-email'); if (fe&&biz.email) fe.textContent = '📧 '+biz.email;
-  var fc = document.getElementById('footer-copy'); if (fc) fc.textContent = '© '+biz.year+' '+biz.brand+'. All rights reserved.';
 }
