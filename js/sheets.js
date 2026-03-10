@@ -575,15 +575,54 @@ const NoticeAPI = {
 };
 
 // ============================================================
-// 🏬 페이지 로드 시 대리점 브랜딩 자동 적용
+// 🏬 페이지 로드 시 브랜딩 자동 적용
 // ============================================================
 document.addEventListener('DOMContentLoaded', async function() {
   const dealerId = DealerContext.getDealerId();
-  if (!dealerId) return;
-  // 1차: 즉시 적용
-  await DealerContext.applyBranding();
-  // 2차: app.js 로드 완료 후 (약 1초)
-  setTimeout(() => DealerContext.applyBranding(), 1000);
-  // 3차: 시트 데이터 로드 완료 후 (약 2.5초) - 사업자정보 덮어쓰기 방지
-  setTimeout(() => DealerContext.applyBranding(), 2500);
+
+  if (dealerId) {
+    // ── 대리점 모드: 대리점 브랜딩 적용 ──
+    await DealerContext.applyBranding();
+    setTimeout(() => DealerContext.applyBranding(), 1000);
+    setTimeout(() => DealerContext.applyBranding(), 2500);
+  } else {
+    // ── 본사 모드: 브랜드명 항상 "담누리마켓" 고정 ──
+    const BRAND = '담누리마켓';
+
+    function fixBrandName() {
+      // 헤더 로고
+      const storeName = document.getElementById('store-name');
+      if (storeName && storeName.textContent !== BRAND) storeName.textContent = BRAND;
+
+      // 푸터 브랜드명
+      const footerName = document.getElementById('footer-store-name');
+      if (footerName && !footerName.textContent.includes(BRAND)) footerName.textContent = '🏪 ' + BRAND;
+
+      // 푸터 저작권
+      const footerCopy = document.getElementById('footer-copy');
+      if (footerCopy && !footerCopy.textContent.includes(BRAND)) {
+        footerCopy.textContent = '© 2026 ' + BRAND + '. All rights reserved.';
+      }
+
+      // 페이지 타이틀
+      if (document.title.includes('비에스컴퍼니')) {
+        document.title = document.title.replace(/\(주\)비에스컴퍼니|비에스컴퍼니/g, BRAND);
+      }
+    }
+
+    // 즉시 + app.js 로드 후 반복 보정
+    fixBrandName();
+    setTimeout(fixBrandName, 500);
+    setTimeout(fixBrandName, 1500);
+    setTimeout(fixBrandName, 3000);
+
+    // MutationObserver로 app.js 덮어쓰기 방지
+    const storeName = document.getElementById('store-name');
+    if (storeName) {
+      const obs = new MutationObserver(() => {
+        if (storeName.textContent !== BRAND) storeName.textContent = BRAND;
+      });
+      obs.observe(storeName, { childList: true, subtree: true, characterData: true });
+    }
+  }
 });
