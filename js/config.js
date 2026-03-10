@@ -48,7 +48,7 @@ const CONFIG = {
   PG: {
     PROVIDER:      '',   // 윈글로벌 계약 후 입력 (예: 'winglobal')
     MERCHANT_ID:   '',   // 윈글로벌 MID 입력
-    API_PROXY_URL: 'https://script.google.com/macros/s/AKfycbzLGhAge8yjuJXyH32tOQeX8YVQHlXniMmN8NlMbLrht-1xEW-p41dvhciVPDhz8s_NVQ/exec',
+    API_PROXY_URL: 'https://script.google.com/macros/s/AKfycbyCvY5m2dE0_vOcKCwvZRsbJwjys_7NC0kWDVwOZ4Gjkvqb9JeRc_C2SSBq57wXAYBHCA/exec',
   },
   // ✅ 기타 설정
   PRODUCTS_PER_PAGE: 12,
