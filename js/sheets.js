@@ -65,7 +65,7 @@ const DealerContext = {
       const url = 'https://docs.google.com/spreadsheets/d/' + SHEET_ID
         + '/gviz/tq?tqx=out:csv&sheet=' + encodeURIComponent('가맹점') + '&t=' + Date.now();
       const rows = await SheetAPI.fetch(url);
-      this._dealer = rows.find(r => r['대리점ID'] === id && r['상태'] !== '해지') || null;
+      this._dealer = rows.find(r => (r['대리점ID'] || r['가맹점ID']) === id && r['상태'] !== '해지') || null;
     } catch(e) { this._dealer = null; }
     this._loaded = true;
     return this._dealer;
@@ -140,10 +140,10 @@ const DealerProductAPI = {
   async getByDealer(dealerId) {
     const SHEET_ID = CONFIG.SHEET_ID || '1t804fRO8HfQtmOzpDAz2IZfzRDQ7t8LYllFGZr3ftUI';
     const url = 'https://docs.google.com/spreadsheets/d/' + SHEET_ID
-      + '/gviz/tq?tqx=out:csv&sheet=' + encodeURIComponent('가맹점상품') + '&t=' + Date.now();
+      + '/gviz/tq?tqx=out:csv&sheet=' + encodeURIComponent('대리점상품') + '&t=' + Date.now();
     const rows = await SheetAPI.fetch(url);
     return rows
-      .filter(r => r['대리점ID'] === dealerId && r['사용여부'] !== 'FALSE' && r['상품명'])
+      .filter(r => (r['대리점ID']||r['가맹점ID']) === dealerId && r['사용여부'] !== 'FALSE' && r['상품명'])
       .map(row => ({
         id: 'D_' + (row['번호'] || ''),   // 본사 상품과 ID 충돌 방지
         name: row['상품명'] || '',
@@ -166,7 +166,7 @@ const DealerProductAPI = {
         salesCount: 0,
         rating: parseFloat(row['별점평균']) || 0,
         reviewCount: parseInt(row['리뷰수']) || 0,
-        dealerId: row['대리점ID'] || '',
+        dealerId: row['대리점ID'] || row['가맹점ID'] || '',
         isDealer: true,   // 대리점 상품 표시용
       }));
   }
