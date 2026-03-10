@@ -3,6 +3,55 @@ var currentRating = 0;
 var allReviews = [];
 var images = [];
 var currentImgIdx = 0;
+var optionPriceOverride = null; // 옵션 선택 시 가격 오버라이드
+
+// ============================================================
+// 카테고리별 옵션 라벨 자동 매핑
+// ============================================================
+function getCategoryLabels(category) {
+  var cat = category || '';
+  // 식품 계열
+  var foodKeywords = ['식품', '음식', '건강', '농산물', '수산물', '축산물', '간식', '음료', '식재료', '반찬', '고기', '과일', '야채', '채소'];
+  var isFood = foodKeywords.some(function(k){ return cat.indexOf(k) >= 0; });
+  if (isFood) return { color: '구성', size: '용량/개수', colorId: 'color', sizeId: 'size' };
+
+  // 신발
+  if (cat.indexOf('신발') >= 0) return { color: '색상', size: '사이즈(mm)', colorId: 'color', sizeId: 'size' };
+
+  // 뷰티/화장품
+  var beautyKeywords = ['뷰티', '화장품', '스킨케어', '헤어'];
+  var isBeauty = beautyKeywords.some(function(k){ return cat.indexOf(k) >= 0; });
+  if (isBeauty) return { color: '타입', size: '용량', colorId: 'color', sizeId: 'size' };
+
+  // 전자/가전
+  var techKeywords = ['전자', '가전', '디지털', '컴퓨터'];
+  var isTech = techKeywords.some(function(k){ return cat.indexOf(k) >= 0; });
+  if (isTech) return { color: '색상', size: '옵션', colorId: 'color', sizeId: 'size' };
+
+  // 기본 (의류 등)
+  return { color: '색상', size: '사이즈', colorId: 'color', sizeId: 'size' };
+}
+
+// ============================================================
+// 옵션 항목 파싱
+// name:값  → 값 >= 1000 이면 가격, 0 이면 품절, 1~999 이면 재고수량
+// ============================================================
+function parseOptionItem(raw) {
+  var parts = raw.trim().split(':');
+  var name = parts[0].trim();
+  var val = parts.length > 1 ? parseInt(parts[1]) : null;
+
+  var isPrice  = val !== null && val >= 1000;
+  var soldOut  = val !== null && !isPrice && val === 0;
+  var stock    = (!isPrice && val !== null) ? val : 999;
+
+  return {
+    name: name,
+    price: isPrice ? val : null,   // 절대 가격 (옵션별 다른 가격)
+    stock: isPrice ? 999 : stock,
+    soldOut: soldOut
+  };
+}
 
 function initPage() {
   try {
@@ -45,6 +94,9 @@ function loadProduct(id) {
 }
 
 function renderProduct(p) {
+  // 옵션 가격 초기화
+  optionPriceOverride = null;
+
   document.title = p.name + ' - ' + (typeof CONFIG !== 'undefined' ? CONFIG.STORE.NAME : '담누리마켓');
 
   var bcCat = document.getElementById('bc-category');
@@ -65,7 +117,7 @@ function renderProduct(p) {
   var nameEl = document.getElementById('detail-name');
   if (nameEl) nameEl.textContent = p.name;
 
-  // 이미지 갤러리 (대표이미지만 - 상세이미지는 탭에 별도 표시)
+  // 이미지 갤러리
   images = [p.image].filter(Boolean);
   if (!images.length) images = ['https://picsum.photos/600/600?random=' + p.id];
   currentImgIdx = 0;
@@ -109,46 +161,55 @@ function renderProduct(p) {
     if (feeEl) feeEl.textContent = '무료배송 🎉';
   }
 
-  // 옵션 색상
+  // ✅ 카테고리별 옵션 라벨 동적 변경
+  var catLabels = getCategoryLabels(p.category);
+
+  // 옵션 라벨 텍스트 교체
+  var colorLabelEl = document.querySelector('#option-color-section .option-label');
+  if (colorLabelEl) colorLabelEl.textContent = catLabels.color;
+  var sizeLabelEl = document.querySelector('#option-size-section .option-label');
+  if (sizeLabelEl) sizeLabelEl.textContent = catLabels.size;
+
+  // ✅ 옵션1 (colors 필드 → 구성/색상 등)
   if (p.colors) {
     var colorItems = p.colors.split('|').map(function(s){ return s.trim(); }).filter(Boolean);
     if (colorItems.length) {
       var sec = document.getElementById('option-color-section');
       var chips = document.getElementById('option-color-chips');
       if (sec) sec.classList.add('has-options');
-      if (chips) chips.innerHTML = colorItems.map(function(c){
-        var parts = c.split(':');
-        var name = parts[0].trim();
-        var stock = parts.length > 1 ? parseInt(parts[1]) : 999;
-        var soldOut = stock === 0;
-        return '<button class="option-chip' + (soldOut ? ' sold-out' : '') + '" '
+      if (chips) chips.innerHTML = colorItems.map(function(raw){
+        var opt = parseOptionItem(raw);
+        var priceTag = opt.price ? ' <small style="color:var(--accent);font-weight:700;">' + opt.price.toLocaleString() + '원</small>' : '';
+        return '<button class="option-chip' + (opt.soldOut ? ' sold-out' : '') + '" '
           + 'onclick="selectOption(this,\'color\')" '
-          + 'data-stock="' + stock + '" '
-          + (soldOut ? 'disabled ' : '')
-          + 'style="' + (soldOut ? 'opacity:0.4;text-decoration:line-through;cursor:not-allowed;' : '') + '">'
-          + name + (soldOut ? ' (품절)' : '') + '</button>';
+          + 'data-name="' + opt.name + '" '
+          + 'data-price="' + (opt.price || 0) + '" '
+          + 'data-stock="' + opt.stock + '" '
+          + (opt.soldOut ? 'disabled ' : '')
+          + 'style="' + (opt.soldOut ? 'opacity:0.4;text-decoration:line-through;cursor:not-allowed;' : '') + '">'
+          + opt.name + (opt.price ? '' : '') + (opt.soldOut ? ' (품절)' : '') + priceTag + '</button>';
       }).join('');
     }
   }
 
-  // 옵션 사이즈
+  // ✅ 옵션2 (sizes 필드 → 용량/사이즈 등)
   if (p.sizes) {
     var sizeItems = p.sizes.split('|').map(function(s){ return s.trim(); }).filter(Boolean);
     if (sizeItems.length) {
       var ssec = document.getElementById('option-size-section');
       var schips = document.getElementById('option-size-chips');
       if (ssec) ssec.classList.add('has-options');
-      if (schips) schips.innerHTML = sizeItems.map(function(s){
-        var parts = s.split(':');
-        var name = parts[0].trim();
-        var stock = parts.length > 1 ? parseInt(parts[1]) : 999;
-        var soldOut = stock === 0;
-        return '<button class="option-chip' + (soldOut ? ' sold-out' : '') + '" '
+      if (schips) schips.innerHTML = sizeItems.map(function(raw){
+        var opt = parseOptionItem(raw);
+        var priceTag = opt.price ? ' <small style="color:var(--accent);font-weight:700;">' + opt.price.toLocaleString() + '원</small>' : '';
+        return '<button class="option-chip' + (opt.soldOut ? ' sold-out' : '') + '" '
           + 'onclick="selectOption(this,\'size\')" '
-          + 'data-stock="' + stock + '" '
-          + (soldOut ? 'disabled ' : '')
-          + 'style="' + (soldOut ? 'opacity:0.4;text-decoration:line-through;cursor:not-allowed;' : '') + '">'
-          + name + (soldOut ? ' (품절)' : '') + '</button>';
+          + 'data-name="' + opt.name + '" '
+          + 'data-price="' + (opt.price || 0) + '" '
+          + 'data-stock="' + opt.stock + '" '
+          + (opt.soldOut ? 'disabled ' : '')
+          + 'style="' + (opt.soldOut ? 'opacity:0.4;text-decoration:line-through;cursor:not-allowed;' : '') + '">'
+          + opt.name + (opt.soldOut ? ' (품절)' : '') + priceTag + '</button>';
       }).join('');
     }
   }
@@ -183,23 +244,17 @@ function renderProduct(p) {
 
   updateTotal();
 
-  // ✅ 상세이미지 + 스펙 + 인증 + 주의사항 렌더링
+  // 상세이미지 + 스펙 + 인증 + 주의사항 렌더링
   renderDetailContent(p);
 }
 
-// ============================================================
-// ✅ 핵심 수정: 'tab-detail' → 'tab-desc' 로 변경
-//    + 상세이미지(Q열), 상세이미지2(R열) 세로 긴 이미지 표시 추가
-// ============================================================
 function renderDetailContent(p) {
-  var tab = document.getElementById('tab-desc'); // ✅ 수정된 ID
+  var tab = document.getElementById('tab-desc');
   if (!tab) return;
 
-  // 기존에 추가된 동적 콘텐츠 제거 (중복 방지)
   var old = tab.querySelectorAll('.dynamic-detail');
   old.forEach(function(el){ el.remove(); });
 
-  // ── 상세이미지 (Q열) ──────────────────────────────────────
   if (p.detailImages) {
     var imgs1 = p.detailImages.split('|').map(function(s){ return s.trim(); }).filter(Boolean);
     if (imgs1.length) {
@@ -215,7 +270,6 @@ function renderDetailContent(p) {
     }
   }
 
-  // ── 상세이미지2 (R열) ─────────────────────────────────────
   if (p.detailImages2) {
     var imgs2 = p.detailImages2.split('|').map(function(s){ return s.trim(); }).filter(Boolean);
     if (imgs2.length) {
@@ -231,7 +285,6 @@ function renderDetailContent(p) {
     }
   }
 
-  // ── 상세스펙 테이블 (V열) ────────────────────────────────
   if (p.specs) {
     var items = p.specs.split('|').map(function(s){ return s.trim(); }).filter(Boolean);
     if (items.length) {
@@ -254,7 +307,6 @@ function renderDetailContent(p) {
     }
   }
 
-  // ── 인증이미지 (W열) ─────────────────────────────────────
   if (p.certImage) {
     var certDiv = document.createElement('div');
     certDiv.className = 'dynamic-detail';
@@ -265,7 +317,6 @@ function renderDetailContent(p) {
     tab.appendChild(certDiv);
   }
 
-  // ── 주의사항 (X열) ───────────────────────────────────────
   if (p.caution) {
     var cautionDiv = document.createElement('div');
     cautionDiv.className = 'dynamic-detail';
@@ -275,8 +326,6 @@ function renderDetailContent(p) {
     tab.appendChild(cautionDiv);
   }
 }
-
-// 기존 renderSpecs 함수는 renderDetailContent로 대체됨 (삭제)
 
 function renderYoutube(url) {
   var wrap = document.getElementById('youtube-wrap');
@@ -394,22 +443,61 @@ function openLightboxUrl(url) {
 
 var selectedOptions = {};
 
+// ✅ 옵션 선택 시 가격 자동 변경
 function selectOption(el, group) {
   el.closest('.option-chips').querySelectorAll('.option-chip').forEach(function(c){ c.classList.remove('active'); });
   el.classList.add('active');
-  selectedOptions[group] = el.textContent.replace(' (품절)', '').trim();
+
+  var optName  = el.dataset.name  || el.textContent.replace(' (품절)', '').trim();
+  var optPrice = parseInt(el.dataset.price) || 0;
+
+  selectedOptions[group] = optName;
+
+  // 옵션에 가격이 있으면 → 표시 금액 업데이트
+  if (optPrice >= 1000) {
+    optionPriceOverride = optPrice;
+
+    // 가격 표시 업데이트
+    var detPrice = document.getElementById('detail-price');
+    if (detPrice) detPrice.textContent = optPrice.toLocaleString() + '원';
+
+    // 원가 대비 할인율 숨김 (옵션 가격은 절대값이므로)
+    var origEl = document.getElementById('detail-original-price');
+    var discEl = document.getElementById('detail-discount');
+    if (origEl) origEl.style.display = 'none';
+    if (discEl) discEl.style.display = 'none';
+  } else {
+    // 가격 옵션 없는 항목 → 기본 상품 가격 복원
+    var hasAnyPrice = el.closest('.option-chips').querySelectorAll('[data-price]');
+    var anyPrice = false;
+    hasAnyPrice.forEach(function(btn){ if(parseInt(btn.dataset.price) >= 1000) anyPrice = true; });
+
+    if (!anyPrice) {
+      optionPriceOverride = null;
+      var basePrice = currentProduct ? (currentProduct.salePrice || currentProduct.price) : 0;
+      var detPriceEl = document.getElementById('detail-price');
+      if (detPriceEl) detPriceEl.textContent = basePrice.toLocaleString() + '원';
+    }
+  }
+
   updateSelectedSummary();
+  updateTotal();
 }
 
+// ✅ 선택 옵션 요약 (가격 포함 표시)
 function updateSelectedSummary() {
   var wrap = document.getElementById('selected-option-summary');
   if (!wrap) return;
+
+  var catLabels = currentProduct ? getCategoryLabels(currentProduct.category) : { color: '색상', size: '사이즈' };
   var parts = [];
-  if (selectedOptions['color']) parts.push('색상: ' + selectedOptions['color']);
-  if (selectedOptions['size']) parts.push('사이즈: ' + selectedOptions['size']);
+  if (selectedOptions['color']) parts.push(catLabels.color + ': ' + selectedOptions['color']);
+  if (selectedOptions['size'])  parts.push(catLabels.size  + ': ' + selectedOptions['size']);
+
   if (parts.length) {
+    var priceInfo = optionPriceOverride ? ' · ' + optionPriceOverride.toLocaleString() + '원' : '';
     wrap.style.display = 'block';
-    wrap.innerHTML = '<span style="font-size:13px;color:var(--accent);font-weight:600;">✅ ' + parts.join(' / ') + '</span>';
+    wrap.innerHTML = '<span style="font-size:13px;color:var(--accent);font-weight:600;">✅ ' + parts.join(' / ') + priceInfo + '</span>';
   } else {
     wrap.style.display = 'none';
   }
@@ -420,13 +508,16 @@ function checkRequiredOptions() {
                     document.getElementById('option-color-section').classList.contains('has-options');
   var hasSizeOpt = document.getElementById('option-size-section') &&
                    document.getElementById('option-size-section').classList.contains('has-options');
+
+  var catLabels = currentProduct ? getCategoryLabels(currentProduct.category) : { color: '색상', size: '사이즈' };
+
   if (hasColorOpt && !selectedOptions['color']) {
-    alert('색상을 선택해주세요!');
+    alert(catLabels.color + '을(를) 선택해주세요!');
     document.getElementById('option-color-section').scrollIntoView({behavior:'smooth'});
     return false;
   }
   if (hasSizeOpt && !selectedOptions['size']) {
-    alert('사이즈를 선택해주세요!');
+    alert(catLabels.size + '을(를) 선택해주세요!');
     document.getElementById('option-size-section').scrollIntoView({behavior:'smooth'});
     return false;
   }
@@ -448,9 +539,11 @@ function changeQty(delta) {
   updateTotal();
 }
 
+// ✅ 수량 × (옵션가격 or 상품가격)
 function updateTotal() {
   var qty = parseInt(document.getElementById('qty-input').value) || 1;
-  var price = currentProduct ? (currentProduct.salePrice || currentProduct.price) : 0;
+  var basePrice = currentProduct ? (currentProduct.salePrice || currentProduct.price) : 0;
+  var price = optionPriceOverride || basePrice;
   var totalEl = document.getElementById('qty-total');
   if (totalEl) totalEl.textContent = '총 ' + (price * qty).toLocaleString() + '원';
 }
@@ -460,11 +553,16 @@ function addToCart() {
   if (!checkRequiredOptions()) return;
   var qty = parseInt(document.getElementById('qty-input').value) || 1;
   var productWithOptions = Object.assign({}, currentProduct);
+  if (optionPriceOverride) {
+    productWithOptions.salePrice = optionPriceOverride;
+    productWithOptions.price = optionPriceOverride;
+  }
   if (selectedOptions['color']) productWithOptions.selectedColor = selectedOptions['color'];
-  if (selectedOptions['size']) productWithOptions.selectedSize = selectedOptions['size'];
+  if (selectedOptions['size'])  productWithOptions.selectedSize  = selectedOptions['size'];
+  var catLabels = getCategoryLabels(currentProduct.category);
   var optStr = [];
-  if (selectedOptions['color']) optStr.push(selectedOptions['color']);
-  if (selectedOptions['size']) optStr.push(selectedOptions['size']);
+  if (selectedOptions['color']) optStr.push(catLabels.color + ': ' + selectedOptions['color']);
+  if (selectedOptions['size'])  optStr.push(catLabels.size  + ': ' + selectedOptions['size']);
   if (optStr.length) productWithOptions.optionText = optStr.join(' / ');
   Cart.add(productWithOptions, qty);
 }
@@ -474,10 +572,18 @@ function buyNow() {
   if (!checkRequiredOptions()) return;
   var qty = parseInt(document.getElementById('qty-input').value) || 1;
   var productWithOptions = Object.assign({}, currentProduct);
+  if (optionPriceOverride) {
+    productWithOptions.salePrice = optionPriceOverride;
+    productWithOptions.price = optionPriceOverride;
+  }
   if (selectedOptions['color']) productWithOptions.selectedColor = selectedOptions['color'];
   if (selectedOptions['size'])  productWithOptions.selectedSize  = selectedOptions['size'];
+  var catLabels = getCategoryLabels(currentProduct.category);
   if (selectedOptions['color'] || selectedOptions['size']) {
-    productWithOptions.optionText = [selectedOptions['color'], selectedOptions['size']].filter(Boolean).join(' / ');
+    productWithOptions.optionText = [
+      selectedOptions['color'] ? catLabels.color + ': ' + selectedOptions['color'] : '',
+      selectedOptions['size']  ? catLabels.size  + ': ' + selectedOptions['size']  : ''
+    ].filter(Boolean).join(' / ');
   }
   Cart.clear();
   Cart.add(productWithOptions, qty);
