@@ -1476,8 +1476,8 @@ function renderPopupList(){
   }).join('');
 }
 // 배너 모달
-function openBannerModal(){ clearBannerForm(); document.getElementById('bm-title').textContent='🎨 배너 등록'; document.getElementById('banner-modal').classList.add('active'); }
-function closeBannerModal(){ document.getElementById('banner-modal').classList.remove('active'); }
+function openBannerModal(){ clearBannerForm(); document.getElementById('bm-title').textContent='🎨 배너 등록'; document.getElementById('banner-modal').classList.add('open'); }
+function closeBannerModal(){ document.getElementById('banner-modal').classList.remove('open'); }
 function clearBannerForm(){ ['bm-id','bm-title-input','bm-sub','bm-img','bm-link','bm-btn','bm-start','bm-end'].forEach(function(id){ var el=document.getElementById(id); if(el) el.value=''; }); document.getElementById('bm-order').value='1'; document.getElementById('bm-active').value='TRUE'; document.getElementById('bm-bg').value='#FF5733'; document.getElementById('bm-color').value='#ffffff'; }
 
 function editBanner(btn){ var id=btn.getAttribute('data-id');
@@ -1496,7 +1496,7 @@ function editBanner(btn){ var id=btn.getAttribute('data-id');
   document.getElementById('bm-end').value = b['종료일']||'';
   document.getElementById('bm-order').value = b['순서']||'1';
   document.getElementById('bm-active').value = b['사용여부']==='FALSE'?'FALSE':'TRUE';
-  document.getElementById('banner-modal').classList.add('active');
+  document.getElementById('banner-modal').classList.add('open');
 }
 
 function saveBanner(){
@@ -1528,8 +1528,8 @@ function deleteBannerItem(btn){ var id=btn.getAttribute('data-id'); var title=bt
 }
 
 // 팝업 모달
-function openPopupModal(){ clearPopupForm(); document.getElementById('pm-title').textContent='📢 팝업 등록'; document.getElementById('popup-modal').classList.add('active'); }
-function closePopupModal(){ document.getElementById('popup-modal').classList.remove('active'); }
+function openPopupModal(){ clearPopupForm(); document.getElementById('pm-title').textContent='📢 팝업 등록'; document.getElementById('popup-modal').classList.add('open'); }
+function closePopupModal(){ document.getElementById('popup-modal').classList.remove('open'); }
 function clearPopupForm(){ ['pm-id','pm-title-input','pm-content','pm-img','pm-link','pm-start','pm-end'].forEach(function(id){ var el=document.getElementById(id); if(el) el.value=''; }); document.getElementById('pm-width').value='500px'; document.getElementById('pm-active').value='TRUE'; }
 
 function editPopup(btn){ var id=btn.getAttribute('data-id');
@@ -1545,7 +1545,7 @@ function editPopup(btn){ var id=btn.getAttribute('data-id');
   document.getElementById('pm-start').value = p['시작일']||'';
   document.getElementById('pm-end').value = p['종료일']||'';
   document.getElementById('pm-active').value = p['사용여부']==='FALSE'?'FALSE':'TRUE';
-  document.getElementById('popup-modal').classList.add('active');
+  document.getElementById('popup-modal').classList.add('open');
 }
 
 function savePopup(){
@@ -1576,8 +1576,8 @@ function deletePopupItem(btn){ var id=btn.getAttribute('data-id'); var title=btn
 // ============================================================
 // 공동구매 모달
 // ============================================================
-function openGroupBuyModal(){ clearGroupBuyForm(); document.getElementById('gbm-title').textContent='👥 공동구매 등록'; document.getElementById('groupbuy-modal').classList.add('active'); }
-function closeGroupBuyModal(){ document.getElementById('groupbuy-modal').classList.remove('active'); }
+function openGroupBuyModal(){ clearGroupBuyForm(); document.getElementById('gbm-title').textContent='👥 공동구매 등록'; document.getElementById('groupbuy-modal').classList.add('open'); }
+function closeGroupBuyModal(){ document.getElementById('groupbuy-modal').classList.remove('open'); }
 function clearGroupBuyForm(){ ['gbm-id','gbm-pid','gbm-title-input','gbm-price','gbm-delivery','gbm-start','gbm-end','gbm-desc'].forEach(function(id){ var el=document.getElementById(id); if(el) el.value=''; }); document.getElementById('gbm-target').value='100'; document.getElementById('gbm-current').value='0'; document.getElementById('gbm-active').value='TRUE'; }
 
 function editGroupBuyItem(id){
@@ -1595,7 +1595,7 @@ function editGroupBuyItem(id){
   document.getElementById('gbm-active').value = g.isActive?'TRUE':'FALSE';
   if(g.startAt){ var s=g.startAt; document.getElementById('gbm-start').value=s.getFullYear()+'-'+String(s.getMonth()+1).padStart(2,'0')+'-'+String(s.getDate()).padStart(2,'0')+'T'+String(s.getHours()).padStart(2,'0')+':'+String(s.getMinutes()).padStart(2,'0'); }
   if(g.endAt){ var e=g.endAt; document.getElementById('gbm-end').value=e.getFullYear()+'-'+String(e.getMonth()+1).padStart(2,'0')+'-'+String(e.getDate()).padStart(2,'0')+'T'+String(e.getHours()).padStart(2,'0')+':'+String(e.getMinutes()).padStart(2,'0'); }
-  document.getElementById('groupbuy-modal').classList.add('active');
+  document.getElementById('groupbuy-modal').classList.add('open');
 }
 
 function saveGroupBuy(){
@@ -1669,8 +1669,8 @@ function loadDealer(){
   }).catch(function(){ document.getElementById('dealer-tw').innerHTML=EMPTY('🏬','대리점 없음'); });
 }
 
-function openDealerModal(){ clearDealerForm(); document.getElementById('dm-title').textContent='🏬 대리점 등록'; document.getElementById('dealer-modal').classList.add('active'); }
-function closeDealerModal(){ document.getElementById('dealer-modal').classList.remove('active'); }
+function openDealerModal(){ clearDealerForm(); document.getElementById('dm-title').textContent='🏬 대리점 등록'; document.getElementById('dealer-modal').classList.add('open'); }
+function closeDealerModal(){ document.getElementById('dealer-modal').classList.remove('open'); }
 function clearDealerForm(){ ['dm-id','dm-fid','dm-name','dm-owner','dm-phone','dm-email','dm-address','dm-domain','dm-start','dm-end','dm-bank'].forEach(function(id){ var el=document.getElementById(id); if(el) el.value=''; }); document.getElementById('dm-commission').value='2'; document.getElementById('dm-status').value='모집중'; document.getElementById('dm-color').value='#FF5733'; }
 
 function editDealer(btn){ var fid=btn.getAttribute('data-id');
@@ -1691,7 +1691,7 @@ function editDealer(btn){ var fid=btn.getAttribute('data-id');
   document.getElementById('dm-commission').value = d['수수료율']||'2';
   document.getElementById('dm-status').value = d['상태']||'모집중';
   document.getElementById('dm-bank').value = d['정산계좌']||'';
-  document.getElementById('dealer-modal').classList.add('active');
+  document.getElementById('dealer-modal').classList.add('open');
 }
 
 function saveDealer(){
