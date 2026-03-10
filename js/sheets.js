@@ -539,6 +539,41 @@ const GroupBuyAPI = {
   }
 };
 
+
+// ============================================================
+// 📢 공지사항 API
+// ============================================================
+const NoticeAPI = {
+  _SHEET_ID: '1t804fRO8HfQtmOzpDAz2IZfzRDQ7t8LYllFGZr3ftUI',
+
+  async getAll() {
+    const url = 'https://docs.google.com/spreadsheets/d/' + this._SHEET_ID
+      + '/gviz/tq?tqx=out:csv&sheet=' + encodeURIComponent('공지사항') + '&t=' + Date.now();
+    const rows = await SheetAPI.fetch(url);
+    return rows.map(row => ({
+      id:        row['번호'] || '',
+      title:     row['제목'] || '',
+      content:   row['내용'] || '',
+      type:      row['구분'] || '공지',       // 공지 / 매뉴얼 / FAQ
+      priority:  row['중요도'] || '보통',     // 보통 / 중요 / 긴급
+      isActive:  row['사용여부'] !== 'FALSE',
+      date:      row['작성일'] || '',
+    }));
+  },
+
+  // 공지사항만 (대리점 공지용)
+  async getNotices() {
+    const all = await this.getAll();
+    return all.filter(n => n.isActive && n.type !== '매뉴얼');
+  },
+
+  // 운영매뉴얼만
+  async getManuals() {
+    const all = await this.getAll();
+    return all.filter(n => n.isActive && n.type === '매뉴얼');
+  }
+};
+
 // ============================================================
 // 🏬 페이지 로드 시 대리점 브랜딩 자동 적용
 // ============================================================
