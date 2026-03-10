@@ -881,30 +881,42 @@
 
 <!-- ===== 공지사항 등록/수정 모달 ===== -->
 <div class="modal-ov" id="notice-modal">
-  <div class="modal" style="max-width:520px;">
+  <div class="modal" style="max-width:560px;">
     <div class="modal-hd"><span id="nm-title">📢 공지 등록</span><button onclick="closeNoticeModal()">✕</button></div>
-    <div class="modal-body">
+    <div class="modal-body" style="display:flex;flex-direction:column;gap:16px;">
       <input type="hidden" id="nm-id">
-      <div class="fg"><label class="fl">제목 *</label><input class="fi" id="nm-title-input" placeholder="공지 제목"></div>
-      <div class="fg"><label class="fl">내용 *</label><textarea class="fi" id="nm-content" rows="5" placeholder="공지 내용을 입력하세요" style="resize:vertical;"></textarea></div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-        <div class="fg"><label class="fl">구분</label>
-          <select class="fi" id="nm-type">
+      <div>
+        <label class="flabel">제목 <span class="req">*</span></label>
+        <input class="fi" id="nm-title-input" placeholder="공지 제목을 입력하세요" style="width:100%;box-sizing:border-box;">
+      </div>
+      <div>
+        <label class="flabel">내용 <span class="req">*</span></label>
+        <textarea class="fi" id="nm-content" rows="6" placeholder="공지 내용을 입력하세요" style="width:100%;box-sizing:border-box;resize:vertical;"></textarea>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+        <div>
+          <label class="flabel">구분</label>
+          <select class="fi" id="nm-type" style="width:100%;">
             <option value="공지">📢 공지사항</option>
             <option value="매뉴얼">📖 운영매뉴얼</option>
             <option value="FAQ">❓ FAQ</option>
           </select>
         </div>
-        <div class="fg"><label class="fl">중요도</label>
-          <select class="fi" id="nm-priority">
+        <div>
+          <label class="flabel">중요도</label>
+          <select class="fi" id="nm-priority" style="width:100%;">
             <option value="보통">보통</option>
             <option value="중요">🔴 중요</option>
             <option value="긴급">🚨 긴급</option>
           </select>
         </div>
       </div>
-      <div class="fg"><label class="fl">사용여부</label>
-        <select class="fi" id="nm-active"><option value="TRUE">✅ 사용</option><option value="FALSE">❌ 미사용</option></select>
+      <div>
+        <label class="flabel">사용여부</label>
+        <select class="fi" id="nm-active" style="width:100%;">
+          <option value="TRUE">✅ 사용</option>
+          <option value="FALSE">❌ 미사용</option>
+        </select>
       </div>
     </div>
     <div class="modal-ft">
