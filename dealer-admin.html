@@ -697,12 +697,12 @@ function doLogin() {
   fetch(sheetUrl('가맹점')).then(function(r){return r.text();}).then(function(csv){
     var rows = parseCSV(csv);
     var found = rows.find(function(r){
-      return (r['아이디']||r['가맹점ID']) === id && r['비밀번호'] === pw && r['상태'] !== '해지';
+      return (r['아이디']||r['대리점ID']) === id && r['비밀번호'] === pw && r['상태'] !== '해지';
     });
     document.getElementById('lloading').style.display='none';
     if(found) {
       DEALER = {
-        id: found['가맹점ID'] || found['아이디'],
+        id: found['대리점ID'] || found['아이디'],
         name: found['가맹점명'] || id,
         owner: found['대표자명'] || '',
         domain: found['도메인'] || '',
@@ -780,15 +780,15 @@ function loadDashboard() {
     fetch(sheetUrl('리뷰')).then(function(r){return r.text();}),
     fetch(sheetUrl('공지사항')).then(function(r){return r.text();})
   ]).then(function(results){
-    var myProds = parseCSV(results[0]).filter(function(p){ return p['가맹점ID']===DEALER.id; });
+    var myProds = parseCSV(results[0]).filter(function(p){ return p['대리점ID']===DEALER.id; });
     var allOrders = parseCSV(results[1]);
-    var myOrders = allOrders.filter(function(o){ return o['가맹점ID']===DEALER.id; });
+    var myOrders = allOrders.filter(function(o){ return o['대리점ID']===DEALER.id; });
     var today = new Date().toISOString().split('T')[0];
     var todayOrders = myOrders.filter(function(o){ return (o['주문일시']||'').startsWith(today); });
     var thisMonth = new Date().toISOString().substring(0,7);
     var monthSales = myOrders.filter(function(o){ return (o['주문일시']||'').startsWith(thisMonth); })
       .reduce(function(s,o){ return s+(parseInt(o['결제금액'])||0); }, 0);
-    var myReviews = parseCSV(results[2]).filter(function(r){ return r['가맹점ID']===DEALER.id; });
+    var myReviews = parseCSV(results[2]).filter(function(r){ return r['대리점ID']===DEALER.id; });
 
     document.getElementById('dash-orders').textContent = todayOrders.length;
     document.getElementById('dash-sales').textContent = monthSales.toLocaleString()+'원';
@@ -878,7 +878,7 @@ function loadMyProducts() {
   if(!DEALER) return;
   document.getElementById('my-products-tw').innerHTML = '<div class="loading"><div class="lspin">⏳</div></div>';
   fetch(sheetUrl('대리점상품')).then(function(r){return r.text();}).then(function(csv){
-    myProducts = parseCSV(csv).filter(function(p){ return p['가맹점ID']===DEALER.id; });
+    myProducts = parseCSV(csv).filter(function(p){ return p['대리점ID']===DEALER.id; });
     renderMyProducts();
   }).catch(function(){
     document.getElementById('my-products-tw').innerHTML = EMPTY('📦','상품 없음','상품 등록 버튼으로 추가하세요');
@@ -1058,7 +1058,7 @@ function saveMyProduct(){
     뱃지: document.getElementById('mpm-badge').value,
     추천여부: document.getElementById('mpm-featured').value,
     사용여부: document.getElementById('mpm-active').value,
-    가맹점ID: DEALER.id
+    대리점ID: DEALER.id
   };
   fetch(SCRIPT_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'saveDealerProduct',data:data})})
     .then(function(){ showToast('상품이 저장됐습니다!','ok'); closeMyProdModal(); setTimeout(loadMyProducts,1500); });
@@ -1082,7 +1082,7 @@ function loadOrders() {
   if(!DEALER) return;
   document.getElementById('orders-tw').innerHTML = '<div class="loading"><div class="lspin">⏳</div></div>';
   fetch(sheetUrl('주문')).then(function(r){return r.text();}).then(function(csv){
-    allOrders = parseCSV(csv).filter(function(o){ return o['가맹점ID']===DEALER.id; });
+    allOrders = parseCSV(csv).filter(function(o){ return o['대리점ID']===DEALER.id; });
     filteredOrders = allOrders;
     renderOrders(filteredOrders);
   }).catch(function(){
@@ -1194,7 +1194,7 @@ function loadSettlement() {
   if(!DEALER) return;
   document.getElementById('settlement-tw').innerHTML = '<div class="loading"><div class="lspin">⏳</div></div>';
   fetch(sheetUrl('정산')).then(function(r){return r.text();}).then(function(csv){
-    var rows = parseCSV(csv).filter(function(r){ return r['가맹점ID']===DEALER.id; });
+    var rows = parseCSV(csv).filter(function(r){ return r['대리점ID']===DEALER.id; });
     var totalSales=0, totalPg=0, totalHq=0, totalMine=0;
     rows.forEach(function(r){
       totalSales += parseInt(r['총매출'])||0;
@@ -1231,7 +1231,7 @@ function loadReviews() {
   if(!DEALER) return;
   document.getElementById('reviews-tw').innerHTML = '<div class="loading"><div class="lspin">⏳</div></div>';
   fetch(sheetUrl('리뷰')).then(function(r){return r.text();}).then(function(csv){
-    allReviews = parseCSV(csv).filter(function(r){ return r['가맹점ID']===DEALER.id; });
+    allReviews = parseCSV(csv).filter(function(r){ return r['대리점ID']===DEALER.id; });
     renderReviews(allReviews);
   }).catch(function(){
     document.getElementById('reviews-tw').innerHTML = EMPTY('⭐','리뷰 없음');
