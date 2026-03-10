@@ -349,7 +349,7 @@
     <div class="hd-nav">
       <a href="index.html" target="_blank">🌐 쇼핑몰</a>
       <a href="products.html" target="_blank">📦 상품목록</a>
-      <a href="https://docs.google.com/spreadsheets/d/1t804fRO8HfQtmOzpDAz2IZfzRDQ7t8LYllFGZr3ftUI" target="_blank">📊 구글시트</a>
+      <a href="https://gasway.shop" target="_blank">🌐 쇼핑몰 바로가기</a>
     </div>
     <div class="hd-right">
       <div class="hd-date" id="hd-date"></div>
@@ -391,8 +391,9 @@
       </div>
       <div class="sb-hr"></div>
       <div class="sb-sec">
-        <div class="sb-label">가맹점</div>
-        <div class="sb-item" onclick="go('franchise',this)"><span class="si">🏬</span> 가맹점 관리</div>
+        <div class="sb-label">대리점</div>
+        <div class="sb-item" onclick="go('dealer',this)"><span class="si">🏬</span> 대리점 관리</div>
+        <div class="sb-item" onclick="go('notice',this)"><span class="si">📢</span> 공지/매뉴얼</div>
       </div>
       <div class="sb-hr"></div>
       <div class="sb-sec">
@@ -493,7 +494,6 @@
       <div class="ph">
         <div><div class="ph-title">카테고리 관리</div><div class="ph-sub">구글시트 카테고리 시트 연동</div></div>
         <div class="ph-acts">
-          <a href="https://docs.google.com/spreadsheets/d/1t804fRO8HfQtmOzpDAz2IZfzRDQ7t8LYllFGZr3ftUI" target="_blank" class="btn btn-outline">📊 구글시트에서 수정</a>
         </div>
       </div>
       <div class="card">
@@ -527,7 +527,7 @@
         <div><div class="ph-title">공동구매 관리</div><div class="ph-sub">구글시트 &quot;공동구매&quot; 시트와 연동됩니다</div></div>
         <div class="ph-acts">
           <button class="btn btn-outline" onclick="loadGroupBuy()">🔄 새로고침</button>
-          <a href="https://docs.google.com/spreadsheets/d/1t804fRO8HfQtmOzpDAz2IZfzRDQ7t8LYllFGZr3ftUI" target="_blank" class="btn btn-primary">📊 구글시트에서 추가/수정</a>
+          <button class="btn btn-primary" onclick="openGroupBuyModal()">➕ 공동구매 추가</button>
         </div>
       </div>
       <div class="stat-grid">
@@ -537,7 +537,7 @@
         <div class="sc c-red"><div class="sc-top"><div class="sc-icon">👥</div></div><div class="sc-val" id="gb-total-qty">-</div><div class="sc-label">총 참여수</div></div>
       </div>
       <div class="card" style="margin-bottom:16px;">
-        <div class="card-hd"><div class="card-title">📋 구글시트 &quot;공동구매&quot; 시트 입력 방법</div></div>
+        <div class="card-hd"><div class="card-title">💡 공동구매 입력 안내</div></div>
         <div style="padding:16px;overflow-x:auto;">
           <table style="width:100%;border-collapse:collapse;font-size:12px;">
             <tr style="background:#f7f8fb;">
@@ -566,8 +566,7 @@
             </tr>
           </table>
           <div style="margin-top:10px;padding:10px 14px;background:#fff8f7;border-radius:8px;font-size:12px;color:#c0392b;border:1px solid #fdd;">
-            ⚠️ <strong>종료일시</strong>는 <strong>2026-03-20 23:59</strong> 형식 (날짜+공백+시간) → 쇼핑몰에서 초단위 카운트다운 자동 표시<br>
-            ⚠️ <strong>현재참여</strong> 숫자를 올리면 달성률 바가 자동 업데이트됩니다
+            💡 위 <strong>➕ 공동구매 추가</strong> 버튼으로 등록하세요. 종료일시는 날짜+시간까지 설정 가능하며, 마감까지 초단위 카운트다운이 쇼핑몰에 자동 표시됩니다.
           </div>
         </div>
       </div>
@@ -612,34 +611,71 @@
     <!-- ⑧ 배너/팝업 -->
     <div id="page-banners" class="page">
       <div class="ph">
-        <div><div class="ph-title">배너/팝업 관리</div><div class="ph-sub">구글시트에서 수정 후 새로고침</div></div>
+        <div><div class="ph-title">배너/팝업 관리</div><div class="ph-sub">메인 배너와 공지 팝업을 직접 등록·수정·삭제하세요</div></div>
         <div class="ph-acts">
-          <a href="https://docs.google.com/spreadsheets/d/1t804fRO8HfQtmOzpDAz2IZfzRDQ7t8LYllFGZr3ftUI" target="_blank" class="btn btn-outline">📊 구글시트 열기</a>
+          <button class="btn btn-outline" onclick="loadBanners()">🔄 새로고침</button>
+        </div>
+      </div>
+      <!-- 배너 섹션 -->
+      <div class="card" style="margin-bottom:16px;">
+        <div class="card-hd">
+          <div class="card-title">🎨 배너 목록</div>
+          <button class="btn btn-primary" style="font-size:12px;padding:6px 14px;" onclick="openBannerModal()">➕ 배너 추가</button>
+        </div>
+        <div id="banner-list-wrap" style="padding:16px;"><div class="loading"><div class="lspin">⏳</div></div></div>
+      </div>
+      <!-- 팝업 섹션 -->
+      <div class="card">
+        <div class="card-hd">
+          <div class="card-title">📢 팝업 목록</div>
+          <button class="btn btn-primary" style="font-size:12px;padding:6px 14px;" onclick="openPopupModal()">➕ 팝업 추가</button>
+        </div>
+        <div id="popup-list-wrap" style="padding:16px;"><div class="loading"><div class="lspin">⏳</div></div></div>
+      </div>
+    </div>
+
+    <!-- ⑨ 대리점 -->
+    <div id="page-dealer" class="page">
+      <div class="ph">
+        <div><div class="ph-title">대리점 관리</div><div class="ph-sub">대리점 계약 현황 및 정보 관리</div></div>
+        <div class="ph-acts">
+          <button class="btn btn-outline" onclick="loadDealer()">🔄 새로고침</button>
+          <button class="btn btn-primary" onclick="openDealerModal()">➕ 대리점 추가</button>
+        </div>
+      </div>
+      <div class="stat-grid">
+        <div class="sc c-green"><div class="sc-top"><div class="sc-icon">🟢</div></div><div class="sc-val" id="dealer-active">-</div><div class="sc-label">운영중</div></div>
+        <div class="sc c-blue"><div class="sc-top"><div class="sc-icon">📋</div></div><div class="sc-val" id="dealer-recruit">-</div><div class="sc-label">모집중</div></div>
+        <div class="sc c-orange"><div class="sc-top"><div class="sc-icon">⏸️</div></div><div class="sc-val" id="dealer-pause">-</div><div class="sc-label">일시중지</div></div>
+        <div class="sc c-red"><div class="sc-top"><div class="sc-icon">📊</div></div><div class="sc-val" id="dealer-total">-</div><div class="sc-label">전체</div></div>
+      </div>
+      <div class="card">
+        <div class="card-hd"><div class="card-title">🏬 대리점 목록</div></div>
+        <div class="tw" id="dealer-tw"><div class="loading"><div class="lspin">⏳</div></div></div>
+      </div>
+    </div>
+
+    <!-- 공지/매뉴얼 -->
+    <div id="page-notice" class="page">
+      <div class="ph">
+        <div><div class="ph-title">공지사항 · 운영매뉴얼</div><div class="ph-sub">대리점에 공유할 공지 및 운영 가이드</div></div>
+        <div class="ph-acts">
+          <button class="btn btn-outline" onclick="loadNotice()">🔄 새로고침</button>
+          <button class="btn btn-primary" onclick="openNoticeModal()">➕ 공지 등록</button>
         </div>
       </div>
       <div class="two-col">
         <div class="card">
-          <div class="card-hd"><div class="card-title">🎨 활성 배너</div></div>
-          <div id="banner-wrap" style="padding:16px;"><div class="loading"><div class="lspin">⏳</div></div></div>
+          <div class="card-hd"><div class="card-title">📢 공지사항</div></div>
+          <div id="notice-list" style="padding:16px;"><div class="loading"><div class="lspin">⏳</div></div></div>
         </div>
         <div class="card">
-          <div class="card-hd"><div class="card-title">📢 활성 팝업</div></div>
-          <div id="popup-wrap" style="padding:16px;"><div class="loading"><div class="lspin">⏳</div></div></div>
+          <div class="card-hd">
+            <div class="card-title">📖 운영 매뉴얼</div>
+            <button class="btn btn-outline" style="font-size:12px;padding:5px 12px;" onclick="openManualModal()">✏️ 수정</button>
+          </div>
+          <div id="manual-wrap" style="padding:16px;"></div>
         </div>
-      </div>
-    </div>
-
-    <!-- ⑨ 가맹점 -->
-    <div id="page-franchise" class="page">
-      <div class="ph">
-        <div><div class="ph-title">가맹점 관리</div></div>
-        <div class="ph-acts">
-          <a href="https://docs.google.com/spreadsheets/d/1t804fRO8HfQtmOzpDAz2IZfzRDQ7t8LYllFGZr3ftUI" target="_blank" class="btn btn-outline">📊 구글시트에서 추가</a>
-        </div>
-      </div>
-      <div class="card">
-        <div class="card-hd"><div class="card-title">🏬 가맹점 목록</div></div>
-        <div class="tw" id="fran-tw"><div class="loading"><div class="lspin">⏳</div></div></div>
       </div>
     </div>
 
@@ -659,6 +695,182 @@
     </div>
 
   </main>
+</div>
+
+
+<!-- ===== 배너 등록/수정 모달 ===== -->
+<div class="modal-ov" id="banner-modal">
+  <div class="modal" style="max-width:540px;">
+    <div class="modal-hd"><span id="bm-title">🎨 배너 등록</span><button onclick="closeBannerModal()">✕</button></div>
+    <div class="modal-body">
+      <input type="hidden" id="bm-id">
+      <div class="fg"><label class="fl">제목 *</label><input class="fi" id="bm-title-input" placeholder="배너 제목"></div>
+      <div class="fg"><label class="fl">부제목</label><input class="fi" id="bm-sub" placeholder="부제목 (선택)"></div>
+      <div class="fg"><label class="fl">이미지 URL</label><input class="fi" id="bm-img" placeholder="https://... (없으면 배경색만 표시)"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div class="fg"><label class="fl">배경색</label><input class="fi" id="bm-bg" type="color" value="#FF5733" style="height:40px;padding:4px;"></div>
+        <div class="fg"><label class="fl">글자색</label><input class="fi" id="bm-color" type="color" value="#ffffff" style="height:40px;padding:4px;"></div>
+      </div>
+      <div class="fg"><label class="fl">링크 URL</label><input class="fi" id="bm-link" placeholder="products.html 또는 https://..."></div>
+      <div class="fg"><label class="fl">버튼 텍스트</label><input class="fi" id="bm-btn" placeholder="지금 쇼핑하기"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div class="fg"><label class="fl">시작일</label><input class="fi" id="bm-start" type="date"></div>
+        <div class="fg"><label class="fl">종료일</label><input class="fi" id="bm-end" type="date"></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div class="fg"><label class="fl">순서</label><input class="fi" id="bm-order" type="number" value="1" min="1"></div>
+        <div class="fg"><label class="fl">사용여부</label>
+          <select class="fi" id="bm-active"><option value="TRUE">✅ 사용</option><option value="FALSE">❌ 미사용</option></select>
+        </div>
+      </div>
+      <div id="bm-preview" style="margin-top:8px;border-radius:8px;overflow:hidden;height:80px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;color:#fff;background:#FF5733;transition:all 0.2s;">
+        미리보기
+      </div>
+    </div>
+    <div class="modal-ft">
+      <button class="btn btn-outline" onclick="closeBannerModal()">취소</button>
+      <button class="btn btn-primary" onclick="saveBanner()">💾 저장</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 팝업 등록/수정 모달 ===== -->
+<div class="modal-ov" id="popup-modal">
+  <div class="modal" style="max-width:520px;">
+    <div class="modal-hd"><span id="pm-title">📢 팝업 등록</span><button onclick="closePopupModal()">✕</button></div>
+    <div class="modal-body">
+      <input type="hidden" id="pm-id">
+      <div class="fg"><label class="fl">제목 *</label><input class="fi" id="pm-title-input" placeholder="팝업 제목"></div>
+      <div class="fg"><label class="fl">내용</label><textarea class="fi" id="pm-content" rows="3" placeholder="팝업 본문 내용" style="resize:vertical;"></textarea></div>
+      <div class="fg"><label class="fl">이미지 URL</label><input class="fi" id="pm-img" placeholder="https://... (이미지 있으면 내용 대신 표시)"></div>
+      <div class="fg"><label class="fl">링크 URL</label><input class="fi" id="pm-link" placeholder="클릭 시 이동할 주소 (선택)"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div class="fg"><label class="fl">팝업 너비</label><input class="fi" id="pm-width" placeholder="500px" value="500px"></div>
+        <div class="fg"><label class="fl">사용여부</label>
+          <select class="fi" id="pm-active"><option value="TRUE">✅ 사용</option><option value="FALSE">❌ 미사용</option></select>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div class="fg"><label class="fl">시작일</label><input class="fi" id="pm-start" type="date"></div>
+        <div class="fg"><label class="fl">종료일</label><input class="fi" id="pm-end" type="date"></div>
+      </div>
+    </div>
+    <div class="modal-ft">
+      <button class="btn btn-outline" onclick="closePopupModal()">취소</button>
+      <button class="btn btn-primary" onclick="savePopup()">💾 저장</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 공동구매 등록/수정 모달 ===== -->
+<div class="modal-ov" id="groupbuy-modal">
+  <div class="modal" style="max-width:560px;">
+    <div class="modal-hd"><span id="gbm-title">👥 공동구매 등록</span><button onclick="closeGroupBuyModal()">✕</button></div>
+    <div class="modal-body">
+      <input type="hidden" id="gbm-id">
+      <div class="fg"><label class="fl">상품번호 *</label><input class="fi" id="gbm-pid" type="number" placeholder="상품목록 시트의 번호"></div>
+      <div class="fg"><label class="fl">제목 *</label><input class="fi" id="gbm-title-input" placeholder="공동구매 제목 (상품명 대신 표시)"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div class="fg"><label class="fl">공동구매가 * (원)</label><input class="fi" id="gbm-price" type="number" placeholder="17900"></div>
+        <div class="fg"><label class="fl">목표 수량 (명)</label><input class="fi" id="gbm-target" type="number" placeholder="100" value="100"></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div class="fg"><label class="fl">현재 참여수</label><input class="fi" id="gbm-current" type="number" placeholder="0" value="0"></div>
+        <div class="fg"><label class="fl">배송예정일</label><input class="fi" id="gbm-delivery" type="date"></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div class="fg"><label class="fl">시작일시</label><input class="fi" id="gbm-start" type="datetime-local"></div>
+        <div class="fg"><label class="fl">종료일시 *</label><input class="fi" id="gbm-end" type="datetime-local"></div>
+      </div>
+      <div class="fg"><label class="fl">설명</label><textarea class="fi" id="gbm-desc" rows="2" placeholder="공동구매 안내 문구" style="resize:vertical;"></textarea></div>
+      <div class="fg"><label class="fl">사용여부</label>
+        <select class="fi" id="gbm-active"><option value="TRUE">✅ 사용</option><option value="FALSE">❌ 미사용</option></select>
+      </div>
+    </div>
+    <div class="modal-ft">
+      <button class="btn btn-outline" onclick="closeGroupBuyModal()">취소</button>
+      <button class="btn btn-primary" onclick="saveGroupBuy()">💾 저장</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 대리점 등록/수정 모달 ===== -->
+<div class="modal-ov" id="dealer-modal">
+  <div class="modal" style="max-width:540px;">
+    <div class="modal-hd"><span id="dm-title">🏬 대리점 등록</span><button onclick="closeDealerModal()">✕</button></div>
+    <div class="modal-body">
+      <input type="hidden" id="dm-id">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div class="fg"><label class="fl">대리점 ID *</label><input class="fi" id="dm-fid" placeholder="dealer_001"></div>
+        <div class="fg"><label class="fl">대리점명 *</label><input class="fi" id="dm-name" placeholder="담누리마켓 서울점"></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div class="fg"><label class="fl">대표자명</label><input class="fi" id="dm-owner" placeholder="홍길동"></div>
+        <div class="fg"><label class="fl">연락처</label><input class="fi" id="dm-phone" placeholder="010-0000-0000"></div>
+      </div>
+      <div class="fg"><label class="fl">이메일</label><input class="fi" id="dm-email" placeholder="dealer@example.com"></div>
+      <div class="fg"><label class="fl">주소</label><input class="fi" id="dm-address" placeholder="서울시 강남구 ..."></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div class="fg"><label class="fl">도메인</label><input class="fi" id="dm-domain" placeholder="seoul.damnuri.co.kr"></div>
+        <div class="fg"><label class="fl">테마색상</label><input class="fi" id="dm-color" type="color" value="#FF5733" style="height:40px;padding:4px;"></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div class="fg"><label class="fl">계약일</label><input class="fi" id="dm-start" type="date"></div>
+        <div class="fg"><label class="fl">계약종료일</label><input class="fi" id="dm-end" type="date"></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div class="fg"><label class="fl">수수료율 (%)</label><input class="fi" id="dm-commission" type="number" value="2" step="0.1"></div>
+        <div class="fg"><label class="fl">상태</label>
+          <select class="fi" id="dm-status">
+            <option value="운영중">🟢 운영중</option>
+            <option value="모집중">📋 모집중</option>
+            <option value="일시중지">⏸️ 일시중지</option>
+            <option value="해지">🔴 해지</option>
+          </select>
+        </div>
+      </div>
+      <div class="fg"><label class="fl">정산계좌</label><input class="fi" id="dm-bank" placeholder="은행명 계좌번호 예금주"></div>
+    </div>
+    <div class="modal-ft">
+      <button class="btn btn-outline" onclick="closeDealerModal()">취소</button>
+      <button class="btn btn-primary" onclick="saveDealer()">💾 저장</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 공지사항 등록/수정 모달 ===== -->
+<div class="modal-ov" id="notice-modal">
+  <div class="modal" style="max-width:520px;">
+    <div class="modal-hd"><span id="nm-title">📢 공지 등록</span><button onclick="closeNoticeModal()">✕</button></div>
+    <div class="modal-body">
+      <input type="hidden" id="nm-id">
+      <div class="fg"><label class="fl">제목 *</label><input class="fi" id="nm-title-input" placeholder="공지 제목"></div>
+      <div class="fg"><label class="fl">내용 *</label><textarea class="fi" id="nm-content" rows="5" placeholder="공지 내용을 입력하세요" style="resize:vertical;"></textarea></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div class="fg"><label class="fl">구분</label>
+          <select class="fi" id="nm-type">
+            <option value="공지">📢 공지사항</option>
+            <option value="매뉴얼">📖 운영매뉴얼</option>
+            <option value="FAQ">❓ FAQ</option>
+          </select>
+        </div>
+        <div class="fg"><label class="fl">중요도</label>
+          <select class="fi" id="nm-priority">
+            <option value="보통">보통</option>
+            <option value="중요">🔴 중요</option>
+            <option value="긴급">🚨 긴급</option>
+          </select>
+        </div>
+      </div>
+      <div class="fg"><label class="fl">사용여부</label>
+        <select class="fi" id="nm-active"><option value="TRUE">✅ 사용</option><option value="FALSE">❌ 미사용</option></select>
+      </div>
+    </div>
+    <div class="modal-ft">
+      <button class="btn btn-outline" onclick="closeNoticeModal()">취소</button>
+      <button class="btn btn-primary" onclick="saveNotice()">💾 저장</button>
+    </div>
+  </div>
 </div>
 
 <!-- 상품 등록/수정 모달 -->
@@ -893,7 +1105,7 @@
 var ADMIN_ID = 'admin', ADMIN_PW = 'damnuri2026';
 var SCRIPT_URL = (typeof CONFIG!=='undefined') ? CONFIG.PG.API_PROXY_URL : '';
 var IMG_BASE = (typeof CONFIG!=='undefined') ? CONFIG.IMAGE_BASE : 'https://min323300.github.io/myshop/images/';
-var SHEET_URL = 'https://docs.google.com/spreadsheets/d/1t804fRO8HfQtmOzpDAz2IZfzRDQ7t8LYllFGZr3ftUI';
+var SHEET_URL = '';
 
 // ============================================================
 // ☁️ Cloudinary 설정
@@ -933,7 +1145,7 @@ function go(pid, el) {
   if(pg) pg.classList.add('active');
   if(el) el.classList.add('active');
   curPage=pid;
-  var map={'dashboard':loadDash,'prod-list':loadProds,'photo-box':loadPhotos,'cat-mgmt':loadCats,'orders':loadOrders,'groupbuy':loadGroupBuy,'settlement':loadSettle,'reviews':loadReviews,'banners':loadBanners,'franchise':loadFran,'settings':loadSettings};
+  var map={'dashboard':loadDash,'prod-list':loadProds,'photo-box':loadPhotos,'cat-mgmt':loadCats,'orders':loadOrders,'groupbuy':loadGroupBuy,'settlement':loadSettle,'reviews':loadReviews,'banners':loadBanners,'dealer':loadDealer,'notice':loadNotice,'settings':loadSettings};
   if(map[pid]) map[pid]();
 }
 function refresh() { go(curPage, document.querySelector('.sb-item.active')); }
@@ -1127,46 +1339,408 @@ function loadReviews(){
 }
 
 // ============================================================
-// 배너/팝업
+// 배너/팝업 CRUD
 // ============================================================
+var bannerAllData = [];
+var popupAllData = [];
+
 function loadBanners(){
-  if(typeof BannerAPI!=='undefined') {
-    BannerAPI.getActive().then(function(banners){
-      document.getElementById('banner-wrap').innerHTML = banners.length
-        ? banners.map(function(b){
-            return '<div style="margin-bottom:12px;border-radius:10px;overflow:hidden;border:1px solid var(--border);">'+
-              '<div style="background:'+(b.bgColor||'#333')+';color:'+(b.textColor||'#fff')+';padding:16px;text-align:center;">'+
-                '<div style="font-weight:700;font-size:15px;">'+b.title+'</div>'+
-                (b.subtitle?'<div style="font-size:12px;opacity:0.8;margin-top:4px;">'+b.subtitle+'</div>':'')+
-              '</div>'+
-              '<div style="padding:10px 14px;font-size:12px;color:var(--gray);">링크: '+(b.link||'-')+' · 버튼: '+(b.btnText||'-')+'</div></div>';
-          }).join('')
-        : EMPTY('🎨','활성 배너 없음','구글시트 배너 시트에서 추가하세요');
-    });
-  }
-  if(typeof PopupAPI!=='undefined') {
-    PopupAPI.getActive().then(function(pops){
-      document.getElementById('popup-wrap').innerHTML = pops.length
-        ? pops.map(function(p){ return '<div style="padding:12px;border:1px solid var(--border);border-radius:8px;margin-bottom:8px;"><strong>'+p.title+'</strong><div style="font-size:12px;color:var(--gray);margin-top:4px;">'+p.content+'</div></div>'; }).join('')
-        : EMPTY('📢','활성 팝업 없음','구글시트 팝업 시트에서 추가하세요');
-    });
-  }
+  var SHEET_ID = '1t804fRO8HfQtmOzpDAz2IZfzRDQ7t8LYllFGZr3ftUI';
+  // 배너 로드
+  var bUrl = 'https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/gviz/tq?tqx=out:csv&sheet='+encodeURIComponent('배너')+'&t='+Date.now();
+  document.getElementById('banner-list-wrap').innerHTML = '<div class="loading"><div class="lspin">⏳</div></div>';
+  document.getElementById('popup-list-wrap').innerHTML = '<div class="loading"><div class="lspin">⏳</div></div>';
+
+  fetch(bUrl).then(function(r){return r.text();}).then(function(csv){
+    bannerAllData = parseAdminCSV(csv);
+    renderBannerList();
+  }).catch(function(){ document.getElementById('banner-list-wrap').innerHTML = EMPTY('🎨','배너 없음','➕ 배너 추가 버튼으로 등록하세요'); });
+
+  var pUrl = 'https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/gviz/tq?tqx=out:csv&sheet='+encodeURIComponent('팝업')+'&t='+Date.now();
+  fetch(pUrl).then(function(r){return r.text();}).then(function(csv){
+    popupAllData = parseAdminCSV(csv);
+    renderPopupList();
+  }).catch(function(){ document.getElementById('popup-list-wrap').innerHTML = EMPTY('📢','팝업 없음','➕ 팝업 추가 버튼으로 등록하세요'); });
+}
+
+function parseAdminCSV(csv) {
+  var lines = csv.trim().split('\n');
+  var headers = lines[0].split(',').map(function(h){ return h.trim().replace(/"/g,''); });
+  return lines.slice(1).map(function(line){
+    var vals=[], cur='', inQ=false;
+    for(var i=0;i<line.length;i++){
+      var ch=line[i]; if(ch==='"'){inQ=!inQ;} else if(ch===','&&!inQ){vals.push(cur.trim());cur='';} else cur+=ch;
+    }
+    vals.push(cur.trim());
+    var obj={}; headers.forEach(function(h,i){ obj[h]=(vals[i]||'').replace(/"/g,'').trim(); }); return obj;
+  }).filter(function(r){ return Object.values(r).some(function(v){return v;}); });
+}
+
+function renderBannerList(){
+  var el = document.getElementById('banner-list-wrap');
+  if(!bannerAllData.length){ el.innerHTML=EMPTY('🎨','배너 없음','➕ 배너 추가 버튼으로 등록하세요'); return; }
+  el.innerHTML = bannerAllData.map(function(b){
+    var active = b['사용여부']==='TRUE';
+    var no = (b['번호']||'').replace(/"/g,'');
+    var tit = (b['제목']||'').replace(/"/g,'').replace(/'/g,'&#39;');
+    return '<div style="margin-bottom:12px;border-radius:10px;overflow:hidden;border:1px solid var(--border);">'
+      +'<div style="background:'+(b['배경색']||'#FF5733')+';color:'+(b['글자색']||'#fff')+';padding:14px;display:flex;align-items:center;justify-content:space-between;">'
+      +'<div><div style="font-weight:700;font-size:14px;">'+(b['제목']||'-')+'</div>'+(b['부제목']?'<div style="font-size:11px;opacity:0.8;margin-top:2px;">'+b['부제목']+'</div>':'')+'</div>'
+      +'<span style="background:rgba(255,255,255,0.2);padding:3px 10px;border-radius:12px;font-size:11px;">'+(active?'✅ 사용':'❌ 미사용')+'</span>'
+      +'</div>'
+      +'<div style="padding:10px 14px;font-size:12px;color:var(--gray);display:flex;align-items:center;justify-content:space-between;">'
+      +'<span>링크: '+(b['링크']||'-')+' · 순서: '+(b['순서']||'-')+'</span>'
+      +'<div style="display:flex;gap:8px;">'
+      +'<button class="btn btn-outline" style="font-size:11px;padding:4px 10px;" onclick="editBanner(this)" data-id="'+no+'">✏️ 수정</button>'
+      +'<button class="btn" style="font-size:11px;padding:4px 10px;background:#fee;color:#c0392b;border:1px solid #fcc;" onclick="deleteBannerItem(this)" data-id="'+no+'" data-title="'+tit+'">🗑️ 삭제</button>'
+      +'</div></div></div>';
+  }).join('');
+}
+function renderPopupList(){
+  var el = document.getElementById('popup-list-wrap');
+  if(!popupAllData.length){ el.innerHTML=EMPTY('📢','팝업 없음','➕ 팝업 추가 버튼으로 등록하세요'); return; }
+  el.innerHTML = popupAllData.map(function(p){
+    var active = p['사용여부']==='TRUE';
+    var no = (p['번호']||'').replace(/"/g,'');
+    var tit = (p['제목']||'').replace(/"/g,'').replace(/'/g,'&#39;');
+    return '<div style="padding:14px;border:1px solid var(--border);border-radius:8px;margin-bottom:10px;">'
+      +'<div style="display:flex;justify-content:space-between;align-items:flex-start;">'
+      +'<div><div style="font-weight:700;font-size:14px;">'+(p['제목']||'-')+'</div>'
+      +'<div style="font-size:12px;color:var(--gray);margin-top:4px;max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+(p['내용']||(p['이미지']?'[이미지 팝업]':''))+'</div>'
+      +'<div style="font-size:11px;color:var(--gray);margin-top:4px;">'+(p['시작일']?p['시작일']+' ~ ':'')+' '+(p['종료일']||'')+'</div></div>'
+      +'<div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;">'
+      +'<span style="'+(active?'background:#e8f5e9;color:#388e3c':'background:#fce4ec;color:#c62828')+';padding:3px 10px;border-radius:12px;font-size:11px;font-weight:700;">'+(active?'✅ 활성':'❌ 비활성')+'</span>'
+      +'<div style="display:flex;gap:6px;">'
+      +'<button class="btn btn-outline" style="font-size:11px;padding:4px 10px;" onclick="editPopup(this)" data-id="'+no+'">✏️ 수정</button>'
+      +'<button class="btn" style="font-size:11px;padding:4px 10px;background:#fee;color:#c0392b;border:1px solid #fcc;" onclick="deletePopupItem(this)" data-id="'+no+'" data-title="'+tit+'">🗑️ 삭제</button>'
+      +'</div></div></div></div>';
+  }).join('');
+}
+// 배너 모달
+function openBannerModal(){ clearBannerForm(); document.getElementById('bm-title').textContent='🎨 배너 등록'; document.getElementById('banner-modal').classList.add('active'); }
+function closeBannerModal(){ document.getElementById('banner-modal').classList.remove('active'); }
+function clearBannerForm(){ ['bm-id','bm-title-input','bm-sub','bm-img','bm-link','bm-btn','bm-start','bm-end'].forEach(function(id){ var el=document.getElementById(id); if(el) el.value=''; }); document.getElementById('bm-order').value='1'; document.getElementById('bm-active').value='TRUE'; document.getElementById('bm-bg').value='#FF5733'; document.getElementById('bm-color').value='#ffffff'; }
+
+function editBanner(btn){ var id=btn.getAttribute('data-id');
+  var b = bannerAllData.find(function(x){ return x['번호']===String(id); });
+  if(!b) return;
+  document.getElementById('bm-title').textContent='🎨 배너 수정';
+  document.getElementById('bm-id').value = b['번호']||'';
+  document.getElementById('bm-title-input').value = b['제목']||'';
+  document.getElementById('bm-sub').value = b['부제목']||'';
+  document.getElementById('bm-img').value = b['이미지']||'';
+  document.getElementById('bm-bg').value = b['배경색']||'#FF5733';
+  document.getElementById('bm-color').value = b['글자색']||'#ffffff';
+  document.getElementById('bm-link').value = b['링크']||'';
+  document.getElementById('bm-btn').value = b['버튼텍스트']||'';
+  document.getElementById('bm-start').value = b['시작일']||'';
+  document.getElementById('bm-end').value = b['종료일']||'';
+  document.getElementById('bm-order').value = b['순서']||'1';
+  document.getElementById('bm-active').value = b['사용여부']==='FALSE'?'FALSE':'TRUE';
+  document.getElementById('banner-modal').classList.add('active');
+}
+
+function saveBanner(){
+  var title = document.getElementById('bm-title-input').value.trim();
+  if(!title){ showToast('제목을 입력하세요','warn'); return; }
+  if(!SCRIPT_URL){ showToast('Apps Script URL이 config.js에 설정되어 있지 않습니다','warn'); return; }
+  var data = {
+    번호: document.getElementById('bm-id').value||'',
+    제목: title, 부제목: document.getElementById('bm-sub').value,
+    이미지: document.getElementById('bm-img').value,
+    배경색: document.getElementById('bm-bg').value,
+    글자색: document.getElementById('bm-color').value,
+    링크: document.getElementById('bm-link').value,
+    버튼텍스트: document.getElementById('bm-btn').value,
+    시작일: document.getElementById('bm-start').value,
+    종료일: document.getElementById('bm-end').value,
+    순서: document.getElementById('bm-order').value,
+    사용여부: document.getElementById('bm-active').value
+  };
+  fetch(SCRIPT_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'saveBanner',data:data})})
+    .then(function(){ showToast('배너가 저장됐습니다!','ok'); closeBannerModal(); setTimeout(loadBanners,1500); });
+}
+
+function deleteBannerItem(btn){ var id=btn.getAttribute('data-id'); var title=btn.getAttribute('data-title');
+  if(!confirm('['+title+'] 배너를 삭제하시겠습니까?')) return;
+  if(!SCRIPT_URL){ showToast('Apps Script URL 미설정','warn'); return; }
+  fetch(SCRIPT_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'deleteBanner',data:{번호:id}})})
+    .then(function(){ showToast('삭제됐습니다','ok'); setTimeout(loadBanners,1500); });
+}
+
+// 팝업 모달
+function openPopupModal(){ clearPopupForm(); document.getElementById('pm-title').textContent='📢 팝업 등록'; document.getElementById('popup-modal').classList.add('active'); }
+function closePopupModal(){ document.getElementById('popup-modal').classList.remove('active'); }
+function clearPopupForm(){ ['pm-id','pm-title-input','pm-content','pm-img','pm-link','pm-start','pm-end'].forEach(function(id){ var el=document.getElementById(id); if(el) el.value=''; }); document.getElementById('pm-width').value='500px'; document.getElementById('pm-active').value='TRUE'; }
+
+function editPopup(btn){ var id=btn.getAttribute('data-id');
+  var p = popupAllData.find(function(x){ return x['번호']===String(id); });
+  if(!p) return;
+  document.getElementById('pm-title').textContent='📢 팝업 수정';
+  document.getElementById('pm-id').value = p['번호']||'';
+  document.getElementById('pm-title-input').value = p['제목']||'';
+  document.getElementById('pm-content').value = p['내용']||'';
+  document.getElementById('pm-img').value = p['이미지']||'';
+  document.getElementById('pm-link').value = p['링크']||'';
+  document.getElementById('pm-width').value = p['팝업너비']||'500px';
+  document.getElementById('pm-start').value = p['시작일']||'';
+  document.getElementById('pm-end').value = p['종료일']||'';
+  document.getElementById('pm-active').value = p['사용여부']==='FALSE'?'FALSE':'TRUE';
+  document.getElementById('popup-modal').classList.add('active');
+}
+
+function savePopup(){
+  var title = document.getElementById('pm-title-input').value.trim();
+  if(!title){ showToast('제목을 입력하세요','warn'); return; }
+  if(!SCRIPT_URL){ showToast('Apps Script URL이 config.js에 설정되어 있지 않습니다','warn'); return; }
+  var data = {
+    번호: document.getElementById('pm-id').value||'',
+    제목: title, 내용: document.getElementById('pm-content').value,
+    이미지: document.getElementById('pm-img').value,
+    링크: document.getElementById('pm-link').value,
+    팝업너비: document.getElementById('pm-width').value,
+    시작일: document.getElementById('pm-start').value,
+    종료일: document.getElementById('pm-end').value,
+    사용여부: document.getElementById('pm-active').value
+  };
+  fetch(SCRIPT_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'savePopup',data:data})})
+    .then(function(){ showToast('팝업이 저장됐습니다!','ok'); closePopupModal(); setTimeout(loadBanners,1500); });
+}
+
+function deletePopupItem(btn){ var id=btn.getAttribute('data-id'); var title=btn.getAttribute('data-title');
+  if(!confirm('['+title+'] 팝업을 삭제하시겠습니까?')) return;
+  if(!SCRIPT_URL){ showToast('Apps Script URL 미설정','warn'); return; }
+  fetch(SCRIPT_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'deletePopup',data:{번호:id}})})
+    .then(function(){ showToast('삭제됐습니다','ok'); setTimeout(loadBanners,1500); });
 }
 
 // ============================================================
-// 가맹점
+// 공동구매 모달
 // ============================================================
-function loadFran(){
-  if(typeof FranchiseAPI==='undefined') return;
-  FranchiseAPI.getAll().then(function(list){
-    document.getElementById('fran-tw').innerHTML = list.length
-      ? '<table>'+TH(['ID','가맹점명','도메인','상태','수수료율'])+'<tbody>'+list.map(function(f){
-          return '<tr><td>'+f.id+'</td><td><strong>'+f.name+'</strong></td><td>'+(f.domain||'-')+'</td>'+
-            '<td><span class="bdg bdg-green">'+(f.status||'-')+'</span></td><td>'+f.commissionRate+'%</td></tr>';
+function openGroupBuyModal(){ clearGroupBuyForm(); document.getElementById('gbm-title').textContent='👥 공동구매 등록'; document.getElementById('groupbuy-modal').classList.add('active'); }
+function closeGroupBuyModal(){ document.getElementById('groupbuy-modal').classList.remove('active'); }
+function clearGroupBuyForm(){ ['gbm-id','gbm-pid','gbm-title-input','gbm-price','gbm-delivery','gbm-start','gbm-end','gbm-desc'].forEach(function(id){ var el=document.getElementById(id); if(el) el.value=''; }); document.getElementById('gbm-target').value='100'; document.getElementById('gbm-current').value='0'; document.getElementById('gbm-active').value='TRUE'; }
+
+function editGroupBuyItem(id){
+  var g = gbAllData.find(function(x){ return x.id===String(id); });
+  if(!g) return;
+  document.getElementById('gbm-title').textContent='👥 공동구매 수정';
+  document.getElementById('gbm-id').value = g.id||'';
+  document.getElementById('gbm-pid').value = g.productId||'';
+  document.getElementById('gbm-title-input').value = g.title||'';
+  document.getElementById('gbm-price').value = g.groupPrice||'';
+  document.getElementById('gbm-target').value = g.targetQty||100;
+  document.getElementById('gbm-current').value = g.currentQty||0;
+  document.getElementById('gbm-delivery').value = g.deliveryDate||'';
+  document.getElementById('gbm-desc').value = g.description||'';
+  document.getElementById('gbm-active').value = g.isActive?'TRUE':'FALSE';
+  if(g.startAt){ var s=g.startAt; document.getElementById('gbm-start').value=s.getFullYear()+'-'+String(s.getMonth()+1).padStart(2,'0')+'-'+String(s.getDate()).padStart(2,'0')+'T'+String(s.getHours()).padStart(2,'0')+':'+String(s.getMinutes()).padStart(2,'0'); }
+  if(g.endAt){ var e=g.endAt; document.getElementById('gbm-end').value=e.getFullYear()+'-'+String(e.getMonth()+1).padStart(2,'0')+'-'+String(e.getDate()).padStart(2,'0')+'T'+String(e.getHours()).padStart(2,'0')+':'+String(e.getMinutes()).padStart(2,'0'); }
+  document.getElementById('groupbuy-modal').classList.add('active');
+}
+
+function saveGroupBuy(){
+  var pid = document.getElementById('gbm-pid').value.trim();
+  var price = document.getElementById('gbm-price').value.trim();
+  var endDt = document.getElementById('gbm-end').value;
+  if(!pid||!price||!endDt){ showToast('상품번호, 공동구매가, 종료일시는 필수입니다','warn'); return; }
+  if(!SCRIPT_URL){ showToast('Apps Script URL이 config.js에 설정되어 있지 않습니다','warn'); return; }
+  var startRaw = document.getElementById('gbm-start').value;
+  var endRaw = endDt;
+  function fmtDt(v){ if(!v) return ''; return v.replace('T',' ').substring(0,16); }
+  var data = {
+    번호: document.getElementById('gbm-id').value||'',
+    상품번호: pid, 제목: document.getElementById('gbm-title-input').value,
+    공동구매가: price, 목표수량: document.getElementById('gbm-target').value,
+    현재참여: document.getElementById('gbm-current').value,
+    시작일시: fmtDt(startRaw), 종료일시: fmtDt(endRaw),
+    배송예정일: document.getElementById('gbm-delivery').value,
+    설명: document.getElementById('gbm-desc').value,
+    사용여부: document.getElementById('gbm-active').value
+  };
+  fetch(SCRIPT_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'saveGroupBuy',data:data})})
+    .then(function(){ showToast('공동구매가 저장됐습니다!','ok'); closeGroupBuyModal(); setTimeout(loadGroupBuy,1500); });
+}
+
+function deleteGroupBuyItem(id, title){
+  if(!confirm('['+title+'] 공동구매를 삭제하시겠습니까?')) return;
+  if(!SCRIPT_URL){ showToast('Apps Script URL 미설정','warn'); return; }
+  fetch(SCRIPT_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'deleteGroupBuy',data:{번호:id}})})
+    .then(function(){ showToast('삭제됐습니다','ok'); setTimeout(loadGroupBuy,1500); });
+}
+
+// ============================================================
+// 대리점 CRUD
+// ============================================================
+var dealerAllData = [];
+
+function loadDealer(){
+  var SHEET_ID = '1t804fRO8HfQtmOzpDAz2IZfzRDQ7t8LYllFGZr3ftUI';
+  var url = 'https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/gviz/tq?tqx=out:csv&sheet='+encodeURIComponent('가맹점')+'&t='+Date.now();
+  document.getElementById('dealer-tw').innerHTML = '<div class="loading"><div class="lspin">⏳</div></div>';
+  fetch(url).then(function(r){return r.text();}).then(function(csv){
+    dealerAllData = parseAdminCSV(csv);
+    var active=0,recruit=0,pause=0;
+    dealerAllData.forEach(function(d){
+      var st=d['상태']||'';
+      if(st==='운영중') active++;
+      else if(st==='모집중') recruit++;
+      else if(st==='일시중지') pause++;
+    });
+    document.getElementById('dealer-active').textContent=active;
+    document.getElementById('dealer-recruit').textContent=recruit;
+    document.getElementById('dealer-pause').textContent=pause;
+    document.getElementById('dealer-total').textContent=dealerAllData.length;
+    var statusColor={'운영중':'bdg-green','모집중':'bdg-blue','일시중지':'bdg-orange','해지':'bdg-red'};
+    document.getElementById('dealer-tw').innerHTML = dealerAllData.length
+      ? '<table>'+TH(['ID','대리점명','대표자','연락처','도메인','상태','수수료율','계약기간','관리'])+'<tbody>'
+        +dealerAllData.map(function(d){
+          return '<tr><td style="font-size:11px;color:var(--gray);">'+d['가맹점ID']+'</td>'
+            +'<td><strong>'+d['가맹점명']+'</strong></td>'
+            +'<td>'+(d['대표자명']||'-')+'</td>'
+            +'<td>'+(d['연락처']||'-')+'</td>'
+            +'<td style="font-size:12px;">'+(d['도메인']||'-')+'</td>'
+            +'<td><span class="bdg '+(statusColor[d['상태']]||'bdg-gray')+'">'+(d['상태']||'-')+'</span></td>'
+            +'<td>'+(d['수수료율']||'2')+'%</td>'
+            +'<td style="font-size:11px;">'+(d['계약일']||'-')+' ~ '+(d['계약종료일']||'')+'</td>'
+            +'<td><button class="btn btn-outline" style="font-size:11px;padding:4px 10px;" onclick="editDealer(this)" data-id="'+d['가맹점ID']+'">✏️ 수정</button></td>'
+            +'</tr>';
         }).join('')+'</tbody></table>'
-      : EMPTY('🏬','가맹점 없음');
+      : EMPTY('🏬','대리점 없음','➕ 대리점 추가 버튼으로 등록하세요');
+  }).catch(function(){ document.getElementById('dealer-tw').innerHTML=EMPTY('🏬','대리점 없음'); });
+}
+
+function openDealerModal(){ clearDealerForm(); document.getElementById('dm-title').textContent='🏬 대리점 등록'; document.getElementById('dealer-modal').classList.add('active'); }
+function closeDealerModal(){ document.getElementById('dealer-modal').classList.remove('active'); }
+function clearDealerForm(){ ['dm-id','dm-fid','dm-name','dm-owner','dm-phone','dm-email','dm-address','dm-domain','dm-start','dm-end','dm-bank'].forEach(function(id){ var el=document.getElementById(id); if(el) el.value=''; }); document.getElementById('dm-commission').value='2'; document.getElementById('dm-status').value='모집중'; document.getElementById('dm-color').value='#FF5733'; }
+
+function editDealer(btn){ var fid=btn.getAttribute('data-id');
+  var d = dealerAllData.find(function(x){ return x['가맹점ID']===fid; });
+  if(!d) return;
+  document.getElementById('dm-title').textContent='🏬 대리점 수정';
+  document.getElementById('dm-id').value = d['가맹점ID']||'';
+  document.getElementById('dm-fid').value = d['가맹점ID']||'';
+  document.getElementById('dm-name').value = d['가맹점명']||'';
+  document.getElementById('dm-owner').value = d['대표자명']||'';
+  document.getElementById('dm-phone').value = d['연락처']||'';
+  document.getElementById('dm-email').value = d['이메일']||'';
+  document.getElementById('dm-address').value = d['주소']||'';
+  document.getElementById('dm-domain').value = d['도메인']||'';
+  document.getElementById('dm-color').value = d['테마색상']||'#FF5733';
+  document.getElementById('dm-start').value = d['계약일']||'';
+  document.getElementById('dm-end').value = d['계약종료일']||'';
+  document.getElementById('dm-commission').value = d['수수료율']||'2';
+  document.getElementById('dm-status').value = d['상태']||'모집중';
+  document.getElementById('dm-bank').value = d['정산계좌']||'';
+  document.getElementById('dealer-modal').classList.add('active');
+}
+
+function saveDealer(){
+  var fid = document.getElementById('dm-fid').value.trim();
+  var name = document.getElementById('dm-name').value.trim();
+  if(!fid||!name){ showToast('대리점 ID와 대리점명은 필수입니다','warn'); return; }
+  if(!SCRIPT_URL){ showToast('Apps Script URL이 config.js에 설정되어 있지 않습니다','warn'); return; }
+  var data = {
+    가맹점ID: fid, 가맹점명: name, 대표자명: document.getElementById('dm-owner').value,
+    연락처: document.getElementById('dm-phone').value, 이메일: document.getElementById('dm-email').value,
+    주소: document.getElementById('dm-address').value, 도메인: document.getElementById('dm-domain').value,
+    테마색상: document.getElementById('dm-color').value,
+    계약일: document.getElementById('dm-start').value, 계약종료일: document.getElementById('dm-end').value,
+    수수료율: document.getElementById('dm-commission').value, 상태: document.getElementById('dm-status').value,
+    정산계좌: document.getElementById('dm-bank').value
+  };
+  fetch(SCRIPT_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'saveDealer',data:data})})
+    .then(function(){ showToast('대리점이 저장됐습니다!','ok'); closeDealerModal(); setTimeout(loadDealer,1500); });
+}
+
+// ============================================================
+// 공지/매뉴얼
+// ============================================================
+var noticeAllData = [];
+
+function loadNotice(){
+  var SHEET_ID = '1t804fRO8HfQtmOzpDAz2IZfzRDQ7t8LYllFGZr3ftUI';
+  var url = 'https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/gviz/tq?tqx=out:csv&sheet='+encodeURIComponent('공지사항')+'&t='+Date.now();
+  document.getElementById('notice-list').innerHTML = '<div class="loading"><div class="lspin">⏳</div></div>';
+  document.getElementById('manual-wrap').innerHTML = '<div class="loading"><div class="lspin">⏳</div></div>';
+  fetch(url).then(function(r){return r.text();}).then(function(csv){
+    noticeAllData = parseAdminCSV(csv);
+    var notices = noticeAllData.filter(function(n){ return n['구분']!=='매뉴얼' && n['사용여부']!=='FALSE'; });
+    var manuals = noticeAllData.filter(function(n){ return n['구분']==='매뉴얼' && n['사용여부']!=='FALSE'; });
+    var priColor={'긴급':'#c0392b','중요':'#e67e22','보통':'#666'};
+    document.getElementById('notice-list').innerHTML = notices.length
+      ? notices.map(function(n){
+          return '<div style="padding:14px;border:1px solid var(--border);border-radius:8px;margin-bottom:10px;">'
+            +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">'
+            +'<div style="display:flex;align-items:center;gap:8px;">'
+            +(n['중요도']&&n['중요도']!=='보통'?'<span style="background:'+(n['중요도']==='긴급'?'#fde8e8':'#fef3e2')+';color:'+priColor[n['중요도']||'보통']+';padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700;">'+n['중요도']+'</span>':'')
+            +'<strong style="font-size:14px;">'+n['제목']+'</strong></div>'
+            +'<div style="display:flex;gap:6px;">'
+            +'<button class="btn btn-outline" style="font-size:11px;padding:3px 8px;" onclick="editNotice(this)" data-id="'+n['번호']+'">✏️</button>'
+            +'<button class="btn" style="font-size:11px;padding:3px 8px;background:#fee;color:#c0392b;border:1px solid #fcc;" onclick="deleteNoticeItem(this)" data-id="'+n['번호']+'" data-title="'+n['제목'].replace(/"/g,'')+'">🗑️</button>'
+            +'</div></div>'
+            +'<div style="font-size:13px;color:#444;white-space:pre-wrap;">'+n['내용']+'</div>'
+            +'<div style="font-size:11px;color:var(--gray);margin-top:6px;">'+n['작성일']+'</div>'
+            +'</div>';
+        }).join('')
+      : EMPTY('📢','공지사항 없음','➕ 공지 등록 버튼으로 추가하세요');
+    document.getElementById('manual-wrap').innerHTML = manuals.length
+      ? manuals.map(function(m){
+          return '<details style="border:1px solid var(--border);border-radius:8px;margin-bottom:8px;overflow:hidden;">'
+            +'<summary style="padding:12px 16px;cursor:pointer;font-weight:700;font-size:13px;background:var(--bg-card);">'+m['제목']+'</summary>'
+            +'<div style="padding:14px 16px;font-size:13px;color:#444;white-space:pre-wrap;border-top:1px solid var(--border);">'+m['내용']+'</div>'
+            +'</details>';
+        }).join('')
+      : EMPTY('📖','운영매뉴얼 없음','구분을 "매뉴얼"로 선택해서 등록하세요');
+  }).catch(function(){
+    document.getElementById('notice-list').innerHTML=EMPTY('📢','공지사항 없음');
+    document.getElementById('manual-wrap').innerHTML=EMPTY('📖','운영매뉴얼 없음');
   });
 }
+
+function openNoticeModal(){ clearNoticeForm(); document.getElementById('nm-title').textContent='📢 공지 등록'; document.getElementById('notice-modal').classList.add('active'); }
+function closeNoticeModal(){ document.getElementById('notice-modal').classList.remove('active'); }
+function clearNoticeForm(){ ['nm-id','nm-title-input','nm-content'].forEach(function(id){ var el=document.getElementById(id); if(el) el.value=''; }); document.getElementById('nm-type').value='공지'; document.getElementById('nm-priority').value='보통'; document.getElementById('nm-active').value='TRUE'; }
+
+function editNotice(btn){ var id=btn.getAttribute('data-id');
+  var n = noticeAllData.find(function(x){ return x['번호']===String(id); });
+  if(!n) return;
+  document.getElementById('nm-title').textContent='📢 공지 수정';
+  document.getElementById('nm-id').value = n['번호']||'';
+  document.getElementById('nm-title-input').value = n['제목']||'';
+  document.getElementById('nm-content').value = n['내용']||'';
+  document.getElementById('nm-type').value = n['구분']||'공지';
+  document.getElementById('nm-priority').value = n['중요도']||'보통';
+  document.getElementById('nm-active').value = n['사용여부']==='FALSE'?'FALSE':'TRUE';
+  document.getElementById('notice-modal').classList.add('active');
+}
+
+function saveNotice(){
+  var title = document.getElementById('nm-title-input').value.trim();
+  var content = document.getElementById('nm-content').value.trim();
+  if(!title||!content){ showToast('제목과 내용은 필수입니다','warn'); return; }
+  if(!SCRIPT_URL){ showToast('Apps Script URL이 config.js에 설정되어 있지 않습니다','warn'); return; }
+  var now = new Date(); var dateStr = now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+'-'+String(now.getDate()).padStart(2,'0');
+  var data = {
+    번호: document.getElementById('nm-id').value||'',
+    제목: title, 내용: content,
+    구분: document.getElementById('nm-type').value,
+    중요도: document.getElementById('nm-priority').value,
+    사용여부: document.getElementById('nm-active').value,
+    작성일: dateStr
+  };
+  fetch(SCRIPT_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'saveNotice',data:data})})
+    .then(function(){ showToast('공지가 저장됐습니다!','ok'); closeNoticeModal(); setTimeout(loadNotice,1500); });
+}
+
+function deleteNoticeItem(btn){ var id=btn.getAttribute('data-id'); var title=btn.getAttribute('data-title');
+  if(!confirm('['+title+'] 공지를 삭제하시겠습니까?')) return;
+  if(!SCRIPT_URL){ showToast('Apps Script URL 미설정','warn'); return; }
+  fetch(SCRIPT_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'deleteNotice',data:{번호:id}})})
+    .then(function(){ showToast('삭제됐습니다','ok'); setTimeout(loadNotice,1500); });
+}
+
+function openManualModal(){ document.getElementById('nm-type').value='매뉴얼'; openNoticeModal(); document.getElementById('nm-title').textContent='📖 매뉴얼 등록'; }
 
 // ============================================================
 // 설정
@@ -1183,8 +1757,7 @@ function loadSettings(){
         '<span style="font-weight:500;'+(r[1]==='미설정'?'color:var(--red)':'')+'">'+r[1]+'</span></div>';
     }).join('');
   document.getElementById('links-wrap').innerHTML=
-    [['🌐 쇼핑몰','https://gasway.shop'],['📊 구글시트 DB',SHEET_URL],
-     ['📦 GitHub','https://github.com/min323300/myshop'],
+    [['🌐 쇼핑몰','https://gasway.shop'],['📦 GitHub','https://github.com/min323300/myshop'],
      ['☁️ Cloudinary','https://console.cloudinary.com']].map(function(r){
       return '<div style="padding:10px 0;border-bottom:1px solid var(--border);">'+
         '<a href="'+r[1]+'" target="_blank" style="color:var(--accent);font-weight:600;font-size:13px;">'+r[0]+'</a>'+
