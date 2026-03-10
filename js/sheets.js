@@ -99,6 +99,34 @@ const DealerContext = {
     const footerCopy = document.getElementById('footer-copy');
     if (footerCopy) footerCopy.textContent = '© 2026 ' + name + '. All rights reserved.';
 
+    // 4-1) 푸터 사업자 정보 - 대리점 사업자번호 있으면 대리점 정보, 없으면 본사 정보 그대로
+    const dealerBizNo = (dealer['사업자번호'] || '').trim();
+    if (dealerBizNo) {
+      // 대리점 사업자 있음 → 대리점 정보로 교체
+      const fb = document.getElementById('footer-biz');
+      if (fb) {
+        const parts = [];
+        parts.push('상호: ' + name);
+        parts.push('사업자번호: ' + dealerBizNo);
+        if (dealer['대표자명']) parts.push('대표: ' + dealer['대표자명']);
+        if (dealer['통신판매업번호']) parts.push('통신판매업: ' + dealer['통신판매업번호']);
+        fb.textContent = parts.join(' | ');
+      }
+      const fa = document.getElementById('footer-addr');
+      if (fa) {
+        const ap = [];
+        if (dealer['주소']) ap.push('주소: ' + dealer['주소']);
+        if (dealer['연락처']) ap.push('TEL: ' + dealer['연락처']);
+        if (dealer['이메일']) ap.push('EMAIL: ' + dealer['이메일']);
+        fa.textContent = ap.join(' | ');
+      }
+      const fp = document.getElementById('footer-phone');
+      if (fp && dealer['연락처']) fp.textContent = '📞 ' + dealer['연락처'];
+      const fe = document.getElementById('footer-email');
+      if (fe && dealer['이메일']) fe.textContent = '📧 ' + dealer['이메일'];
+    }
+    // 사업자번호 없으면 본사 정보 그대로 유지 (loadBizInfo가 이미 채워놓음)
+
     // 4) 헤더 공지바 (.header-notice)
     const notice = document.querySelector('.header-notice');
     if (notice) notice.textContent = '🏬 ' + name + ' 공식 쇼핑몰에 오신 것을 환영합니다!';
