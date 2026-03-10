@@ -775,7 +775,7 @@ function loadDashboard() {
   if(!DEALER) return;
   document.getElementById('dash-sub').textContent = DEALER.name + ' 대리점 대시보드';
   Promise.all([
-    fetch(sheetUrl('가맹점상품')).then(function(r){return r.text();}),
+    fetch(sheetUrl('대리점상품')).then(function(r){return r.text();}),
     fetch(sheetUrl('주문')).then(function(r){return r.text();}),
     fetch(sheetUrl('리뷰')).then(function(r){return r.text();}),
     fetch(sheetUrl('공지사항')).then(function(r){return r.text();})
@@ -877,7 +877,7 @@ var myProducts = [];
 function loadMyProducts() {
   if(!DEALER) return;
   document.getElementById('my-products-tw').innerHTML = '<div class="loading"><div class="lspin">⏳</div></div>';
-  fetch(sheetUrl('가맹점상품')).then(function(r){return r.text();}).then(function(csv){
+  fetch(sheetUrl('대리점상품')).then(function(r){return r.text();}).then(function(csv){
     myProducts = parseCSV(csv).filter(function(p){ return p['가맹점ID']===DEALER.id; });
     renderMyProducts();
   }).catch(function(){
