@@ -624,7 +624,7 @@
 // ============================================================
 var SHEET_ID = '1t804fRO8HfQtmOzpDAz2IZfzRDQ7t8LYllFGZr3ftUI';
 // Apps Script URL (config.js 없이 직접 설정)
-var SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzYDBEmbFoax6BWK4tWXC7Y8likER4_bb2XiT7Xmyj9u5cbUkHE_f6rkOa0ynzsUJ9ieg/exec';
+var SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw_rbhRHPQhNYHttEbAyKiLDB32r1TQlhPBO6V3kIQq0AW1mNoz0yb3gjlaiQtB1uyn/exec';
 
 var DEALER = null; // 로그인한 대리점 정보
 var CLOUDINARY_CLOUD = 'dmefdyags';
@@ -697,7 +697,18 @@ function doLogin() {
   fetch(sheetUrl('가맹점')).then(function(r){return r.text();}).then(function(csv){
     var rows = parseCSV(csv);
     var found = rows.find(function(r){
-      return (r['아이디']||r['대리점ID']) === id && r['비밀번호'] === pw && r['상태'] !== '해지';
+      // 로그인 방식: 번호(순번) 또는 아이디 또는 대리점ID로 로그인
+      var rowId = String(r['번호']||'').trim();
+      var customId = (r['아이디']||r['대리점ID']||'').trim();
+      var idMatch = rowId === id || customId === id;
+
+      // 비밀번호: Q열(비밀번호) 또는 연락처 뒷 4자리
+      var phone = String(r['연락처']||'').replace(/[^0-9]/g,'');
+      var phoneLast4 = phone.slice(-4);
+      var storedPw = String(r['비밀번호']||'').trim();
+      var pwMatch = (storedPw && pw === storedPw) || pw === phoneLast4;
+
+      return idMatch && pwMatch && r['상태'] !== '해지';
     });
     document.getElementById('lloading').style.display='none';
     if(found) {
