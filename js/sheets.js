@@ -39,6 +39,111 @@ const SheetAPI = {
   }
 };
 
+
+// ============================================================
+// 🏬 대리점 URL 파라미터 감지 및 상품 통합 로직
+// ============================================================
+
+// URL에서 dealer 파라미터 읽기
+// 예: gasway.shop?dealer=seoul_01 → 'seoul_01'
+// 예: gasway.shop → null (본사)
+const DealerContext = {
+  _dealer: null,
+  _loaded: false,
+
+  getDealerId() {
+    const params = new URLSearchParams(window.location.search);
+    return params.get('dealer') || null;
+  },
+
+  async load() {
+    if (this._loaded) return this._dealer;
+    const id = this.getDealerId();
+    if (!id) { this._loaded = true; return null; }
+    try {
+      const SHEET_ID = CONFIG.SHEET_ID || '1t804fRO8HfQtmOzpDAz2IZfzRDQ7t8LYllFGZr3ftUI';
+      const url = 'https://docs.google.com/spreadsheets/d/' + SHEET_ID
+        + '/gviz/tq?tqx=out:csv&sheet=' + encodeURIComponent('가맹점') + '&t=' + Date.now();
+      const rows = await SheetAPI.fetch(url);
+      this._dealer = rows.find(r => r['가맹점ID'] === id && r['상태'] !== '해지') || null;
+    } catch(e) { this._dealer = null; }
+    this._loaded = true;
+    return this._dealer;
+  },
+
+  // 대리점 브랜딩 쇼핑몰에 적용
+  async applyBranding() {
+    const dealer = await this.load();
+    if (!dealer) return;
+    // 헤더 브랜드명 변경
+    const brandEls = document.querySelectorAll('.brand-name, .header-brand, .logo-text, [data-brand]');
+    brandEls.forEach(el => el.textContent = dealer['가맹점명'] || '');
+    // 테마 색상 변경
+    if (dealer['테마색상']) {
+      document.documentElement.style.setProperty('--primary', dealer['테마색상']);
+      document.documentElement.style.setProperty('--accent', dealer['테마색상']);
+    }
+    // 페이지 타이틀 변경
+    if (dealer['가맹점명']) document.title = document.title.replace('담누리마켓', dealer['가맹점명']);
+    // 딜러 링크 유지 (모든 내부 링크에 ?dealer=ID 유지)
+    this.keepDealerLinks(dealer['가맹점ID']);
+  },
+
+  // 내부 링크에 dealer 파라미터 자동 추가
+  keepDealerLinks(dealerId) {
+    if (!dealerId) return;
+    document.addEventListener('click', function(e) {
+      var a = e.target.closest('a');
+      if (!a) return;
+      var href = a.getAttribute('href') || '';
+      // 내부 링크에만 적용 (http로 시작하지 않고, #만도 아닌)
+      if (!href.startsWith('http') && !href.startsWith('#') && href !== '') {
+        var sep = href.includes('?') ? '&' : '?';
+        a.href = href + sep + 'dealer=' + dealerId;
+      }
+    }, true);
+  }
+};
+
+// ============================================================
+// 대리점 상품 API
+// ============================================================
+const DealerProductAPI = {
+  async getByDealer(dealerId) {
+    const SHEET_ID = CONFIG.SHEET_ID || '1t804fRO8HfQtmOzpDAz2IZfzRDQ7t8LYllFGZr3ftUI';
+    const url = 'https://docs.google.com/spreadsheets/d/' + SHEET_ID
+      + '/gviz/tq?tqx=out:csv&sheet=' + encodeURIComponent('가맹점상품') + '&t=' + Date.now();
+    const rows = await SheetAPI.fetch(url);
+    return rows
+      .filter(r => r['가맹점ID'] === dealerId && r['사용여부'] !== 'FALSE' && r['상품명'])
+      .map(row => ({
+        id: 'D_' + (row['번호'] || ''),   // 본사 상품과 ID 충돌 방지
+        name: row['상품명'] || '',
+        price: parseInt(row['가격']) || 0,
+        salePrice: parseInt(row['할인가']) || 0,
+        category: row['카테고리'] || '',
+        image: resolveImageUrl(row['이미지']) || 'https://via.placeholder.com/400x400?text=상품이미지',
+        image2: resolveImageUrl(row['이미지2']) || '',
+        image3: resolveImageUrl(row['이미지3']) || '',
+        image4: resolveImageUrl(row['이미지4']) || '',
+        detailImages: row['상세이미지'] || '',
+        description: row['상품설명'] || '',
+        options: row['옵션'] || '',
+        deliveryFee: row['배송비'] || '무료',
+        deliveryDays: row['배송일'] || '1~3일',
+        stock: parseInt(row['재고']) || 0,
+        badge: row['뱃지'] || '',
+        isFeatured: row['추천여부'] === 'TRUE',
+        isActive: true,
+        salesCount: 0,
+        rating: parseFloat(row['별점평균']) || 0,
+        reviewCount: parseInt(row['리뷰수']) || 0,
+        dealerId: row['가맹점ID'] || '',
+        isDealer: true,   // 대리점 상품 표시용
+      }));
+  }
+};
+
 // ============================================================
 // 🖼️ 이미지 URL 헬퍼
 // ============================================================
@@ -53,8 +158,9 @@ function resolveImageUrl(val) {
 // ============================================================
 const ProductAPI = {
   async getAll() {
+    // 본사 상품 로드
     const rows = await SheetAPI.fetchCached(CONFIG.SHEETS.상품목록);
-    return rows.map(row => ({
+    const hqProducts = rows.map(row => ({
       id: row['번호'] || '',
       name: row['상품명'] || '',
       price: parseInt(row['가격']) || 0,
@@ -79,9 +185,26 @@ const ProductAPI = {
       youtube: row['유튜브'] || '',
       specs: row['상세스펙'] || '',
       caution: row['주의사항'] || '',
+      isDealer: false,
     }))
-    .filter(p => p.isActive && p.name)
-    .sort((a, b) => {
+    .filter(p => p.isActive && p.name);
+
+    // 대리점 URL 파라미터 감지 → 대리점 상품 추가 로드
+    const dealerId = DealerContext.getDealerId();
+    if (dealerId) {
+      try {
+        const dealerProducts = await DealerProductAPI.getByDealer(dealerId);
+        // 본사상품 + 대리점상품 합치기
+        const combined = [...hqProducts, ...dealerProducts];
+        return combined.sort((a, b) => {
+          const scoreA = (a.salesCount * 0.4) + (a.rating * 20 * 0.4) + (a.reviewCount * 0.2);
+          const scoreB = (b.salesCount * 0.4) + (b.rating * 20 * 0.4) + (b.reviewCount * 0.2);
+          return scoreB - scoreA;
+        });
+      } catch(e) { /* 대리점 상품 로드 실패 시 본사 상품만 */ }
+    }
+
+    return hqProducts.sort((a, b) => {
       const scoreA = (a.salesCount * 0.4) + (a.rating * 20 * 0.4) + (a.reviewCount * 0.2);
       const scoreB = (b.salesCount * 0.4) + (b.rating * 20 * 0.4) + (b.reviewCount * 0.2);
       return scoreB - scoreA;
@@ -344,3 +467,22 @@ const GroupBuyAPI = {
     });
   }
 };
+
+// ============================================================
+// 🏬 페이지 로드 시 대리점 브랜딩 자동 적용
+// ============================================================
+document.addEventListener('DOMContentLoaded', async function() {
+  const dealerId = DealerContext.getDealerId();
+  if (!dealerId) return;
+  await DealerContext.applyBranding();
+
+  // 대리점 안내 배너 표시 (선택적)
+  const dealer = await DealerContext.load();
+  if (dealer && dealer['가맹점명']) {
+    // 기존 공지바 업데이트
+    const noticeBar = document.querySelector('.notice-bar, .announcement-bar, [class*="notice"]');
+    if (noticeBar) {
+      noticeBar.textContent = '🏬 ' + dealer['가맹점명'] + ' 공식 쇼핑몰에 오신 것을 환영합니다!';
+    }
+  }
+});
