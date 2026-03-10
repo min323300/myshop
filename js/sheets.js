@@ -137,6 +137,16 @@ const DealerContext = {
 // 대리점 상품 API
 // ============================================================
 const DealerProductAPI = {
+  async getAll() {
+    const SHEET_ID = CONFIG.SHEET_ID || '1t804fRO8HfQtmOzpDAz2IZfzRDQ7t8LYllFGZr3ftUI';
+    const url = 'https://docs.google.com/spreadsheets/d/' + SHEET_ID
+      + '/gviz/tq?tqx=out:csv&sheet=' + encodeURIComponent('대리점상품') + '&t=' + Date.now();
+    const rows = await SheetAPI.fetch(url);
+    return rows
+      .filter(r => r['사용여부'] !== 'FALSE' && r['상품명'])
+      .map(row => this._mapRow(row));
+  },
+
   async getByDealer(dealerId) {
     const SHEET_ID = CONFIG.SHEET_ID || '1t804fRO8HfQtmOzpDAz2IZfzRDQ7t8LYllFGZr3ftUI';
     const url = 'https://docs.google.com/spreadsheets/d/' + SHEET_ID
@@ -144,31 +154,35 @@ const DealerProductAPI = {
     const rows = await SheetAPI.fetch(url);
     return rows
       .filter(r => (r['대리점ID']||r['가맹점ID']) === dealerId && r['사용여부'] !== 'FALSE' && r['상품명'])
-      .map(row => ({
-        id: 'D_' + (row['번호'] || ''),   // 본사 상품과 ID 충돌 방지
-        name: row['상품명'] || '',
-        price: parseInt(row['가격']) || 0,
-        salePrice: parseInt(row['할인가']) || 0,
-        category: row['카테고리'] || '',
-        image: resolveImageUrl(row['이미지']) || 'https://via.placeholder.com/400x400?text=상품이미지',
-        image2: resolveImageUrl(row['이미지2']) || '',
-        image3: resolveImageUrl(row['이미지3']) || '',
-        image4: resolveImageUrl(row['이미지4']) || '',
-        detailImages: row['상세이미지'] || '',
-        description: row['상품설명'] || '',
-        options: row['옵션'] || '',
-        deliveryFee: row['배송비'] || '무료',
-        deliveryDays: row['배송일'] || '1~3일',
-        stock: parseInt(row['재고']) || 0,
-        badge: row['뱃지'] || '',
-        isFeatured: row['추천여부'] === 'TRUE',
-        isActive: true,
-        salesCount: 0,
-        rating: parseFloat(row['별점평균']) || 0,
-        reviewCount: parseInt(row['리뷰수']) || 0,
-        dealerId: row['대리점ID'] || row['가맹점ID'] || '',
-        isDealer: true,   // 대리점 상품 표시용
-      }));
+      .map(row => this._mapRow(row));
+  },
+
+  _mapRow(row) {
+    return {
+      id: 'D_' + (row['번호'] || ''),   // 본사 상품과 ID 충돌 방지
+      name: row['상품명'] || '',
+      price: parseInt(row['가격']) || 0,
+      salePrice: parseInt(row['할인가']) || 0,
+      category: row['카테고리'] || '',
+      image: resolveImageUrl(row['이미지']) || 'https://via.placeholder.com/400x400?text=상품이미지',
+      image2: resolveImageUrl(row['이미지2']) || '',
+      image3: resolveImageUrl(row['이미지3']) || '',
+      image4: resolveImageUrl(row['이미지4']) || '',
+      detailImages: row['상세이미지'] || '',
+      description: row['상품설명'] || '',
+      options: row['옵션'] || '',
+      deliveryFee: row['배송비'] || '무료',
+      deliveryDays: row['배송일'] || '1~3일',
+      stock: parseInt(row['재고']) || 0,
+      badge: row['뱃지'] || '',
+      isFeatured: row['추천여부'] === 'TRUE',
+      isActive: true,
+      salesCount: 0,
+      rating: parseFloat(row['별점평균']) || 0,
+      reviewCount: parseInt(row['리뷰수']) || 0,
+      dealerId: row['대리점ID'] || row['가맹점ID'] || '',
+      isDealer: true,
+    };
   }
 };
 
@@ -217,20 +231,21 @@ const ProductAPI = {
     }))
     .filter(p => p.isActive && p.name);
 
-    // 대리점 URL 파라미터 감지 → 대리점 상품 추가 로드
+    // 대리점 URL 파라미터 감지
+    // - dealer=ID 있으면 해당 대리점 상품만 추가
+    // - dealer 없으면 (본사) 모든 대리점 상품 추가
     const dealerId = DealerContext.getDealerId();
-    if (dealerId) {
-      try {
-        const dealerProducts = await DealerProductAPI.getByDealer(dealerId);
-        // 본사상품 + 대리점상품 합치기
-        const combined = [...hqProducts, ...dealerProducts];
-        return combined.sort((a, b) => {
-          const scoreA = (a.salesCount * 0.4) + (a.rating * 20 * 0.4) + (a.reviewCount * 0.2);
-          const scoreB = (b.salesCount * 0.4) + (b.rating * 20 * 0.4) + (b.reviewCount * 0.2);
-          return scoreB - scoreA;
-        });
-      } catch(e) { /* 대리점 상품 로드 실패 시 본사 상품만 */ }
-    }
+    try {
+      const dealerProducts = dealerId
+        ? await DealerProductAPI.getByDealer(dealerId)   // 특정 대리점
+        : await DealerProductAPI.getAll();               // 본사: 전체 대리점 상품
+      const combined = [...hqProducts, ...dealerProducts];
+      return combined.sort((a, b) => {
+        const scoreA = (a.salesCount * 0.4) + (a.rating * 20 * 0.4) + (a.reviewCount * 0.2);
+        const scoreB = (b.salesCount * 0.4) + (b.rating * 20 * 0.4) + (b.reviewCount * 0.2);
+        return scoreB - scoreA;
+      });
+    } catch(e) { /* 대리점 상품 로드 실패 시 본사 상품만 */ }
 
     return hqProducts.sort((a, b) => {
       const scoreA = (a.salesCount * 0.4) + (a.rating * 20 * 0.4) + (a.reviewCount * 0.2);
