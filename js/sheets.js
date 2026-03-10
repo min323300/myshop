@@ -78,29 +78,42 @@ const DealerContext = {
     const name = dealer['가맹점명'] || '';
     if (!name) return;
 
-    // 1) 헤더 로고 텍스트 (#store-name)
+    // 1) 헤더 로고 (#store-name) - app.js 덮어쓰기 방지용 MutationObserver 등록
     const storeName = document.getElementById('store-name');
-    if (storeName) storeName.textContent = name;
+    if (storeName) {
+      storeName.textContent = name;
+      // app.js가 나중에 바꾸면 다시 되돌림
+      if (!storeName._dealerObserver) {
+        storeName._dealerObserver = new MutationObserver(() => {
+          if (storeName.textContent !== name) storeName.textContent = name;
+        });
+        storeName._dealerObserver.observe(storeName, { childList: true, subtree: true, characterData: true });
+      }
+    }
 
     // 2) 푸터 브랜드명 (#footer-store-name)
     const footerName = document.getElementById('footer-store-name');
     if (footerName) footerName.textContent = '🏪 ' + name;
 
-    // 3) 헤더 공지바 (.header-notice) → 대리점 환영 메시지로 변경
+    // 3) 푸터 저작권 (#footer-copy)
+    const footerCopy = document.getElementById('footer-copy');
+    if (footerCopy) footerCopy.textContent = '© 2026 ' + name + '. All rights reserved.';
+
+    // 4) 헤더 공지바 (.header-notice)
     const notice = document.querySelector('.header-notice');
     if (notice) notice.textContent = '🏬 ' + name + ' 공식 쇼핑몰에 오신 것을 환영합니다!';
 
-    // 4) 페이지 타이틀 변경
-    document.title = document.title.replace('담누리마켓', name);
+    // 5) 페이지 타이틀
+    document.title = document.title.replace(/담누리마켓|비에스컴퍼니|\(주\)비에스컴퍼니/g, name);
 
-    // 5) 테마 색상 변경
+    // 6) 테마 색상
     if (dealer['테마색상']) {
       document.documentElement.style.setProperty('--primary', dealer['테마색상']);
       document.documentElement.style.setProperty('--accent', dealer['테마색상']);
       document.documentElement.style.setProperty('--color-primary', dealer['테마색상']);
     }
 
-    // 6) 내부 링크에 dealer 파라미터 유지
+    // 7) 내부 링크 dealer 파라미터 유지
     this.keepDealerLinks(dealer['가맹점ID']);
   },
 
@@ -489,8 +502,10 @@ const GroupBuyAPI = {
 document.addEventListener('DOMContentLoaded', async function() {
   const dealerId = DealerContext.getDealerId();
   if (!dealerId) return;
-  // 즉시 적용
+  // 1차: 즉시 적용
   await DealerContext.applyBranding();
-  // 동적 렌더링 완료 후 재적용 (app.js가 DOM 변경할 수 있으므로)
-  setTimeout(() => DealerContext.applyBranding(), 800);
+  // 2차: app.js 로드 완료 후 (약 1초)
+  setTimeout(() => DealerContext.applyBranding(), 1000);
+  // 3차: 시트 데이터 로드 완료 후 (약 2.5초) - 사업자정보 덮어쓰기 방지
+  setTimeout(() => DealerContext.applyBranding(), 2500);
 });
