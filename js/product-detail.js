@@ -1,3 +1,11 @@
+// 대리점 URL 헬퍼
+function dealerUrl(url) {
+  var dealerId = new URLSearchParams(window.location.search).get('dealer');
+  if (!dealerId) return url;
+  var sep = url.includes('?') ? '&' : '?';
+  return url + sep + 'dealer=' + dealerId;
+}
+
 var currentProduct = null;
 var currentRating = 0;
 var allReviews = [];
@@ -63,7 +71,7 @@ function initPage() {
   loadShippingPolicy();
   var params = new URLSearchParams(location.search);
   var productId = params.get('id');
-  if (!productId) { alert('상품 정보를 찾을 수 없습니다'); location.href = 'products.html'; return; }
+  if (!productId) { alert('상품 정보를 찾을 수 없습니다'); location.href = dealerUrl('products.html'); return; }
 
   loadProduct(productId);
 }
@@ -587,7 +595,7 @@ function buyNow() {
   }
   Cart.clear();
   Cart.add(productWithOptions, qty);
-  location.href = 'order.html';
+  location.href = dealerUrl('order.html');
 }
 
 function toggleWish() {
@@ -714,7 +722,7 @@ function loadRelated() {
     container.innerHTML = related.map(function(p) {
       var price = p.salePrice || p.price;
       var discount = p.salePrice ? Math.round((1-p.salePrice/p.price)*100) : 0;
-      return '<div class="product-card" onclick="location.href=\'product.html?id=' + p.id + '\'">'
+      return '<div class="product-card" onclick="location.href=dealerUrl(\'product.html?id=' + p.id + '\')">'
         + '<div class="product-img-wrap"><img src="' + p.image + '" alt="' + p.name + '" loading="lazy">'
         + (p.badge ? '<span class="product-badge badge-' + p.badge.toLowerCase() + '">' + p.badge + '</span>' : '') + '</div>'
         + '<div class="product-info"><div class="product-category">' + p.category + '</div>'
