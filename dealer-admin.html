@@ -780,7 +780,10 @@ function loadDashboard() {
     fetch(sheetUrl('리뷰')).then(function(r){return r.text();}),
     fetch(sheetUrl('공지사항')).then(function(r){return r.text();})
   ]).then(function(results){
-    var myProds = parseCSV(results[0]).filter(function(p){ return p['대리점ID']===DEALER.id; });
+    var myProds = parseCSV(results[0]).filter(function(p){
+      var pid = (p['대리점ID']||p['가맹점ID']||'').toString().trim();
+      return pid === (DEALER.id||'').toString().trim();
+    });
     var allOrders = parseCSV(results[1]);
     var myOrders = allOrders.filter(function(o){ return o['대리점ID']===DEALER.id; });
     var today = new Date().toISOString().split('T')[0];
@@ -878,7 +881,15 @@ function loadMyProducts() {
   if(!DEALER) return;
   document.getElementById('my-products-tw').innerHTML = '<div class="loading"><div class="lspin">⏳</div></div>';
   fetch(sheetUrl('대리점상품')).then(function(r){return r.text();}).then(function(csv){
-    myProducts = parseCSV(csv).filter(function(p){ return p['대리점ID']===DEALER.id; });
+    var allProds = parseCSV(csv);
+    console.log('대리점상품 전체:', allProds.length, 'DEALER.id:', DEALER.id);
+    if(allProds.length > 0) console.log('첫번째 행 키들:', Object.keys(allProds[0]));
+    myProducts = allProds.filter(function(p){
+      var pid = (p['대리점ID']||p['가맹점ID']||'').toString().trim();
+      var did = (DEALER.id||'').toString().trim();
+      return pid === did;
+    });
+    console.log('필터 후 내 상품:', myProducts.length);
     renderMyProducts();
   }).catch(function(){
     document.getElementById('my-products-tw').innerHTML = EMPTY('📦','상품 없음','상품 등록 버튼으로 추가하세요');
