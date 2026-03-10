@@ -325,11 +325,14 @@ function loadBizInfo() {
       else { cur += ch; }
     }
     cols.push(cur.trim());
+    // 사업자정보 시트 컬럼: 상호|사업자번호|대표|주소|전화|이메일|도메인|연도|브랜드명|통신판매업
+    var rawBrand = (cols[8]||'').trim();
     var biz = {
       name: cols[0]||'담누리마켓', regNo: cols[1]||'', ceo: cols[2]||'',
       address: cols[3]||'', phone: cols[4]||'1588-0000', email: cols[5]||'',
       domain: cols[6]||'', year: cols[7]||new Date().getFullYear(),
-      brand: cols[8]||cols[0]||'담누리마켓', mailOrder: cols[9]||''
+      brand: rawBrand || '담누리마켓',  // 브랜드명 없으면 담누리마켓 고정
+      mailOrder: cols[9]||''
     };
     applyBizInfo(biz);
   }).catch(function(e){ console.log('사업자정보 로드 실패:', e); });
