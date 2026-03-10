@@ -65,7 +65,7 @@ const DealerContext = {
       const url = 'https://docs.google.com/spreadsheets/d/' + SHEET_ID
         + '/gviz/tq?tqx=out:csv&sheet=' + encodeURIComponent('가맹점') + '&t=' + Date.now();
       const rows = await SheetAPI.fetch(url);
-      this._dealer = rows.find(r => r['가맹점ID'] === id && r['상태'] !== '해지') || null;
+      this._dealer = rows.find(r => r['대리점ID'] === id && r['상태'] !== '해지') || null;
     } catch(e) { this._dealer = null; }
     this._loaded = true;
     return this._dealer;
@@ -114,7 +114,7 @@ const DealerContext = {
     }
 
     // 7) 내부 링크 dealer 파라미터 유지
-    this.keepDealerLinks(dealer['가맹점ID']);
+    this.keepDealerLinks(dealer['대리점ID']);
   },
 
   // 내부 링크에 dealer 파라미터 자동 추가
@@ -143,7 +143,7 @@ const DealerProductAPI = {
       + '/gviz/tq?tqx=out:csv&sheet=' + encodeURIComponent('가맹점상품') + '&t=' + Date.now();
     const rows = await SheetAPI.fetch(url);
     return rows
-      .filter(r => r['가맹점ID'] === dealerId && r['사용여부'] !== 'FALSE' && r['상품명'])
+      .filter(r => r['대리점ID'] === dealerId && r['사용여부'] !== 'FALSE' && r['상품명'])
       .map(row => ({
         id: 'D_' + (row['번호'] || ''),   // 본사 상품과 ID 충돌 방지
         name: row['상품명'] || '',
@@ -166,7 +166,7 @@ const DealerProductAPI = {
         salesCount: 0,
         rating: parseFloat(row['별점평균']) || 0,
         reviewCount: parseInt(row['리뷰수']) || 0,
-        dealerId: row['가맹점ID'] || '',
+        dealerId: row['대리점ID'] || '',
         isDealer: true,   // 대리점 상품 표시용
       }));
   }
@@ -377,13 +377,13 @@ const BannerAPI = {
 const FranchiseAPI = {
   async getById(id) {
     const rows = await SheetAPI.fetchCached(CONFIG.SHEETS.가맹점);
-    return rows.find(row => row['가맹점ID'] === id) || null;
+    return rows.find(row => row['대리점ID'] === id) || null;
   },
 
   async getAll() {
     const rows = await SheetAPI.fetchCached(CONFIG.SHEETS.가맹점);
     return rows.map(row => ({
-      id: row['가맹점ID'],
+      id: row['대리점ID'],
       name: row['가맹점명'],
       owner: row['대표자명'],
       phone: row['연락처'],
