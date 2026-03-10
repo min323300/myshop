@@ -380,6 +380,7 @@
           <span class="si">🛒</span> 주문 관리
           <span class="sbadge" id="new-badge" style="display:none">N</span>
         </div>
+        <div class="sb-item" onclick="go('groupbuy',this)"><span class="si">👥</span> 공동구매 관리</div>
         <div class="sb-item" onclick="go('settlement',this)"><span class="si">💰</span> 정산 관리</div>
       </div>
       <div class="sb-hr"></div>
@@ -516,6 +517,68 @@
           <div class="stab" onclick="fOrder('취소',this)">취소/반품</div>
         </div>
         <div class="tw" id="order-tw"><div class="loading"><div class="lspin">⏳</div></div></div>
+      </div>
+    </div>
+
+
+    <!-- 공동구매 관리 -->
+    <div id="page-groupbuy" class="page">
+      <div class="ph">
+        <div><div class="ph-title">공동구매 관리</div><div class="ph-sub">구글시트 &quot;공동구매&quot; 시트와 연동됩니다</div></div>
+        <div class="ph-acts">
+          <button class="btn btn-outline" onclick="loadGroupBuy()">🔄 새로고침</button>
+          <a href="https://docs.google.com/spreadsheets/d/1t804fRO8HfQtmOzpDAz2IZfzRDQ7t8LYllFGZr3ftUI" target="_blank" class="btn btn-primary">📊 구글시트에서 추가/수정</a>
+        </div>
+      </div>
+      <div class="stat-grid">
+        <div class="sc c-green"><div class="sc-top"><div class="sc-icon">▶️</div></div><div class="sc-val" id="gb-active-cnt">-</div><div class="sc-label">진행중</div></div>
+        <div class="sc c-blue"><div class="sc-top"><div class="sc-icon">⏳</div></div><div class="sc-val" id="gb-upcoming-cnt">-</div><div class="sc-label">예정</div></div>
+        <div class="sc c-orange"><div class="sc-top"><div class="sc-icon">✅</div></div><div class="sc-val" id="gb-ended-cnt">-</div><div class="sc-label">마감</div></div>
+        <div class="sc c-red"><div class="sc-top"><div class="sc-icon">👥</div></div><div class="sc-val" id="gb-total-qty">-</div><div class="sc-label">총 참여수</div></div>
+      </div>
+      <div class="card" style="margin-bottom:16px;">
+        <div class="card-hd"><div class="card-title">📋 구글시트 &quot;공동구매&quot; 시트 입력 방법</div></div>
+        <div style="padding:16px;overflow-x:auto;">
+          <table style="width:100%;border-collapse:collapse;font-size:12px;">
+            <tr style="background:#f7f8fb;">
+              <th style="padding:8px 12px;border:1px solid #e4e8ef;">번호</th>
+              <th style="padding:8px 12px;border:1px solid #e4e8ef;">상품번호</th>
+              <th style="padding:8px 12px;border:1px solid #e4e8ef;">제목</th>
+              <th style="padding:8px 12px;border:1px solid #e4e8ef;">공동구매가</th>
+              <th style="padding:8px 12px;border:1px solid #e4e8ef;">목표수량</th>
+              <th style="padding:8px 12px;border:1px solid #e4e8ef;">현재참여</th>
+              <th style="padding:8px 12px;border:1px solid #e4e8ef;">시작일시</th>
+              <th style="padding:8px 12px;border:1px solid #e4e8ef;">종료일시</th>
+              <th style="padding:8px 12px;border:1px solid #e4e8ef;">배송예정일</th>
+              <th style="padding:8px 12px;border:1px solid #e4e8ef;">사용여부</th>
+            </tr>
+            <tr>
+              <td style="padding:8px 12px;border:1px solid #e4e8ef;">1</td>
+              <td style="padding:8px 12px;border:1px solid #e4e8ef;">1</td>
+              <td style="padding:8px 12px;border:1px solid #e4e8ef;">떡갈비 공동구매</td>
+              <td style="padding:8px 12px;border:1px solid #e4e8ef;color:#FF5733;font-weight:700;">17900</td>
+              <td style="padding:8px 12px;border:1px solid #e4e8ef;">100</td>
+              <td style="padding:8px 12px;border:1px solid #e4e8ef;">57</td>
+              <td style="padding:8px 12px;border:1px solid #e4e8ef;">2026-03-10 00:00</td>
+              <td style="padding:8px 12px;border:1px solid #e4e8ef;color:#e53935;font-weight:700;">2026-03-20 23:59</td>
+              <td style="padding:8px 12px;border:1px solid #e4e8ef;">2026-03-25</td>
+              <td style="padding:8px 12px;border:1px solid #e4e8ef;">TRUE</td>
+            </tr>
+          </table>
+          <div style="margin-top:10px;padding:10px 14px;background:#fff8f7;border-radius:8px;font-size:12px;color:#c0392b;border:1px solid #fdd;">
+            ⚠️ <strong>종료일시</strong>는 <strong>2026-03-20 23:59</strong> 형식 (날짜+공백+시간) → 쇼핑몰에서 초단위 카운트다운 자동 표시<br>
+            ⚠️ <strong>현재참여</strong> 숫자를 올리면 달성률 바가 자동 업데이트됩니다
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="stabs">
+          <div class="stab active" onclick="fGroupBuy('all',this)">전체 <span class="tc" id="gb-cnt-all">0</span></div>
+          <div class="stab" onclick="fGroupBuy('active',this)">▶ 진행중 <span class="tc" id="gb-cnt-active">0</span></div>
+          <div class="stab" onclick="fGroupBuy('upcoming',this)">⏳ 예정 <span class="tc" id="gb-cnt-upcoming">0</span></div>
+          <div class="stab" onclick="fGroupBuy('ended',this)">✅ 마감 <span class="tc" id="gb-cnt-ended">0</span></div>
+        </div>
+        <div class="tw" id="gb-tw"><div class="loading"><div class="lspin">⏳</div></div></div>
       </div>
     </div>
 
@@ -870,7 +933,7 @@ function go(pid, el) {
   if(pg) pg.classList.add('active');
   if(el) el.classList.add('active');
   curPage=pid;
-  var map={'dashboard':loadDash,'prod-list':loadProds,'photo-box':loadPhotos,'cat-mgmt':loadCats,'orders':loadOrders,'settlement':loadSettle,'reviews':loadReviews,'banners':loadBanners,'franchise':loadFran,'settings':loadSettings};
+  var map={'dashboard':loadDash,'prod-list':loadProds,'photo-box':loadPhotos,'cat-mgmt':loadCats,'orders':loadOrders,'groupbuy':loadGroupBuy,'settlement':loadSettle,'reviews':loadReviews,'banners':loadBanners,'franchise':loadFran,'settings':loadSettings};
   if(map[pid]) map[pid]();
 }
 function refresh() { go(curPage, document.querySelector('.sb-item.active')); }
@@ -1299,6 +1362,190 @@ function toggleProd(id,name,isActive){
   fetch(SCRIPT_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},
     body:JSON.stringify({action:'updateProductStatus',data:{번호:id,사용여부:isActive?'FALSE':'TRUE'}})
   }).then(function(){ showToast('상태 변경됐습니다. 새로고침하세요.','ok'); setTimeout(loadProds,2000); });
+}
+
+
+// ============================================================
+// 공동구매 관리
+// ============================================================
+var gbAllData = [];
+var gbCurrentFilter = 'all';
+var gbTimerInterval = null;
+
+function parseDateTime(str) {
+  if (!str) return null;
+  return new Date(str.replace(' ', 'T'));
+}
+
+function getGbStatus(g) {
+  var now = new Date();
+  if (!g.isActive) return 'disabled';
+  if (g.startAt && now < g.startAt) return 'upcoming';
+  if (g.endAt && now > g.endAt) return 'ended';
+  return 'active';
+}
+
+function getPct(cur, tgt) {
+  if (!tgt) return 0;
+  return Math.min(100, Math.round((cur / tgt) * 100));
+}
+
+function getRemaining(endAt) {
+  if (!endAt) return '';
+  var diff = endAt - new Date();
+  if (diff <= 0) return '마감';
+  var d = Math.floor(diff/86400000);
+  var h = Math.floor((diff%86400000)/3600000);
+  var m = Math.floor((diff%3600000)/60000);
+  var s = Math.floor((diff%60000)/1000);
+  var t = (d>0 ? d+'일 ' : '') + String(h).padStart(2,'0') + ':' + String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+  return t;
+}
+
+function fmtDateTime(dt) {
+  if (!dt) return '-';
+  return dt.getFullYear()+'-'+String(dt.getMonth()+1).padStart(2,'0')+'-'+String(dt.getDate()).padStart(2,'0')
+    +' '+String(dt.getHours()).padStart(2,'0')+':'+String(dt.getMinutes()).padStart(2,'0');
+}
+
+function loadGroupBuy() {
+  var tw = document.getElementById('gb-tw');
+  if (tw) tw.innerHTML = '<div class="loading"><div class="lspin">⏳</div><div style="margin-top:10px">불러오는 중...</div></div>';
+
+  var SHEET_ID = '1t804fRO8HfQtmOzpDAz2IZfzRDQ7t8LYllFGZr3ftUI';
+  var gbUrl = 'https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/gviz/tq?tqx=out:csv&sheet='+encodeURIComponent('공동구매')+'&t='+Date.now();
+  var prodUrl = 'https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/gviz/tq?tqx=out:csv&sheet='+encodeURIComponent('상품목록')+'&t='+Date.now();
+
+  function parseCSV(csv) {
+    var lines = csv.trim().split('
+');
+    var headers = lines[0].split(',').map(function(h){ return h.trim().replace(/"/g,''); });
+    return lines.slice(1).map(function(line){
+      var vals=[], cur='', inQ=false;
+      for(var i=0;i<line.length;i++){
+        var ch=line[i];
+        if(ch==='"'){inQ=!inQ;}
+        else if(ch===','&&!inQ){vals.push(cur.trim());cur='';}
+        else cur+=ch;
+      }
+      vals.push(cur.trim());
+      var obj={};
+      headers.forEach(function(h,i){ obj[h]=(vals[i]||'').replace(/"/g,'').trim(); });
+      return obj;
+    }).filter(function(r){ return Object.values(r).some(function(v){return v;}); });
+  }
+
+  Promise.all([
+    fetch(gbUrl).then(function(r){return r.text();}),
+    fetch(prodUrl).then(function(r){return r.text();})
+  ]).then(function(results) {
+    var gbRows = parseCSV(results[0]);
+    var prodRows = parseCSV(results[1]);
+
+    gbAllData = gbRows.map(function(row) {
+      var prod = prodRows.find(function(p){ return String(p['번호'])===String(row['상품번호']); }) || {};
+      var g = {
+        id: row['번호']||'',
+        productId: row['상품번호']||'',
+        title: row['제목']||prod['상품명']||'',
+        groupPrice: parseInt(row['공동구매가'])||0,
+        targetQty: parseInt(row['목표수량'])||100,
+        currentQty: parseInt(row['현재참여'])||0,
+        startAt: parseDateTime(row['시작일시']),
+        endAt: parseDateTime(row['종료일시']),
+        deliveryDate: row['배송예정일']||'',
+        isActive: row['사용여부']!=='FALSE',
+        description: row['설명']||'',
+        originalPrice: parseInt(prod['가격'])||0,
+        image: prod['이미지']||'',
+        category: prod['카테고리']||'',
+      };
+      g.status = getGbStatus(g);
+      g.pct = getPct(g.currentQty, g.targetQty);
+      return g;
+    });
+
+    // 통계
+    var active=0, upcoming=0, ended=0, totalQty=0;
+    gbAllData.forEach(function(g){
+      if(g.status==='active') active++;
+      else if(g.status==='upcoming') upcoming++;
+      else if(g.status==='ended') ended++;
+      totalQty += g.currentQty;
+    });
+    var setV = function(id,v){ var el=document.getElementById(id); if(el) el.textContent=v; };
+    setV('gb-active-cnt', active);
+    setV('gb-upcoming-cnt', upcoming);
+    setV('gb-ended-cnt', ended);
+    setV('gb-total-qty', totalQty.toLocaleString()+'명');
+    setV('gb-cnt-all', gbAllData.length);
+    setV('gb-cnt-active', active);
+    setV('gb-cnt-upcoming', upcoming);
+    setV('gb-cnt-ended', ended);
+
+    renderGroupBuy(gbCurrentFilter);
+
+    // 카운트다운 타이머
+    if (gbTimerInterval) clearInterval(gbTimerInterval);
+    gbTimerInterval = setInterval(function(){
+      document.querySelectorAll('[id^="gbt-"]').forEach(function(el){
+        var endMs = parseInt(el.getAttribute('data-end'));
+        if (!endMs) return;
+        var diff = endMs - Date.now();
+        if (diff <= 0) { el.textContent='마감완료'; el.style.color='#999'; return; }
+        el.textContent = getRemaining(new Date(endMs));
+      });
+    }, 1000);
+
+  }).catch(function(e){
+    var tw = document.getElementById('gb-tw');
+    if(tw) tw.innerHTML = '<div class="empty"><div class="empty-ico">⚠️</div><div class="empty-txt">공동구매 시트 없음</div><div class="empty-sub">구글시트에 &quot;공동구매&quot; 시트를 만들어주세요</div></div>';
+  });
+}
+
+function fGroupBuy(filter, el) {
+  gbCurrentFilter = filter;
+  document.querySelectorAll('.stab').forEach(function(t){ t.classList.remove('active'); });
+  if (el) el.classList.add('active');
+  renderGroupBuy(filter);
+}
+
+function renderGroupBuy(filter) {
+  var tw = document.getElementById('gb-tw');
+  if (!tw) return;
+  var data = filter==='all' ? gbAllData : gbAllData.filter(function(g){ return g.status===filter; });
+  if (!data.length) {
+    tw.innerHTML = '<div class="empty"><div class="empty-ico">👥</div><div class="empty-txt">공동구매 없음</div><div class="empty-sub">구글시트에서 추가하세요</div></div>';
+    return;
+  }
+
+  var statusLabel = { active:'<span style="background:#e8f5e9;color:#388e3c;padding:3px 10px;border-radius:12px;font-size:12px;font-weight:700;">▶ 진행중</span>', upcoming:'<span style="background:#e3f2fd;color:#1565c0;padding:3px 10px;border-radius:12px;font-size:12px;font-weight:700;">⏳ 예정</span>', ended:'<span style="background:#f5f5f5;color:#999;padding:3px 10px;border-radius:12px;font-size:12px;font-weight:700;">✅ 마감</span>', disabled:'<span style="background:#fce4ec;color:#c62828;padding:3px 10px;border-radius:12px;font-size:12px;font-weight:700;">🚫 비활성</span>' };
+
+  var html = '<table><thead><tr><th>번호</th><th>상품</th><th>공동구매가</th><th>참여현황</th><th>달성률</th><th>시작일시</th><th>종료일시</th><th>마감까지</th><th>배송예정일</th><th>상태</th></tr></thead><tbody>';
+  data.forEach(function(g){
+    var dc = (g.originalPrice && g.groupPrice < g.originalPrice) ? Math.round((1-g.groupPrice/g.originalPrice)*100) : 0;
+    var pctColor = g.pct>=100 ? '#388e3c' : g.pct>=70 ? '#FF5733' : '#1565c0';
+    html += '<tr>'
+      +'<td style="font-weight:700;">'+g.id+'</td>'
+      +'<td><div style="font-weight:600;max-width:160px;">'+g.title+'</div>'+(g.category?'<div style="font-size:11px;color:#999;">'+g.category+'</div>':'')+'</td>'
+      +'<td><div style="font-weight:900;color:#FF5733;">'+g.groupPrice.toLocaleString()+'원</div>'+(dc?'<div style="font-size:11px;color:#e53935;">'+dc+'% 할인</div>':'')+(g.originalPrice?'<div style="font-size:11px;color:#bbb;text-decoration:line-through;">'+g.originalPrice.toLocaleString()+'원</div>':'')+'</td>'
+      +'<td style="text-align:center;"><strong>'+g.currentQty+'</strong><span style="color:#bbb;"> / '+g.targetQty+'명</span></td>'
+      +'<td style="min-width:100px;">'
+        +'<div style="background:#f0f0f0;border-radius:4px;height:8px;overflow:hidden;margin-bottom:4px;">'
+        +'<div style="height:100%;background:'+pctColor+';width:'+g.pct+'%;border-radius:4px;"></div></div>'
+        +'<div style="font-size:12px;font-weight:700;color:'+pctColor+';">'+g.pct+'%</div>'
+      +'</td>'
+      +'<td style="font-size:12px;">'+fmtDateTime(g.startAt)+'</td>'
+      +'<td style="font-size:12px;font-weight:700;color:#e53935;">'+fmtDateTime(g.endAt)+'</td>'
+      +'<td style="font-size:12px;font-weight:700;color:#e53935;">'
+        +(g.status==='active' ? '<span id="gbt-'+g.id+'" data-end="'+(g.endAt?g.endAt.getTime():0)+'" style="font-family:monospace;">'+getRemaining(g.endAt)+'</span>' : (g.status==='ended' ? '<span style="color:#999;">마감완료</span>' : '<span style="color:#1565c0;">아직 시작 전</span>'))
+      +'</td>'
+      +'<td style="font-size:12px;">'+( g.deliveryDate ? '📦 '+g.deliveryDate : '-')+'</td>'
+      +'<td>'+( statusLabel[g.status]||'' )+'</td>'
+      +'</tr>';
+  });
+  html += '</tbody></table>';
+  tw.innerHTML = html;
 }
 
 // ============================================================
