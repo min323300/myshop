@@ -23,110 +23,142 @@
     .btn-auth { width: 100%; padding: 16px; background: var(--accent); color: #fff; border: none; border-radius: 10px; font-size: 16px; font-weight: 800; cursor: pointer; margin-top: 8px; transition: var(--transition); }
     .btn-auth:hover { background: var(--accent-dark); transform: translateY(-1px); }
     .social-divider { text-align: center; color: var(--gray-light); font-size: 13px; margin: 24px 0; position: relative; }
-    .social-divider::before, .social-divider::after { content: ''; position: absolute; top: 50%; width: 42%; height: 1px; background: var(--border); }
-    .social-divider::before { left: 0; } .social-divider::after { right: 0; }
+    .social-divider::before,.social-divider::after { content:''; position:absolute; top:50%; width:42%; height:1px; background:var(--border); }
+    .social-divider::before { left:0; } .social-divider::after { right:0; }
     .social-btns { display: flex; flex-direction: column; gap: 10px; }
-    .btn-social { padding: 14px; border: 1.5px solid var(--border); border-radius: 10px; font-size: 14px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; transition: var(--transition); background: #fff; }
-    .btn-social:hover { border-color: var(--accent); }
-    .btn-kakao { background: #FEE500; border-color: #FEE500; }
-    .btn-naver { background: #03C75A; color: #fff; border-color: #03C75A; }
-    .terms-note { font-size: 11px; color: var(--gray-light); text-align: center; margin-top: 16px; line-height: 1.8; }
-    .terms-note a { color: var(--accent); }
-    .find-links { display: flex; justify-content: center; gap: 16px; margin-top: 16px; font-size: 13px; }
-    .find-links a { color: var(--gray); }
+    .btn-social { padding:14px; border:1.5px solid var(--border); border-radius:10px; font-size:14px; font-weight:700; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:10px; transition:var(--transition); background:#fff; }
+    .btn-social:hover { border-color:var(--accent); }
+    .btn-kakao { background:#FEE500; border-color:#FEE500; }
+    .btn-naver { background:#03C75A; color:#fff; border-color:#03C75A; }
+    .terms-note { font-size:11px; color:var(--gray-light); text-align:center; margin-top:16px; line-height:1.8; }
+    .terms-note a { color:var(--accent); }
+    .find-links { display:flex; justify-content:center; gap:16px; margin-top:16px; font-size:13px; }
+    .find-links a { color:var(--gray); }
 
     /* 마이페이지 */
     .mypage-wrap { max-width: 900px; margin: 32px auto; padding: 0 24px; }
-    .mypage-header { display: flex; align-items: center; gap: 20px; background: linear-gradient(135deg, var(--accent), #FF8C00); color: #fff; border-radius: 16px; padding: 28px; margin-bottom: 24px; }
-    .mypage-avatar { width: 72px; height: 72px; border-radius: 50%; background: rgba(255,255,255,0.3); display: flex; align-items: center; justify-content: center; font-size: 36px; }
-    .mypage-name { font-size: 22px; font-weight: 900; }
-    .mypage-grade { font-size: 13px; opacity: 0.9; margin-top: 4px; }
-    .mypage-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 24px; }
-    .stat-card { background: #fff; border: 1.5px solid var(--border); border-radius: 12px; padding: 20px; text-align: center; cursor: pointer; transition: var(--transition); }
-    .stat-card:hover { border-color: var(--accent); }
-    .stat-num { font-size: 28px; font-weight: 900; color: var(--accent); }
-    .stat-label { font-size: 12px; color: var(--gray); margin-top: 4px; }
-    .mypage-menu { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
-    .menu-card { background: #fff; border: 1.5px solid var(--border); border-radius: 12px; padding: 20px; display: flex; align-items: center; gap: 14px; cursor: pointer; transition: var(--transition); }
-    .menu-card:hover { border-color: var(--accent); background: #fff5f2; }
-    .menu-icon { font-size: 28px; }
-    .menu-title { font-size: 15px; font-weight: 700; }
-    .menu-desc { font-size: 12px; color: var(--gray); margin-top: 2px; }
+    .mypage-header { display:flex; align-items:center; gap:20px; background:linear-gradient(135deg, var(--accent), #FF8C00); color:#fff; border-radius:16px; padding:28px; margin-bottom:24px; }
+    .mypage-avatar { width:72px; height:72px; border-radius:50%; background:rgba(255,255,255,0.3); display:flex; align-items:center; justify-content:center; font-size:36px; }
+    .mypage-name { font-size:22px; font-weight:900; }
+    .mypage-grade { font-size:13px; opacity:0.9; margin-top:4px; }
+    .mypage-stats { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:16px; }
+    .stat-card { background:#fff; border:1.5px solid var(--border); border-radius:12px; padding:20px; text-align:center; cursor:pointer; transition:var(--transition); }
+    .stat-card:hover { border-color:var(--accent); }
+    .stat-num { font-size:28px; font-weight:900; color:var(--accent); }
+    .stat-label { font-size:12px; color:var(--gray); margin-top:4px; }
+
+    /* ★ 추천인 코드 박스 */
+    .referral-box {
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: #fff; border-radius: 16px; padding: 24px; margin-bottom: 16px;
+      display: flex; align-items: center; justify-content: space-between; gap: 16px;
+      flex-wrap: wrap;
+    }
+    .referral-left .referral-title { font-size: 15px; font-weight: 800; margin-bottom: 4px; }
+    .referral-left .referral-sub { font-size: 12px; opacity: 0.85; line-height: 1.6; }
+    .referral-right { display: flex; flex-direction: column; gap: 8px; align-items: flex-end; }
+    .referral-code-display {
+      background: rgba(255,255,255,0.2); border: 1.5px solid rgba(255,255,255,0.4);
+      border-radius: 10px; padding: 10px 18px; font-size: 20px; font-weight: 900;
+      letter-spacing: 3px; font-family: monospace; text-align: center; min-width: 160px;
+    }
+    .referral-btns { display: flex; gap: 8px; }
+    .btn-ref { padding: 8px 14px; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer; border: none; transition: var(--transition); }
+    .btn-copy { background: rgba(255,255,255,0.9); color: #764ba2; }
+    .btn-share { background: #fff; color: #764ba2; }
+    .btn-copy:hover,.btn-share:hover { transform: translateY(-1px); }
+    .referral-stats { display: flex; gap: 16px; margin-top: 8px; }
+    .ref-stat { text-align: center; }
+    .ref-stat-num { font-size: 18px; font-weight: 900; }
+    .ref-stat-label { font-size: 11px; opacity: 0.8; }
+
+    /* 혜택 안내 */
+    .benefit-info {
+      background: #f0f4ff; border: 1.5px solid #c7d2fe; border-radius: 12px;
+      padding: 16px 20px; margin-bottom: 16px; font-size: 13px;
+    }
+    .benefit-info .bi-title { font-weight: 800; color: #4338ca; margin-bottom: 8px; font-size: 14px; }
+    .benefit-row { display: flex; align-items: center; gap: 8px; padding: 4px 0; color: #374151; }
+    .benefit-row .badge { background: #4338ca; color: #fff; border-radius: 20px; padding: 2px 8px; font-size: 11px; font-weight: 700; }
+
+    .mypage-menu { display:grid; grid-template-columns:repeat(2,1fr); gap:12px; }
+    .menu-card { background:#fff; border:1.5px solid var(--border); border-radius:12px; padding:20px; display:flex; align-items:center; gap:14px; cursor:pointer; transition:var(--transition); }
+    .menu-card:hover { border-color:var(--accent); background:#fff5f2; }
+    .menu-icon { font-size:28px; }
+    .menu-title { font-size:15px; font-weight:700; }
+    .menu-desc { font-size:12px; color:var(--gray); margin-top:2px; }
 
     /* 모달 */
-    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center; padding: 16px; }
-    .modal-overlay.open { display: flex; }
-    .modal-box { background: #fff; border-radius: 16px; width: 100%; max-width: 680px; max-height: 85vh; display: flex; flex-direction: column; overflow: hidden; }
-    .modal-head { display: flex; align-items: center; justify-content: space-between; padding: 20px 24px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
-    .modal-head h2 { font-size: 18px; font-weight: 900; }
-    .modal-close { background: none; border: none; font-size: 28px; cursor: pointer; color: var(--gray); line-height: 1; padding: 0; }
-    .modal-body { padding: 24px; overflow-y: auto; flex: 1; }
+    .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:1000; align-items:center; justify-content:center; padding:16px; }
+    .modal-overlay.open { display:flex; }
+    .modal-box { background:#fff; border-radius:16px; width:100%; max-width:680px; max-height:85vh; display:flex; flex-direction:column; overflow:hidden; }
+    .modal-head { display:flex; align-items:center; justify-content:space-between; padding:20px 24px; border-bottom:1px solid var(--border); flex-shrink:0; }
+    .modal-head h2 { font-size:18px; font-weight:900; }
+    .modal-close { background:none; border:none; font-size:28px; cursor:pointer; color:var(--gray); line-height:1; padding:0; }
+    .modal-body { padding:24px; overflow-y:auto; flex:1; }
 
-    /* 주문카드 */
-    .order-card { border: 1.5px solid var(--border); border-radius: 12px; padding: 16px; margin-bottom: 12px; }
-    .order-card-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-    .order-no { font-size: 12px; color: var(--gray); }
-    .order-status { font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 20px; }
-    .s-결제대기 { background:#fff3cd;color:#856404; }
-    .s-결제완료 { background:#d1fae5;color:#065f46; }
-    .s-상품준비 { background:#dbeafe;color:#1e40af; }
-    .s-배송중   { background:#ede9fe;color:#5b21b6; }
-    .s-배송완료 { background:#f3f4f6;color:#374151; }
-    .s-취소     { background:#fee2e2;color:#991b1b; }
-    .order-product { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
-    .order-meta { font-size: 12px; color: var(--gray); }
-    .order-amount { font-size: 16px; font-weight: 900; color: var(--accent); margin-top: 8px; }
+    .order-card { border:1.5px solid var(--border); border-radius:12px; padding:16px; margin-bottom:12px; }
+    .order-card-head { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; }
+    .order-no { font-size:12px; color:var(--gray); }
+    .order-status { font-size:12px; font-weight:700; padding:4px 10px; border-radius:20px; }
+    .s-결제대기{background:#fff3cd;color:#856404;} .s-결제완료{background:#d1fae5;color:#065f46;}
+    .s-상품준비{background:#dbeafe;color:#1e40af;} .s-배송중{background:#ede9fe;color:#5b21b6;}
+    .s-배송완료{background:#f3f4f6;color:#374151;} .s-취소{background:#fee2e2;color:#991b1b;}
+    .order-product { font-size:14px; font-weight:700; margin-bottom:4px; }
+    .order-meta { font-size:12px; color:var(--gray); }
+    .order-amount { font-size:16px; font-weight:900; color:var(--accent); margin-top:8px; }
 
-    /* 배송단계 */
-    .delivery-steps { display: flex; flex-direction: column; }
-    .d-step { display: flex; gap: 14px; }
-    .d-step-left { display: flex; flex-direction: column; align-items: center; }
-    .d-dot { width: 16px; height: 16px; border-radius: 50%; background: #ddd; flex-shrink: 0; margin-top: 2px; }
-    .d-dot.done { background: var(--accent); }
-    .d-dot.cur  { background: var(--accent); box-shadow: 0 0 0 4px rgba(255,87,51,0.2); }
-    .d-line { width: 2px; height: 36px; background: #ddd; }
-    .d-line.done { background: var(--accent); }
-    .d-step-right { padding-bottom: 28px; }
-    .d-title { font-size: 14px; font-weight: 700; }
-    .d-desc  { font-size: 12px; color: var(--gray); margin-top: 2px; }
+    .delivery-steps { display:flex; flex-direction:column; }
+    .d-step { display:flex; gap:14px; }
+    .d-step-left { display:flex; flex-direction:column; align-items:center; }
+    .d-dot { width:16px; height:16px; border-radius:50%; background:#ddd; flex-shrink:0; margin-top:2px; }
+    .d-dot.done{background:var(--accent);} .d-dot.cur{background:var(--accent);box-shadow:0 0 0 4px rgba(255,87,51,0.2);}
+    .d-line { width:2px; height:36px; background:#ddd; }
+    .d-line.done { background:var(--accent); }
+    .d-step-right { padding-bottom:28px; }
+    .d-title { font-size:14px; font-weight:700; }
+    .d-desc { font-size:12px; color:var(--gray); margin-top:2px; }
 
-    /* 찜목록 */
-    .wish-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
-    .wish-card { border: 1.5px solid var(--border); border-radius: 10px; overflow: hidden; cursor: pointer; transition: var(--transition); }
-    .wish-card:hover { border-color: var(--accent); }
-    .wish-card img { width: 100%; height: 120px; object-fit: cover; }
-    .wish-info { padding: 10px; }
-    .wish-name { font-size: 13px; font-weight: 700; margin-bottom: 4px; }
-    .wish-price { font-size: 14px; font-weight: 900; color: var(--accent); }
+    .wish-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:12px; }
+    .wish-card { border:1.5px solid var(--border); border-radius:10px; overflow:hidden; cursor:pointer; transition:var(--transition); }
+    .wish-card:hover { border-color:var(--accent); }
+    .wish-card img { width:100%; height:120px; object-fit:cover; }
+    .wish-info { padding:10px; }
+    .wish-name { font-size:13px; font-weight:700; margin-bottom:4px; }
+    .wish-price { font-size:14px; font-weight:900; color:var(--accent); }
     .wish-del { float:right; background:none; border:none; color:var(--gray); cursor:pointer; font-size:16px; }
 
-    /* 리뷰 */
-    .review-card { border: 1.5px solid var(--border); border-radius: 10px; padding: 14px; margin-bottom: 10px; }
-    .review-stars { color: #FFB800; font-size: 14px; margin-bottom: 6px; }
-    .review-content { font-size: 14px; line-height: 1.6; }
-    .review-date { font-size: 11px; color: var(--gray-light); margin-top: 6px; }
+    .review-card { border:1.5px solid var(--border); border-radius:10px; padding:14px; margin-bottom:10px; }
+    .review-stars { color:#FFB800; font-size:14px; margin-bottom:6px; }
+    .review-content { font-size:14px; line-height:1.6; }
+    .review-date { font-size:11px; color:var(--gray-light); margin-top:6px; }
 
-    /* 적립금 */
-    .point-box { background: linear-gradient(135deg, var(--accent), #FF8C00); color: #fff; border-radius: 14px; padding: 24px; text-align: center; margin-bottom: 20px; }
-    .point-num { font-size: 36px; font-weight: 900; }
-    .point-label { font-size: 13px; opacity: 0.9; margin-top: 4px; }
-    .point-history { border: 1.5px solid var(--border); border-radius: 10px; overflow: hidden; }
-    .point-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; border-bottom: 1px solid var(--border); font-size: 13px; }
-    .point-row:last-child { border-bottom: none; }
-    .pt-plus { color: #065f46; font-weight: 700; }
+    .point-box { background:linear-gradient(135deg,var(--accent),#FF8C00); color:#fff; border-radius:14px; padding:24px; text-align:center; margin-bottom:20px; }
+    .point-num { font-size:36px; font-weight:900; }
+    .point-label { font-size:13px; opacity:0.9; margin-top:4px; }
+    .point-history { border:1.5px solid var(--border); border-radius:10px; overflow:hidden; }
+    .point-row { display:flex; justify-content:space-between; align-items:center; padding:12px 16px; border-bottom:1px solid var(--border); font-size:13px; }
+    .point-row:last-child { border-bottom:none; }
+    .pt-plus { color:#065f46; font-weight:700; }
+    .pt-minus { color:#991b1b; font-weight:700; }
 
-    /* 정보수정 */
-    .info-form .form-group input { padding: 12px 14px; font-size: 14px; }
-    .btn-save { width: 100%; padding: 14px; background: var(--accent); color: #fff; border: none; border-radius: 10px; font-size: 15px; font-weight: 800; cursor: pointer; margin-top: 8px; }
+    .info-form .form-group input { padding:12px 14px; font-size:14px; }
+    .btn-save { width:100%; padding:14px; background:var(--accent); color:#fff; border:none; border-radius:10px; font-size:15px; font-weight:800; cursor:pointer; margin-top:8px; }
 
-    .empty-state { text-align: center; padding: 40px 20px; color: var(--gray); }
-    .empty-icon { font-size: 48px; margin-bottom: 12px; }
-    .loading-txt { text-align: center; padding: 40px; color: var(--gray); font-size: 14px; }
+    /* 추천 내역 모달 */
+    .ref-history-row { display:flex; justify-content:space-between; align-items:center; padding:12px 0; border-bottom:1px solid var(--border); font-size:14px; }
+    .ref-history-row:last-child { border-bottom:none; }
 
-    @media (max-width: 768px) {
-      .mypage-stats { grid-template-columns: repeat(2, 1fr); }
-      .mypage-menu  { grid-template-columns: 1fr; }
-      .wish-grid    { grid-template-columns: 1fr; }
+    .empty-state { text-align:center; padding:40px 20px; color:var(--gray); }
+    .empty-icon { font-size:48px; margin-bottom:12px; }
+    .loading-txt { text-align:center; padding:40px; color:var(--gray); font-size:14px; }
+
+    @media (max-width:768px) {
+      .mypage-stats { grid-template-columns:repeat(2,1fr); }
+      .mypage-menu { grid-template-columns:1fr; }
+      .wish-grid { grid-template-columns:1fr; }
+      .referral-box { flex-direction:column; }
+      .referral-right { align-items:flex-start; }
     }
   </style>
 </head>
@@ -143,7 +175,7 @@
 <main>
   <!-- 로그인/회원가입 -->
   <div class="auth-wrap" id="auth-section">
-    <div class="auth-logo"><a href="index.html">🏪 담누리마켓</a></div>
+    <div class="auth-logo"><a href="index.html">🏪 <span id="auth-store-name">담누리마켓</span></a></div>
     <div class="auth-tabs">
       <button class="auth-tab active" onclick="switchAuth('login',this)">로그인</button>
       <button class="auth-tab" onclick="switchAuth('signup',this)">회원가입</button>
@@ -165,6 +197,11 @@
       <div class="form-group"><label>비밀번호 *</label><input type="password" id="signup-pw" placeholder="8자 이상 입력"></div>
       <div class="form-group"><label>비밀번호 확인 *</label><input type="password" id="signup-pw2" placeholder="비밀번호 재입력"></div>
       <div class="form-group"><label>연락처</label><input type="tel" id="signup-phone" placeholder="010-0000-0000"></div>
+      <div class="form-group">
+        <label>🎁 추천인 코드 <span style="font-weight:400;color:#6366f1;">(선택 · 입력 시 1,000P 즉시 지급)</span></label>
+        <input type="text" id="signup-ref" placeholder="예: REFA3K9XZ" style="border-color:#c7d2fe;background:#f8f7ff;letter-spacing:2px;">
+        <span style="font-size:11px;color:#6366f1;margin-top:3px;display:block;">추천인 코드가 있으면 입력하세요 · 없으면 비워두세요</span>
+      </div>
       <button class="btn-auth" onclick="doSignup()">회원가입</button>
       <div class="terms-note">가입 시 <a href="terms.html">이용약관</a> 및 <a href="privacy.html">개인정보처리방침</a>에 동의하는 것으로 간주합니다.</div>
     </div>
@@ -181,83 +218,88 @@
       <button onclick="doLogout()" style="margin-left:auto;padding:8px 16px;background:rgba(255,255,255,0.2);color:#fff;border:1px solid rgba(255,255,255,0.4);border-radius:8px;cursor:pointer;font-size:13px;">로그아웃</button>
     </div>
 
+    <!-- 통계 -->
     <div class="mypage-stats">
       <div class="stat-card" onclick="openModal('orders')"><div class="stat-num" id="stat-orders">0</div><div class="stat-label">주문</div></div>
       <div class="stat-card" onclick="openModal('delivery')"><div class="stat-num" id="stat-shipping">0</div><div class="stat-label">배송중</div></div>
       <div class="stat-card" onclick="openModal('wishlist')"><div class="stat-num" id="stat-wish">0</div><div class="stat-label">찜목록</div></div>
-      <div class="stat-card" onclick="openModal('points')"><div class="stat-num" id="stat-points">3,000</div><div class="stat-label">적립금</div></div>
+      <div class="stat-card" onclick="openModal('points')"><div class="stat-num" id="stat-points">0</div><div class="stat-label">적립금</div></div>
     </div>
 
+    <!-- ★ 추천인 코드 박스 -->
+    <div class="referral-box">
+      <div class="referral-left">
+        <div class="referral-title">🎁 내 추천인 코드</div>
+        <div class="referral-sub">
+          친구에게 코드를 공유하세요!<br>
+          친구 가입 시 친구 <strong>+1,000P</strong> · 나 <strong>+2,000P</strong>
+        </div>
+        <div class="referral-stats" style="margin-top:12px;">
+          <div class="ref-stat"><div class="ref-stat-num" id="ref-count">0</div><div class="ref-stat-label">추천 인원</div></div>
+          <div class="ref-stat"><div class="ref-stat-num" id="ref-points">0P</div><div class="ref-stat-label">받은 적립금</div></div>
+        </div>
+      </div>
+      <div class="referral-right">
+        <div class="referral-code-display" id="my-ref-code">로딩중...</div>
+        <div class="referral-btns">
+          <button class="btn-ref btn-copy" onclick="copyRefCode()">📋 코드 복사</button>
+          <button class="btn-ref btn-share" onclick="shareRefLink()">🔗 링크 공유</button>
+        </div>
+        <div style="font-size:11px;opacity:0.8;text-align:right;margin-top:4px;" id="ref-link-preview"></div>
+      </div>
+    </div>
+
+    <!-- 혜택 안내 -->
+    <div class="benefit-info">
+      <div class="bi-title">🎉 추천인 혜택 안내</div>
+      <div class="benefit-row"><span class="badge">추천받은 분</span> 회원가입 시 즉시 <strong>+1,000P</strong> 적립</div>
+      <div class="benefit-row"><span class="badge">추천한 나</span> 친구가 첫 주문 완료 시 <strong>+2,000P</strong> 적립</div>
+      <div class="benefit-row" style="color:var(--gray);font-size:12px;margin-top:4px;">※ 적립금은 1,000P 이상 시 결제에 사용 가능합니다</div>
+    </div>
+
+    <!-- 메뉴 -->
     <div class="mypage-menu">
-      <div class="menu-card" onclick="openModal('orders')">
-        <div class="menu-icon">📋</div>
-        <div><div class="menu-title">주문 내역</div><div class="menu-desc">주문 현황을 확인하세요</div></div>
-      </div>
-      <div class="menu-card" onclick="openModal('delivery')">
-        <div class="menu-icon">🚚</div>
-        <div><div class="menu-title">배송 조회</div><div class="menu-desc">배송 현황을 확인하세요</div></div>
-      </div>
-      <div class="menu-card" onclick="openModal('wishlist')">
-        <div class="menu-icon">❤️</div>
-        <div><div class="menu-title">찜 목록</div><div class="menu-desc">관심 상품을 확인하세요</div></div>
-      </div>
-      <div class="menu-card" onclick="openModal('reviews')">
-        <div class="menu-icon">⭐</div>
-        <div><div class="menu-title">내 리뷰</div><div class="menu-desc">작성한 리뷰를 확인하세요</div></div>
-      </div>
-      <div class="menu-card" onclick="openModal('points')">
-        <div class="menu-icon">🎫</div>
-        <div><div class="menu-title">쿠폰 / 적립금</div><div class="menu-desc">보유 혜택을 확인하세요</div></div>
-      </div>
-      <div class="menu-card" onclick="openModal('profile')">
-        <div class="menu-icon">⚙️</div>
-        <div><div class="menu-title">회원 정보 수정</div><div class="menu-desc">개인 정보를 관리하세요</div></div>
-      </div>
+      <div class="menu-card" onclick="openModal('orders')"><div class="menu-icon">📋</div><div><div class="menu-title">주문 내역</div><div class="menu-desc">주문 현황을 확인하세요</div></div></div>
+      <div class="menu-card" onclick="openModal('delivery')"><div class="menu-icon">🚚</div><div><div class="menu-title">배송 조회</div><div class="menu-desc">배송 현황을 확인하세요</div></div></div>
+      <div class="menu-card" onclick="openModal('wishlist')"><div class="menu-icon">❤️</div><div><div class="menu-title">찜 목록</div><div class="menu-desc">관심 상품을 확인하세요</div></div></div>
+      <div class="menu-card" onclick="openModal('reviews')"><div class="menu-icon">⭐</div><div><div class="menu-title">내 리뷰</div><div class="menu-desc">작성한 리뷰를 확인하세요</div></div></div>
+      <div class="menu-card" onclick="openModal('points')"><div class="menu-icon">🎫</div><div><div class="menu-title">쿠폰 / 적립금</div><div class="menu-desc">보유 혜택을 확인하세요</div></div></div>
+      <div class="menu-card" onclick="openModal('profile')"><div class="menu-icon">⚙️</div><div><div class="menu-title">회원 정보 수정</div><div class="menu-desc">개인 정보를 관리하세요</div></div></div>
     </div>
   </div>
 </main>
 
-<!-- 주문 내역 모달 -->
+<!-- 모달들 -->
 <div class="modal-overlay" id="modal-orders">
   <div class="modal-box">
     <div class="modal-head"><h2>📋 주문 내역</h2><button class="modal-close" onclick="closeModal('orders')">×</button></div>
     <div class="modal-body" id="body-orders"><div class="loading-txt">⏳ 불러오는 중...</div></div>
   </div>
 </div>
-
-<!-- 배송 조회 모달 -->
 <div class="modal-overlay" id="modal-delivery">
   <div class="modal-box">
     <div class="modal-head"><h2>🚚 배송 조회</h2><button class="modal-close" onclick="closeModal('delivery')">×</button></div>
     <div class="modal-body" id="body-delivery"><div class="loading-txt">⏳ 불러오는 중...</div></div>
   </div>
 </div>
-
-<!-- 찜 목록 모달 -->
 <div class="modal-overlay" id="modal-wishlist">
   <div class="modal-box">
     <div class="modal-head"><h2>❤️ 찜 목록</h2><button class="modal-close" onclick="closeModal('wishlist')">×</button></div>
     <div class="modal-body" id="body-wishlist"></div>
   </div>
 </div>
-
-<!-- 내 리뷰 모달 -->
 <div class="modal-overlay" id="modal-reviews">
   <div class="modal-box">
     <div class="modal-head"><h2>⭐ 내 리뷰</h2><button class="modal-close" onclick="closeModal('reviews')">×</button></div>
     <div class="modal-body" id="body-reviews"><div class="loading-txt">⏳ 불러오는 중...</div></div>
   </div>
 </div>
-
-<!-- 쿠폰/적립금 모달 -->
 <div class="modal-overlay" id="modal-points">
   <div class="modal-box">
     <div class="modal-head"><h2>🎫 쿠폰 / 적립금</h2><button class="modal-close" onclick="closeModal('points')">×</button></div>
     <div class="modal-body" id="body-points"></div>
   </div>
 </div>
-
-<!-- 회원 정보 수정 모달 -->
 <div class="modal-overlay" id="modal-profile">
   <div class="modal-box">
     <div class="modal-head"><h2>⚙️ 회원 정보 수정</h2><button class="modal-close" onclick="closeModal('profile')">×</button></div>
@@ -278,6 +320,14 @@
 <script src="js/sheets.js"></script>
 <script src="js/app.js"></script>
 <script>
+// ── 추천 코드 생성 ──
+function generateRefCode(name) {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let code = '';
+  for (let i = 0; i < 6; i++) code += chars[Math.floor(Math.random() * chars.length)];
+  return 'REF' + code;
+}
+
 // ── 인증 ──
 function switchAuth(tab, btn) {
   document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
@@ -285,41 +335,164 @@ function switchAuth(tab, btn) {
   btn.classList.add('active');
   document.getElementById('panel-' + tab).classList.add('active');
 }
+
+// URL에서 추천코드 자동 입력
+window.addEventListener('DOMContentLoaded', () => {
+  const params = new URLSearchParams(location.search);
+  const refCode = params.get('ref');
+  if (refCode) {
+    try { sessionStorage.setItem('pendingRefCode', refCode); } catch(e) {}
+    const inp = document.getElementById('signup-ref');
+    if (inp) { inp.value = refCode; switchAuth('signup', document.querySelectorAll('.auth-tab')[1]); }
+  }
+});
+
 function doLogin() {
   const email = document.getElementById('login-email').value.trim();
   const pw    = document.getElementById('login-pw').value;
   if (!email || !pw) { alert('이메일과 비밀번호를 입력해주세요'); return; }
   const user = { name: email.split('@')[0], email, phone:'', date: new Date().toLocaleDateString('ko-KR') };
+  // 기존 유저의 추천코드 복원
+  const storedCode = localStorage.getItem('refCode_' + email);
+  user.refCode = storedCode || generateRefCode(user.name);
+  if (!storedCode) localStorage.setItem('refCode_' + email, user.refCode);
   sessionStorage.setItem('user', JSON.stringify(user));
   showMypage(user);
 }
+
 function doSignup() {
   const name  = document.getElementById('signup-name').value.trim();
   const email = document.getElementById('signup-email').value.trim();
   const pw    = document.getElementById('signup-pw').value;
   const pw2   = document.getElementById('signup-pw2').value;
   const phone = document.getElementById('signup-phone').value.trim();
+  const inputRef = document.getElementById('signup-ref').value.trim().toUpperCase();
+
   if (!name||!email||!pw) { alert('필수 항목을 모두 입력해주세요'); return; }
   if (pw!==pw2) { alert('비밀번호가 일치하지 않습니다'); return; }
   if (pw.length<8) { alert('비밀번호는 8자 이상이어야 합니다'); return; }
-  const user = { name, email, phone, date: new Date().toLocaleDateString('ko-KR') };
+
+  // 추천코드 생성 및 저장
+  const myRefCode = generateRefCode(name);
+  localStorage.setItem('refCode_' + email, myRefCode);
+
+  // 기본 적립금 3,000P + 추천코드 입력 시 +1,000P
+  let points = 3000;
+  let signupMsg = `환영합니다, ${name}님! 🎉\n가입 축하 적립금 3,000P가 지급됐습니다!`;
+  const usedRef = inputRef || sessionStorage.getItem('pendingRefCode') || '';
+
+  if (usedRef && usedRef.startsWith('REF')) {
+    points += 1000;
+    signupMsg += `\n추천인 코드 적용! 추가 1,000P가 지급됐습니다 🎁`;
+    // Apps Script에 추천 기록 저장 (추천한 사람 +2,000P)
+    sendReferralReward(usedRef, name, email);
+    try { sessionStorage.removeItem('pendingRefCode'); } catch(e) {}
+  }
+
+  const user = { name, email, phone, date: new Date().toLocaleDateString('ko-KR'), refCode: myRefCode, usedRef };
   sessionStorage.setItem('user', JSON.stringify(user));
-  sessionStorage.setItem('myPoints', '3000');
-  alert(`환영합니다, ${name}님! 🎉\n가입 축하 적립금 3,000원이 지급됐습니다!`);
+  sessionStorage.setItem('myPoints', String(points));
+
+  // 포인트 내역 저장
+  const history = [{ type: 'plus', desc: '가입 축하 적립금', amount: 3000, date: new Date().toLocaleDateString('ko-KR') }];
+  if (usedRef && usedRef.startsWith('REF')) {
+    history.push({ type: 'plus', desc: '추천인 코드 적용', amount: 1000, date: new Date().toLocaleDateString('ko-KR') });
+  }
+  try { sessionStorage.setItem('pointHistory', JSON.stringify(history)); } catch(e) {}
+
+  alert(signupMsg);
   showMypage(user);
 }
+
+// 추천한 사람에게 적립금 지급 (Apps Script 전송)
+function sendReferralReward(refCode, newName, newEmail) {
+  const SCRIPT_URL = (typeof CONFIG !== 'undefined') ? CONFIG.PG.API_PROXY_URL : '';
+  if (!SCRIPT_URL) return;
+  fetch(SCRIPT_URL, {
+    method: 'POST', mode: 'no-cors',
+    headers: { 'Content-Type': 'text/plain' },
+    body: JSON.stringify({
+      action: 'saveReferral',
+      data: {
+        추천코드: refCode,
+        피추천인이름: newName,
+        피추천인이메일: newEmail,
+        적립금: 2000,
+        일시: new Date().toLocaleString('ko-KR')
+      }
+    })
+  }).catch(e => console.log('추천 저장 실패:', e));
+}
+
 function doLogout() {
   sessionStorage.removeItem('user');
   document.getElementById('auth-section').style.display = 'block';
   document.getElementById('mypage-section').style.display = 'none';
 }
+
 function showMypage(user) {
   document.getElementById('auth-section').style.display = 'none';
   document.getElementById('mypage-section').style.display = 'block';
   document.getElementById('mp-name').textContent = user.name + '님';
   document.getElementById('mp-date').textContent = user.date;
   document.title = '마이페이지 - 담누리마켓';
+  initRefCode(user);
   loadStats(user);
+}
+
+// ── 추천코드 초기화 ──
+function initRefCode(user) {
+  // 저장된 코드 우선, 없으면 생성
+  let code = user.refCode || localStorage.getItem('refCode_' + user.email);
+  if (!code) {
+    code = generateRefCode(user.name);
+    localStorage.setItem('refCode_' + user.email, code);
+    user.refCode = code;
+    sessionStorage.setItem('user', JSON.stringify(user));
+  }
+  document.getElementById('my-ref-code').textContent = code;
+
+  // 링크 미리보기
+  const base = location.origin + location.pathname.replace('mypage.html', '');
+  const dealerId = (typeof DealerContext !== 'undefined') ? DealerContext.getDealerId() : null;
+  const link = base + 'mypage.html?ref=' + code + (dealerId ? '&dealer=' + dealerId : '');
+  document.getElementById('ref-link-preview').textContent = link.replace('https://', '');
+
+  // 추천 통계 로드
+  loadRefStats(code);
+}
+
+async function loadRefStats(code) {
+  try {
+    const SID = (typeof CONFIG!=='undefined') ? CONFIG.SHEET_ID : '1t804fRO8HfQtmOzpDAz2IZfzRDQ7t8LYllFGZr3ftUI';
+    const url = 'https://docs.google.com/spreadsheets/d/'+SID+'/gviz/tq?tqx=out:csv&sheet='+encodeURIComponent('추천인')+'&t='+Date.now();
+    const rows = await SheetAPI.fetch(url);
+    const mine = rows.filter(r => (r['추천코드']||'').trim() === code);
+    document.getElementById('ref-count').textContent = mine.length;
+    document.getElementById('ref-points').textContent = (mine.length * 2000).toLocaleString() + 'P';
+  } catch(e) {}
+}
+
+// ── 코드 복사 / 링크 공유 ──
+function copyRefCode() {
+  const code = document.getElementById('my-ref-code').textContent;
+  navigator.clipboard.writeText(code).then(() => alert('추천 코드가 복사됐습니다!\n' + code))
+    .catch(() => { prompt('아래 코드를 복사하세요:', code); });
+}
+function shareRefLink() {
+  const user = JSON.parse(sessionStorage.getItem('user') || '{}');
+  const code = user.refCode || document.getElementById('my-ref-code').textContent;
+  const base = location.origin + location.pathname.replace('mypage.html', '');
+  const dealerId = (typeof DealerContext !== 'undefined') ? DealerContext.getDealerId() : null;
+  const link = base + 'mypage.html?ref=' + code + (dealerId ? '&dealer=' + dealerId : '');
+  const storeName = document.getElementById('store-name')?.textContent || '담누리마켓';
+  const text = `${user.name}님이 ${storeName}에 초대했습니다!\n가입 시 적립금 1,000P를 드려요 🎁\n${link}`;
+  if (navigator.share) {
+    navigator.share({ title: '담누리마켓 초대', text, url: link }).catch(()=>{});
+  } else {
+    navigator.clipboard.writeText(text).then(() => alert('공유 링크가 복사됐습니다!'))
+      .catch(() => { prompt('아래 링크를 복사하세요:', link); });
+  }
 }
 
 // ── 통계 ──
@@ -335,7 +508,6 @@ async function loadStats(user) {
   } catch(e) {}
 }
 
-// ── 구글시트 내 주문 조회 ──
 async function fetchMyOrders(user) {
   const SID = (typeof CONFIG!=='undefined') ? CONFIG.SHEET_ID : '1t804fRO8HfQtmOzpDAz2IZfzRDQ7t8LYllFGZr3ftUI';
   const url = 'https://docs.google.com/spreadsheets/d/'+SID+'/gviz/tq?tqx=out:csv&sheet='+encodeURIComponent('주문')+'&t='+Date.now();
@@ -349,7 +521,6 @@ async function fetchMyOrders(user) {
   });
 }
 
-// ── 찜목록 ──
 function getWishList() {
   try { return JSON.parse(localStorage.getItem('wishlist')||'[]'); } catch(e) { return []; }
 }
@@ -371,14 +542,11 @@ function openModal(type) {
   if (type==='points')   renderPoints();
   if (type==='profile')  renderProfile(user);
 }
-function closeModal(type) {
-  document.getElementById('modal-'+type).classList.remove('open');
-}
+function closeModal(type) { document.getElementById('modal-'+type).classList.remove('open'); }
 document.querySelectorAll('.modal-overlay').forEach(el => {
   el.addEventListener('click', e => { if(e.target===el) el.classList.remove('open'); });
 });
 
-// ── 주문 내역 ──
 async function renderOrders(user) {
   const body = document.getElementById('body-orders');
   body.innerHTML = '<div class="loading-txt">⏳ 주문 내역을 불러오는 중...</div>';
@@ -395,12 +563,9 @@ async function renderOrders(user) {
         <div class="order-meta">${o['주문일시']||''} · ${o['결제방법']||''}</div>
         <div class="order-amount">${parseInt(o['결제금액']||0).toLocaleString()}원</div>
       </div>`).join('');
-  } catch(e) {
-    body.innerHTML = '<div class="empty-state"><div class="empty-icon">⚠️</div><p>불러오기 실패. 잠시 후 다시 시도해주세요.</p></div>';
-  }
+  } catch(e) { body.innerHTML = '<div class="empty-state"><div class="empty-icon">⚠️</div><p>불러오기 실패</p></div>'; }
 }
 
-// ── 배송 조회 ──
 async function renderDelivery(user) {
   const body = document.getElementById('body-delivery');
   body.innerHTML = '<div class="loading-txt">⏳ 배송 정보를 불러오는 중...</div>';
@@ -413,7 +578,7 @@ async function renderDelivery(user) {
       {label:'주문완료',icon:'✅',desc:'주문이 접수됐습니다'},
       {label:'결제완료',icon:'💳',desc:'결제가 확인됐습니다'},
       {label:'상품준비',icon:'📦',desc:'상품을 준비 중입니다'},
-      {label:'배송중',  icon:'🚚',desc:'배송이 시작됐습니다'},
+      {label:'배송중',icon:'🚚',desc:'배송이 시작됐습니다'},
       {label:'배송완료',icon:'🏠',desc:'배송이 완료됐습니다'},
     ];
     body.innerHTML = active.map(o => {
@@ -438,12 +603,9 @@ async function renderDelivery(user) {
         </div>
       </div>`;
     }).join('');
-  } catch(e) {
-    body.innerHTML = '<div class="empty-state"><div class="empty-icon">⚠️</div><p>불러오기 실패</p></div>';
-  }
+  } catch(e) { body.innerHTML = '<div class="empty-state"><div class="empty-icon">⚠️</div><p>불러오기 실패</p></div>'; }
 }
 
-// ── 찜 목록 ──
 function renderWishlist() {
   const body = document.getElementById('body-wishlist');
   const list = getWishList();
@@ -464,7 +626,6 @@ function renderWishlist() {
     </div>`).join('')}</div>`;
 }
 
-// ── 내 리뷰 ──
 async function renderReviews(user) {
   const body = document.getElementById('body-reviews');
   body.innerHTML = '<div class="loading-txt">⏳ 리뷰를 불러오는 중...</div>';
@@ -485,21 +646,25 @@ async function renderReviews(user) {
         ${r['답글내용']?`<div style="margin-top:8px;padding:8px;background:#f9f9f9;border-radius:6px;font-size:12px;color:var(--gray);">💬 판매자: ${r['답글내용']}</div>`:''}
         <div class="review-date">${r['작성일']||''}</div>
       </div>`).join('');
-  } catch(e) {
-    body.innerHTML = '<div class="empty-state"><div class="empty-icon">⚠️</div><p>불러오기 실패</p></div>';
-  }
+  } catch(e) { body.innerHTML = '<div class="empty-state"><div class="empty-icon">⚠️</div><p>불러오기 실패</p></div>'; }
 }
 
-// ── 쿠폰/적립금 ──
 function renderPoints() {
   const pts = parseInt(sessionStorage.getItem('myPoints')||'3000');
+  let history = [];
+  try { history = JSON.parse(sessionStorage.getItem('pointHistory')||'[]'); } catch(e) {}
+  if (!history.length) history = [{ type:'plus', desc:'가입 축하 적립금', amount:3000, date: new Date().toLocaleDateString('ko-KR') }];
   document.getElementById('body-points').innerHTML = `
     <div class="point-box">
       <div class="point-num">${pts.toLocaleString()}P</div>
       <div class="point-label">보유 적립금</div>
     </div>
     <div class="point-history">
-      <div class="point-row"><span>가입 축하 적립금</span><span class="pt-plus">+3,000P</span></div>
+      ${history.map(h=>`
+        <div class="point-row">
+          <span>${h.desc}</span>
+          <span class="${h.type==='plus'?'pt-plus':'pt-minus'}">${h.type==='plus'?'+':'−'}${h.amount.toLocaleString()}P</span>
+        </div>`).join('')}
       <div class="point-row" style="color:var(--gray);font-size:12px;justify-content:center;">적립금은 1,000P 이상 결제 시 사용 가능합니다</div>
     </div>
     <div style="margin-top:16px;padding:14px;background:#fff8f0;border-radius:10px;font-size:13px;color:#b85000;">
@@ -507,7 +672,6 @@ function renderPoints() {
     </div>`;
 }
 
-// ── 회원 정보 수정 ──
 function renderProfile(user) {
   document.getElementById('edit-name').value  = user.name  || '';
   document.getElementById('edit-email').value = user.email || '';
@@ -529,11 +693,24 @@ function saveProfile() {
   closeModal('profile');
 }
 
-// 자동 로그인 체크
 const savedUser = sessionStorage.getItem('user');
 if (savedUser) showMypage(JSON.parse(savedUser));
-
 Cart.init();
+
+// auth 로고도 대리점 브랜딩 동기화
+(function syncAuthLogo() {
+  // sheets.js의 applyBranding이 store-name을 바꾼 후 동기화
+  var syncInterval = setInterval(function() {
+    var storeName = document.getElementById('store-name');
+    var authName  = document.getElementById('auth-store-name');
+    if (storeName && authName && storeName.textContent !== '담누리마켓') {
+      authName.textContent = storeName.textContent;
+      clearInterval(syncInterval);
+    }
+  }, 300);
+  // 3초 후 강제 종료
+  setTimeout(function() { clearInterval(syncInterval); }, 3000);
+})();
 </script>
 </body>
 </html>
