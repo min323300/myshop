@@ -36,6 +36,14 @@
     .guest-notice strong { font-weight: 800; }
     .hint-text { font-size: 11px; color: var(--gray); margin-top: 3px; }
 
+    /* ★ 대리점 배지 */
+    .dealer-badge {
+      display: none; align-items: center; gap: 6px;
+      background: #e8f5e9; color: #2e7d32; border: 1px solid #a5d6a7;
+      border-radius: 20px; padding: 5px 14px; font-size: 13px; font-weight: 700;
+      margin-bottom: 14px;
+    }
+
     /* 결제 방법 */
     .pay-methods { display: grid; grid-template-columns: 1fr; gap: 10px; }
     .pay-method { padding: 14px 18px; border: 2px solid var(--border); border-radius: 10px; cursor: pointer; transition: var(--transition); font-size: 14px; font-weight: 600; display:flex; align-items:center; gap:10px; }
@@ -96,6 +104,11 @@
     <div class="order-grid">
       <!-- 왼쪽: 주문 정보 -->
       <div>
+
+        <!-- ★ 대리점 배지 (대리점 모드일 때 자동 표시) -->
+        <div class="dealer-badge" id="dealer-badge">
+          🏬 <span id="dealer-badge-name"></span> 주문
+        </div>
 
         <!-- ✅ 비회원 안내 -->
         <div class="guest-notice">
@@ -256,6 +269,40 @@
 var selectedPay = 'card';
 var orderTotalAmount = 0;
 
+// ============================================================
+// ★ 수정1: 대리점ID 감지 함수 추가 (3단계 우선순위)
+// ============================================================
+function getCurrentDealerId() {
+  // 1순위: URL 파라미터 ?dealer=ID
+  var params = new URLSearchParams(window.location.search);
+  var urlDealer = params.get('dealer');
+  if (urlDealer) {
+    try { sessionStorage.setItem('currentDealerId', urlDealer); } catch(e) {}
+    return urlDealer;
+  }
+  // 2순위: sessionStorage (이전 페이지에서 저장된 값)
+  try {
+    var saved = sessionStorage.getItem('currentDealerId');
+    if (saved) return saved;
+  } catch(e) {}
+  // 3순위: config.js IS_FRANCHISE 설정
+  if (typeof CONFIG !== 'undefined' && CONFIG.IS_FRANCHISE && CONFIG.FRANCHISE_ID) {
+    return CONFIG.FRANCHISE_ID;
+  }
+  return '본사';
+}
+
+// 대리점 배지 표시
+function initDealerBadge() {
+  var dealerId = getCurrentDealerId();
+  var badge = document.getElementById('dealer-badge');
+  var badgeName = document.getElementById('dealer-badge-name');
+  if (badge && badgeName && dealerId && dealerId !== '본사') {
+    badgeName.textContent = dealerId;
+    badge.style.display = 'inline-flex';
+  }
+}
+
 function selectPay(el, type) {
   selectedPay = type;
   document.querySelectorAll('.pay-method').forEach(function(m){ m.classList.remove('active'); });
@@ -316,7 +363,7 @@ function loadOrderItems() {
   document.getElementById('btn-order').textContent     = orderTotalAmount.toLocaleString() + '원 결제하기';
 }
 
-// ✅ 입력값 검증 (비회원 필드 포함)
+// ✅ 입력값 검증
 function validateForm() {
   var ordererName  = document.getElementById('orderer-name').value.trim();
   var ordererPhone = document.getElementById('orderer-phone').value.trim();
@@ -339,29 +386,31 @@ function validateForm() {
   return true;
 }
 
-// ✅ 주문 데이터 수집 (비회원 정보 포함)
+// ============================================================
+// ★ 수정2: buildOrderData() - 구글시트 한글 헤더와 일치 + 대리점ID 포함
+// ============================================================
 function buildOrderData(orderNo) {
   var items = Cart.getItems();
   return {
-    orderNo:       orderNo,
-    orderDate:     new Date().toLocaleString('ko-KR'),
-    // 주문자 정보 (비회원)
-    ordererName:   document.getElementById('orderer-name').value.trim(),
-    ordererPhone:  document.getElementById('orderer-phone').value.trim(),
-    ordererEmail:  document.getElementById('orderer-email').value.trim(),
-    ordererPw:     document.getElementById('orderer-pw').value.trim(),
-    // 배송지
-    receiverName:  document.getElementById('receiver-name').value.trim(),
-    receiverPhone: document.getElementById('receiver-phone').value.trim(),
-    postCode:      document.getElementById('post-code').value.trim(),
-    address:       document.getElementById('address1').value.trim() + ' ' + document.getElementById('address2').value.trim(),
-    memo:          document.getElementById('delivery-memo').value,
-    // 결제
-    payMethod:     selectedPay,
-    amount:        orderTotalAmount,
-    items:         items.map(function(i){ return i.name + ' x' + (i.qty||1); }).join(', '),
-    status:        '결제대기',
-    memberType:    '비회원'
+    '주문번호':   orderNo,
+    '주문일시':   new Date().toLocaleString('ko-KR'),
+    '대리점ID':   getCurrentDealerId(),              // ★ 핵심 추가
+    '주문자명':   document.getElementById('orderer-name').value.trim(),
+    '연락처':     document.getElementById('orderer-phone').value.trim(),
+    '이메일':     document.getElementById('orderer-email').value.trim(),
+    '받는분':     document.getElementById('receiver-name').value.trim(),
+    '받는분연락처': document.getElementById('receiver-phone').value.trim(),
+    '배송주소':   document.getElementById('address1').value.trim() + ' ' + document.getElementById('address2').value.trim(),
+    '우편번호':   document.getElementById('post-code').value.trim(),
+    '상품번호':   items.map(function(i){ return i.id; }).join(', '),
+    '주문상품':   items.map(function(i){ return i.name + ' x' + (i.qty||1); }).join(', '),
+    '수량':       items.reduce(function(s,i){ return s+(i.qty||1); }, 0),
+    '결제금액':   orderTotalAmount,
+    '결제방법':   selectedPay,
+    '추천인코드': '',
+    '회원구분':   '비회원',
+    '주문상태':   '결제대기',
+    '메모':       document.getElementById('delivery-memo').value,
   };
 }
 
@@ -370,36 +419,18 @@ function requestPG(orderData) {
   if (!PG_MERCHANT_ID) {
     saveOrderToSheets(orderData);
     Cart.clear();
-    location.href = 'order-complete.html?no=' + orderData.orderNo + '&method=' + selectedPay;
+    location.href = 'order-complete.html?no=' + orderData['주문번호'] + '&method=' + selectedPay;
     return;
   }
   // PG 연동 후 활성화
   /*
-  WinglobalPay.request({
-    merchantId: PG_MERCHANT_ID,
-    orderId:    orderData.orderNo,
-    orderName:  orderData.items.substring(0, 40),
-    amount:     orderData.amount,
-    buyerName:  orderData.ordererName,
-    buyerPhone: orderData.ordererPhone,
-    buyerEmail: orderData.ordererEmail,
-    buyerAddr:  orderData.address,
-    payMethod:  selectedPay,
-    returnUrl:  location.origin + '/order-complete.html',
-    failUrl:    location.origin + '/order.html',
-    webhookUrl: CONFIG.PG.API_PROXY_URL,
-  }, function(result) {
-    if (result.code === 'SUCCESS') {
-      saveOrderToSheets(orderData);
-      Cart.clear();
-      location.href = 'order-complete.html?no=' + orderData.orderNo + '&method=' + selectedPay;
-    } else {
-      alert('결제 실패: ' + result.message);
-    }
-  });
+  WinglobalPay.request({ ... });
   */
 }
 
+// ============================================================
+// ★ 수정3: saveOrderToSheets() - 한글키로 전송
+// ============================================================
 function saveOrderToSheets(orderData) {
   var SCRIPT_URL = (typeof CONFIG !== 'undefined') ? CONFIG.PG.API_PROXY_URL : '';
   if (!SCRIPT_URL) { console.log('주문 데이터:', orderData); return; }
@@ -434,6 +465,7 @@ function updatePGStatusBadge() {
 Cart.init();
 loadOrderItems();
 updatePGStatusBadge();
+initDealerBadge();
 </script>
 </body>
 </html>
