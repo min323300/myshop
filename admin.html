@@ -1506,7 +1506,48 @@ function changeOrderStatus(sel){
   }).then(function(){ setTimeout(loadOrders, 800); }).catch(function(e){ console.log(e); });
 }
 
-// ✅ 엑셀 다운로드
+function downloadOrderExcel(){
+  if(!allOrders.length){ alert('주문 데이터가 없습니다'); return; }
+  var status  = document.getElementById('order-status-sel') ? document.getElementById('order-status-sel').value : 'all';
+  var dateFrom= document.getElementById('order-date-from') ? document.getElementById('order-date-from').value : '';
+  var dateTo  = document.getElementById('order-date-to')   ? document.getElementById('order-date-to').value   : '';
+  var keyword = document.getElementById('order-search')    ? document.getElementById('order-search').value.trim().toLowerCase() : '';
+
+  var rows = allOrders.filter(function(o){
+    if(status !== 'all' && !(o['주문상태']||'').includes(status)) return false;
+    if(dateFrom || dateTo){
+      var d = (o['주문일시']||o['저장일시']||'').substring(0,10).replace(/\./g,'-').replace(/ /g,'');
+      if(dateFrom && d < dateFrom) return false;
+      if(dateTo   && d > dateTo)   return false;
+    }
+    if(keyword){
+      var t = [o['주문번호'],o['주문자명'],o['연락처'],o['이메일'],o['주문상품']].join(' ').toLowerCase();
+      if(!t.includes(keyword)) return false;
+    }
+    return true;
+  });
+
+  if(!rows.length){ alert('필터 결과가 없습니다'); return; }
+
+  var cols = ['주문번호','주문일시','주문자명','연락처','이메일','받는분','배송주소','주문상품','결제금액','결제방법','대리점ID','추천인코드','회원구분','주문상태','저장일시'];
+  var lines = [cols.join(',')];
+  rows.forEach(function(row){
+    var line = cols.map(function(c){
+      var v = String(row[c]||'').replace(/"/g,'""');
+      return '"' + v + '"';
+    }).join(',');
+    lines.push(line);
+  });
+  var csvContent = '\uFEFF' + lines.join('\n');
+  var blob = new Blob([csvContent], {type:'text/csv;charset=utf-8;'});
+  var link = document.createElement('a');
+  link.href = URL.createObjectURL(blob);
+  var now = new Date();
+  link.download = '주문내역_' + now.getFullYear() + ('0'+(now.getMonth()+1)).slice(-2) + ('0'+now.getDate()).slice(-2) + '.csv';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
 function downloadOrderExcel(){
   if(!allOrders.length){ alert('주문 데이터가 없습니다'); return; }
 
@@ -1532,15 +1573,13 @@ function downloadOrderExcel(){
   if(!rows.length){ alert('필터 결과가 없습니다'); return; }
 
   var cols = ['주문번호','주문일시','주문자명','연락처','이메일','받는분','배송주소','주문상품','결제금액','결제방법','대리점ID','추천인코드','회원구분','주문상태','저장일시'];
-  var csv  = '﻿' + cols.join(',') + '
-';
+  var csv = '\uFEFF' + cols.join(',') + '\n';
   csv += rows.map(function(row){
     return cols.map(function(c){
       var v = String(row[c]||'').replace(/"/g,'""');
       return '"'+v+'"';
     }).join(',');
-  }).join('
-');
+  }).join('\n');
 
   var blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
   var link = document.createElement('a');
