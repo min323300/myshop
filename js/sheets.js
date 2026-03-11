@@ -53,12 +53,19 @@ const DealerContext = {
 
   getDealerId() {
     const params = new URLSearchParams(window.location.search);
-    const id = params.get('dealer') || null;
-    // ★ 추가: order.html 등 다른 페이지에서도 대리점ID를 쓸 수 있도록 sessionStorage에 저장
-    if (id) {
-      try { sessionStorage.setItem('currentDealerId', id); } catch(e) {}
+    const urlId = params.get('dealer') || null;
+    if (urlId) {
+      // URL에 dealer 있으면 sessionStorage에 저장 후 반환
+      try { sessionStorage.setItem('currentDealerId', urlId); } catch(e) {}
+      return urlId;
     }
-    return id;
+    // ★ URL에 dealer 없어도 sessionStorage에서 꺼내서 반환
+    // → order.html, order-complete.html, mypage.html 등 파라미터 없는 페이지에서도 브랜딩 유지
+    try {
+      const saved = sessionStorage.getItem('currentDealerId');
+      if (saved) return saved;
+    } catch(e) {}
+    return null;
   },
 
   async load() {
