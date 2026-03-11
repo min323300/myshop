@@ -53,7 +53,12 @@ const DealerContext = {
 
   getDealerId() {
     const params = new URLSearchParams(window.location.search);
-    return params.get('dealer') || null;
+    const id = params.get('dealer') || null;
+    // ★ 추가: order.html 등 다른 페이지에서도 대리점ID를 쓸 수 있도록 sessionStorage에 저장
+    if (id) {
+      try { sessionStorage.setItem('currentDealerId', id); } catch(e) {}
+    }
+    return id;
   },
 
   async load() {
