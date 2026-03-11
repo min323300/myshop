@@ -1452,43 +1452,64 @@ function clearOrderFilter(){
 
 function renderOrders(rows){
   if(!rows.length){ document.getElementById('order-tw').innerHTML=EMPTY('🛒','주문 내역 없음'); return; }
+
+  // ✅ 시트 실제 컬럼명 자동 감지 (다양한 컬럼명 대응)
+  var sample = rows[0];
+  var keys = Object.keys(sample);
+
+  // 컬럼명 매핑 (시트 컬럼명 → 표시 컬럼명)
+  function getVal(row, candidates) {
+    for(var i=0;i<candidates.length;i++){
+      if(row[candidates[i]] !== undefined && row[candidates[i]] !== '') return row[candidates[i]];
+    }
+    return '-';
+  }
+
   var statusColor = {'결제대기':'#fff3cd','결제완료':'#d1fae5','배송중':'#dbeafe','배송완료':'#e0e7ff','취소':'#fee2e2'};
   var statusText  = {'결제대기':'#856404','결제완료':'#065f46','배송중':'#1e40af','배송완료':'#3730a3','취소':'#991b1b'};
   var statuses = ['결제대기','결제완료','상품준비','배송중','배송완료','취소'];
 
-  var html = '<table><thead><tr>'
-    + '<th>주문번호</th><th>주문일시</th><th>주문자명</th><th>연락처</th><th>이메일</th>'
-    + '<th>주문상품</th><th>결제금액</th><th>대리점ID</th><th>주문상태</th><th>상태변경</th>'
+  var html = '<div style="overflow-x:auto;"><table><thead><tr>'
+    + '<th>주문번호</th><th>주문일시</th><th>주문자명</th><th>연락처</th>'
+    + '<th>이메일</th><th>주문상품</th><th>결제금액</th><th>대리점ID</th><th>주문상태</th><th>상태변경</th>'
     + '</tr></thead><tbody>';
 
   rows.forEach(function(row){
-    var st = row['주문상태'] || '결제대기';
+    var orderNo  = getVal(row, ['주문번호']);
+    var orderDt  = getVal(row, ['주문일시','저장일시','주문날짜']);
+    var orderer  = getVal(row, ['주문자명','주문자이름','이름','name','ordererName']);
+    var phone    = getVal(row, ['연락처','전화번호','phone','ordererPhone']);
+    var email    = getVal(row, ['이메일','email','ordererEmail']);
+    var items    = getVal(row, ['주문상품','상품명','items']);
+    var amount   = getVal(row, ['결제금액','amount','금액']);
+    var dealer   = getVal(row, ['대리점ID','가맹점ID','dealerId']);
+    var st       = getVal(row, ['주문상태','status','상태']);
+    if(st==='-') st = '결제대기';
+
     var bg = statusColor[st] || '#f3f4f6';
     var tc = statusText[st]  || '#374151';
-    var orderNo = (row['주문번호'] || '').replace(/'/g, '');
-    var amt = row['결제금액'] ? Number(row['결제금액']).toLocaleString() + '원' : '-';
+    var amt = (amount && amount !== '-') ? Number(String(amount).replace(/[^0-9]/g,'')).toLocaleString() + '원' : '-';
+    var safeNo = String(orderNo).replace(/"/g,'').replace(/'/g,'');
 
-    var sel = '<select onchange="changeOrderStatus(this)" data-no="' + orderNo + '" style="padding:4px 6px;border:1px solid var(--border);border-radius:6px;font-size:11px;cursor:pointer;">';
-    statuses.forEach(function(s){
-      sel += '<option value="' + s + '"' + (s === st ? ' selected' : '') + '>' + s + '</option>';
-    });
+    var sel = '<select data-no="' + safeNo + '" onchange="changeOrderStatus(this)" style="padding:4px 6px;border:1px solid var(--border);border-radius:6px;font-size:11px;cursor:pointer;">';
+    statuses.forEach(function(s){ sel += '<option value="'+s+'"'+(s===st?' selected':'')+'>'+s+'</option>'; });
     sel += '</select>';
 
     html += '<tr>'
-      + '<td style="font-size:11px;color:var(--accent);font-weight:700;">' + (row['주문번호']||'-') + '</td>'
-      + '<td style="font-size:11px;color:var(--gray);">' + (row['주문일시']||row['저장일시']||'-') + '</td>'
-      + '<td style="font-weight:600;">' + (row['주문자명']||'-') + '</td>'
-      + '<td>' + (row['연락처']||'-') + '</td>'
-      + '<td style="font-size:11px;">' + (row['이메일']||'-') + '</td>'
-      + '<td style="max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="'+(row['주문상품']||'')+'">' + (row['주문상품']||'-') + '</td>'
+      + '<td style="font-size:11px;color:var(--accent);font-weight:700;">' + orderNo + '</td>'
+      + '<td style="font-size:11px;color:var(--gray);">' + orderDt + '</td>'
+      + '<td style="font-weight:600;">' + orderer + '</td>'
+      + '<td>' + phone + '</td>'
+      + '<td style="font-size:11px;">' + email + '</td>'
+      + '<td style="max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="'+items+'">' + items + '</td>'
       + '<td style="font-weight:700;color:var(--accent);">' + amt + '</td>'
-      + '<td style="font-size:11px;">' + (row['대리점ID']||'본사') + '</td>'
+      + '<td style="font-size:11px;">' + (dealer==='본사'||dealer==='-'?'<span style="color:var(--gray)">본사</span>':dealer) + '</td>'
       + '<td><span style="padding:3px 9px;border-radius:20px;font-size:11px;font-weight:700;background:'+bg+';color:'+tc+';">'+st+'</span></td>'
       + '<td>' + sel + '</td>'
       + '</tr>';
   });
 
-  html += '</tbody></table>';
+  html += '</tbody></table></div>';
   document.getElementById('order-tw').innerHTML = html;
 }
 
