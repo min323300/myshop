@@ -40,7 +40,8 @@
 <body>
 <header class="header">
   <div class="header-main">
-    <a href="index.html" class="header-logo"><span>🏪</span><span>담누리마켓</span></a>
+    <!-- ★ id="store-name" 추가 -->
+    <a href="index.html" class="header-logo"><span>🏪</span><span id="store-name">담누리마켓</span></a>
   </div>
 </header>
 
@@ -92,7 +93,9 @@
   </div>
 </main>
 
+<!-- ★ sheets.js 추가 -->
 <script src="js/config.js"></script>
+<script src="js/sheets.js"></script>
 <script src="js/app.js"></script>
 <script>
 const params = new URLSearchParams(location.search);
