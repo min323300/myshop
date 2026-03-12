@@ -437,11 +437,9 @@ function doSignup() {
   if (pw!==pw2) { alert('비밀번호가 일치하지 않습니다'); return; }
   if (pw.length<8) { alert('비밀번호는 8자 이상이어야 합니다'); return; }
 
-  // 추천코드 생성 및 저장
   const myRefCode = generateRefCode(name);
   localStorage.setItem('refCode_' + email, myRefCode);
 
-  // 기본 적립금 3,000P + 추천코드 입력 시 +1,000P
   let points = 3000;
   let signupMsg = `환영합니다, ${name}님! 🎉\n가입 축하 적립금 3,000P가 지급됐습니다!`;
   const usedRef = inputRef || sessionStorage.getItem('pendingRefCode') || '';
@@ -449,7 +447,6 @@ function doSignup() {
   if (usedRef && usedRef.startsWith('REF')) {
     points += 1000;
     signupMsg += `\n추천인 코드 적용! 추가 1,000P가 지급됐습니다 🎁`;
-    // Apps Script에 추천 기록 저장 (추천한 사람 +2,000P)
     sendReferralReward(usedRef, name, email);
     try { sessionStorage.removeItem('pendingRefCode'); } catch(e) {}
   }
@@ -458,12 +455,53 @@ function doSignup() {
   sessionStorage.setItem('user', JSON.stringify(user));
   sessionStorage.setItem('myPoints', String(points));
 
-  // 포인트 내역 저장
   const history = [{ type: 'plus', desc: '가입 축하 적립금', amount: 3000, date: new Date().toLocaleDateString('ko-KR') }];
   if (usedRef && usedRef.startsWith('REF')) {
     history.push({ type: 'plus', desc: '추천인 코드 적용', amount: 1000, date: new Date().toLocaleDateString('ko-KR') });
   }
   try { sessionStorage.setItem('pointHistory', JSON.stringify(history)); } catch(e) {}
+
+  // ✅ Google Sheets 회원 저장 (신규 추가)
+  const SCRIPT_URL = (typeof CONFIG !== 'undefined') ? CONFIG.PG.API_PROXY_URL : '';
+  if (SCRIPT_URL) {
+    fetch(SCRIPT_URL, {
+      method: 'POST', mode: 'no-cors',
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify({
+        action: 'saveMember',
+        data: {
+          이름:         name,
+          연락처:       phone || '',
+          이메일:       email,
+          비밀번호:     pw,
+          추천인코드:   myRefCode,
+          사용추천코드: usedRef || '',
+          회원구분:     '회원',
+          가입일:       new Date().toLocaleDateString('ko-KR'),
+          적립금:       points
+        }
+      })
+    }).catch(e => console.log('회원 저장 실패:', e));
+
+    // ✅ 포인트 내역 Sheets 저장 (신규 추가)
+    fetch(SCRIPT_URL, {
+      method: 'POST', mode: 'no-cors',
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify({
+        action: 'savePointHistory',
+        data: {
+          이름:     name,
+          이메일:   email,
+          연락처:   phone || '',
+          구분:     '적립',
+          금액:     points,
+          설명:     '가입 축하 적립금' + (usedRef ? ' + 추천인 코드 보너스' : ''),
+          주문번호: '',
+          일시:     new Date().toLocaleString('ko-KR')
+        }
+      })
+    }).catch(e => console.log('포인트 내역 저장 실패:', e));
+  }
 
   alert(signupMsg);
   showMypage(user);
