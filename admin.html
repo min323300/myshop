@@ -22,7 +22,7 @@
     <div class="lbox-sub">관리자 패널</div>
     <input type="text" id="lid" placeholder="관리자 아이디" autocomplete="off">
     <input type="password" id="lpw" placeholder="비밀번호">
-    <button class="lbox-btn" onclick="doLogin()">로그인</button>
+    <button class="lbox-btn" onclick="(function(){var id=document.getElementById('lid').value.trim(),pw=document.getElementById('lpw').value.trim();if(id==='admin'&&pw==='damnuri2026'){document.getElementById('login-screen').style.display='none';document.getElementById('app').style.display='block';if(typeof loadDash==='function')loadDash();}else{document.getElementById('lerr').style.display='block';}})()">로그인</button>
     <div class="lbox-err" id="lerr">아이디 또는 비밀번호가 올바르지 않습니다.</div>
   </div>
 </div>
