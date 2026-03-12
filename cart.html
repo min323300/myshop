@@ -51,7 +51,7 @@
     <a href="index.html" class="header-logo"><span>🏪</span><span id="store-name">담누리마켓</span></a>
     <div style="flex:1"></div>
     <div class="header-icons">
-      <a href="mypage.html" class="header-icon"><span class="icon-emoji">👤</span><span>로그인</span></a>
+      <a href="mypage.html" class="header-icon"><span class="icon-emoji">👤</span><span id="login-label">로그인</span></a>
       <a href="cart.html" class="header-icon"><span class="icon-emoji">🛒</span><span>장바구니</span><span class="cart-badge">0</span></a>
     </div>
   </div>
@@ -92,7 +92,6 @@
             <span>최종 결제금액</span>
             <span id="sum-total">0원</span>
           </div>
-          <!-- ✅ 결제하기 → order.html로 이동 -->
           <button class="checkout-btn" id="checkout-btn" onclick="checkout()">
             결제하기
           </button>
@@ -191,22 +190,32 @@ function removeSelected() {
   renderCart();
 }
 
-// ✅ 수정: alert 제거 → order.html로 바로 이동
 function checkout() {
   if (!Cart.getItems().length) {
     alert('장바구니가 비어있습니다.');
     return;
   }
-  // 대리점 파라미터 유지
   var params = new URLSearchParams(window.location.search);
   var dealerId = params.get('dealer');
   var url = 'order.html' + (dealerId ? '?dealer=' + dealerId : '');
   location.href = url;
 }
 
-// ✅ 브랜드명 고정 (담누리마켓)
+// 브랜드명 고정
 document.getElementById('store-name').textContent = '담누리마켓';
 document.getElementById('footer-name').textContent = '담누리마켓';
+
+// ✅ 로그인 상태 헤더 반영
+(function() {
+  try {
+    var userData = sessionStorage.getItem('user');
+    if (!userData) return;
+    var user = JSON.parse(userData);
+    if (!user || !user.name) return;
+    var label = document.getElementById('login-label');
+    if (label) label.textContent = user.name + '님';
+  } catch(e) {}
+})();
 
 Cart.init();
 renderCart();
