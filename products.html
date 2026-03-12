@@ -50,7 +50,7 @@
       </div>
     </div>
     <div class="header-icons">
-      <a href="mypage.html" class="header-icon"><span class="icon-emoji">👤</span><span>로그인</span></a>
+      <a href="mypage.html" class="header-icon"><span class="icon-emoji">👤</span><span id="login-label">로그인</span></a>
       <a href="cart.html" class="header-icon"><span class="icon-emoji">🛒</span><span>장바구니</span><span class="cart-badge">0</span></a>
     </div>
   </div>
@@ -151,12 +151,23 @@
 <script src="js/sheets.js"></script>
 <script src="js/app.js"></script>
 <script>
+// ✅ 로그인 상태 헤더 반영
+(function() {
+  try {
+    var userData = sessionStorage.getItem('user');
+    if (!userData) return;
+    var user = JSON.parse(userData);
+    if (!user || !user.name) return;
+    var label = document.getElementById('login-label');
+    if (label) label.textContent = user.name + '님';
+  } catch(e) {}
+})();
+
 let allProducts = [];
 let filteredProducts = [];
 let currentPage = 1;
 const PER_PAGE = CONFIG.PRODUCTS_PER_PAGE;
 
-// 현재 선택된 카테고리명 저장
 let currentCategoryName = 'all';
 
 function createProductCard(p) {
@@ -239,7 +250,6 @@ function applyFilters() {
   const onlyNew = document.getElementById('filter-new').checked;
   const onlyBest = document.getElementById('filter-best').checked;
 
-  // 현재 선택된 카테고리 기준으로 필터
   let base = currentCategoryName === 'all'
     ? [...allProducts]
     : allProducts.filter(p => p.category.trim() === currentCategoryName.trim());
@@ -267,29 +277,21 @@ function resetFilters() {
   filteredProducts = [...allProducts];
   currentPage = 1;
   renderPage();
-
-  // 전체 버튼 활성화
   document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
   document.querySelector('.nav-item').classList.add('active');
 }
 
-// ✅ 핵심 수정: 카테고리명(문자열)으로 필터링
 function filterByNav(categoryName, btn) {
-  // 모든 nav 버튼 비활성화 후 클릭한 버튼만 활성화
   document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
   if (btn) btn.classList.add('active');
-
   currentCategoryName = categoryName;
-
   if (categoryName === 'all') {
     filteredProducts = [...allProducts];
     document.getElementById('page-heading').textContent = '전체 상품';
   } else {
-    // trim()으로 공백 제거 후 비교
     filteredProducts = allProducts.filter(p => p.category.trim() === categoryName.trim());
     document.getElementById('page-heading').textContent = categoryName + ' 상품';
   }
-
   currentPage = 1;
   renderPage();
 }
@@ -315,7 +317,6 @@ async function initPage() {
     allProducts = [];
   }
 
-  // URL 필터 적용
   if (filterParam === 'sale') filteredProducts = allProducts.filter(p => p.salePrice > 0);
   else if (filterParam === 'new') filteredProducts = allProducts.filter(p => p.badge === 'NEW');
   else if (filterParam === 'best') filteredProducts = allProducts.filter(p => p.badge === 'BEST' || p.isFeatured);
@@ -327,7 +328,6 @@ async function initPage() {
     filteredProducts = [...allProducts];
   }
 
-  // 카테고리 네비 + 필터 패널 로드
   try {
     const categories = await CategoryAPI.getMain();
     const catContainer = document.getElementById('filter-categories');
@@ -335,8 +335,6 @@ async function initPage() {
 
     categories.forEach(c => {
       const catName = c.name.trim();
-
-      // 사이드 필터 라디오
       catContainer.innerHTML += `
         <label class="filter-item">
           <input type="radio" name="cat" value="${catName}"
@@ -344,7 +342,6 @@ async function initPage() {
           ${c.icon} ${catName}
         </label>`;
 
-      // 상단 네비 버튼 - ✅ c.name(카테고리명)으로 필터링
       const btn = document.createElement('button');
       btn.className = 'nav-item';
       btn.textContent = `${c.icon} ${catName}`;
@@ -353,7 +350,6 @@ async function initPage() {
       nav.appendChild(btn);
     });
 
-    // URL에서 카테고리 파라미터 왔으면 해당 버튼 활성화
     if (categoryParam) {
       document.querySelectorAll('.nav-item').forEach(b => {
         if (b.getAttribute('data-category') === categoryParam) {
