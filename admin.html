@@ -658,5 +658,27 @@
 
 <!-- ✅ 관리자 JS (맨 마지막 로드 — HTML 요소 모두 준비된 후) -->
 <script src="js/admin.js"></script>
+<script>
+// ✅ 로그인 함수 강제 재정의 (admin.js 버전 무관하게 항상 작동)
+function doLogin() {
+  var id = document.getElementById('lid').value.trim();
+  var pw = document.getElementById('lpw').value.trim();
+  var ok = (id === 'admin' && pw === 'damnuri2026');
+  if (ok) {
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+    var now = new Date();
+    var h = now.getHours(), am = h >= 12 ? '오후' : '오전', hh = (h % 12) || 12;
+    var dd = document.getElementById('hd-date');
+    var ds = document.getElementById('dash-date');
+    if (dd) dd.textContent = now.getFullYear() + '. ' + String(now.getMonth()+1).padStart(2,'0') + '. ' + String(now.getDate()).padStart(2,'0') + '. ' + am + ' ' + String(hh).padStart(2,'0') + ':' + String(now.getMinutes()).padStart(2,'0');
+    if (ds) ds.textContent = now.getFullYear() + '년 ' + (now.getMonth()+1) + '월 ' + now.getDate() + '일';
+    if (typeof loadDash === 'function') loadDash();
+  } else {
+    document.getElementById('lerr').style.display = 'block';
+  }
+}
+document.getElementById('lpw').addEventListener('keydown', function(e){ if(e.key==='Enter') doLogin(); });
+</script>
 </body>
 </html>
