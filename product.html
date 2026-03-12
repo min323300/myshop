@@ -201,7 +201,7 @@
       </div>
     </div>
     <div class="header-icons">
-      <a href="mypage.html" class="header-icon"><span class="icon-emoji">👤</span><span>로그인</span></a>
+      <a href="mypage.html" class="header-icon"><span class="icon-emoji">👤</span><span id="login-label">로그인</span></a>
       <a href="mypage.html" class="header-icon"><span class="icon-emoji">❤️</span><span>찜목록</span></a>
       <a href="cart.html" class="header-icon"><span class="icon-emoji">🛒</span><span>장바구니</span><span class="cart-badge">0</span></a>
     </div>
@@ -511,5 +511,17 @@
 <script src="js/product-detail.js?v=20260308"></script>
 <script src="js/main.js?v=20260308"></script>
 
+<script>
+(function() {
+  try {
+    var userData = sessionStorage.getItem('user');
+    if (!userData) return;
+    var user = JSON.parse(userData);
+    if (!user || !user.name) return;
+    var label = document.getElementById('login-label');
+    if (label) label.textContent = user.name + '님';
+  } catch(e) {}
+})();
+</script>  
 </body>
 </html>
