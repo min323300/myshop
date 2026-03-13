@@ -346,6 +346,19 @@
           <div class="ph-sub" id="dash-sub">안녕하세요! 오늘도 좋은 하루 되세요 😊</div>
         </div>
       </div>
+      <!-- ★ 내 쇼핑몰 링크 박스 -->
+      <div id="my-shop-link-box" style="background:linear-gradient(135deg,#1e2336 0%,#2d3561 100%);border-radius:12px;padding:18px 22px;margin-bottom:20px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
+        <div style="font-size:22px;">🌐</div>
+        <div style="flex:1;min-width:0;">
+          <div style="color:rgba(255,255,255,0.7);font-size:11px;margin-bottom:4px;">내 쇼핑몰 링크 (고객에게 이 주소를 공유하세요)</div>
+          <div id="my-shop-url" style="color:#fff;font-size:13px;font-weight:600;word-break:break-all;letter-spacing:0.3px;">로딩 중...</div>
+        </div>
+        <div style="display:flex;gap:8px;flex-shrink:0;">
+          <button onclick="copyShopLink()" style="padding:8px 16px;background:#fff;color:#1e2336;border:none;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;">📋 복사</button>
+          <a id="my-shop-open" href="#" target="_blank" style="padding:8px 16px;background:rgba(255,255,255,0.15);color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;">↗ 열기</a>
+        </div>
+      </div>
+
       <div class="stat-grid">
         <div class="sc c-blue"><div class="sc-top"><div class="sc-icon">🛒</div></div><div class="sc-val" id="dash-orders">0</div><div class="sc-label">오늘 주문</div></div>
         <div class="sc c-green"><div class="sc-top"><div class="sc-icon">💰</div></div><div class="sc-val" id="dash-sales">0원</div><div class="sc-label">이달 매출</div></div>
@@ -906,6 +919,14 @@ function startApp() {
   if (shopLink && did) shopLink.href = 'index.html?dealer=' + did;
   var prodsLink = document.getElementById('products-link');
   if (prodsLink && did) prodsLink.href = 'products.html?dealer=' + did;
+
+  // ★ 내 쇼핑몰 링크 박스 업데이트
+  var baseUrl = window.location.origin + window.location.pathname.replace('dealer-admin.html','');
+  var fullShopUrl = baseUrl + 'index.html?dealer=' + did;
+  var urlEl = document.getElementById('my-shop-url');
+  var openEl = document.getElementById('my-shop-open');
+  if(urlEl) urlEl.textContent = fullShopUrl;
+  if(openEl) openEl.href = fullShopUrl;
   go('dashboard', document.querySelector('.sb-item.active'));
 }
 
@@ -1344,6 +1365,26 @@ function renderOrders(list) {
           +'<select class="quick-status-sel" onchange="quickStatusChange(this,\''+o['주문번호']+'\')">'            +'<option value="">변경...</option>'            +'<option value="주문완료"'+(stat==='주문완료'?' selected':'')+'>주문완료</option>'            +'<option value="결제완료"'+(stat==='결제완료'?' selected':'')+'>결제완료</option>'            +'<option value="상품준비"'+(stat==='상품준비'?' selected':'')+'>상품준비</option>'            +'<option value="배송중"'+(stat==='배송중'?' selected':'')+'>배송중</option>'            +'<option value="배송완료"'+(stat==='배송완료'?' selected':'')+'>배송완료</option>'            +'<option value="취소">취소/반품</option>'          +'</select>'        +'</td>'        +'<td><button class="btn btn-outline btn-sm" onclick="viewOrder(\''+o['주문번호']+'\')">상세</button></td>'
         +'</tr>';
     }).join('')+'</tbody></table>';
+}
+
+// ★ 쇼핑몰 링크 복사
+function copyShopLink() {
+  var urlEl = document.getElementById('my-shop-url');
+  if(!urlEl) return;
+  var url = urlEl.textContent;
+  if(navigator.clipboard) {
+    navigator.clipboard.writeText(url).then(function(){
+      showToast('쇼핑몰 링크가 복사됐습니다! 고객에게 공유하세요 😊', 'ok');
+    });
+  } else {
+    var ta = document.createElement('textarea');
+    ta.value = url;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    showToast('쇼핑몰 링크가 복사됐습니다!', 'ok');
+  }
 }
 
 // ★ 대리점 송장번호 입력 모달
