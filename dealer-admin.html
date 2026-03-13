@@ -1304,42 +1304,105 @@ function renderOrders(list) {
   if(!list.length){ el.innerHTML=EMPTY('🛒','주문 없음','필터를 변경하거나 새로고침 해보세요'); return; }
 
   var sorted = list.slice().sort(function(a,b){return b['주문일시']>a['주문일시']?1:-1;});
-  el.innerHTML = '<table>'+TH(['주문번호','주문일시','상품명','수량','금액','주문자/수취인','연락처','주문상태','빠른변경','상세'])+'<tbody>'
+  el.innerHTML = '<table>'+TH(['주문번호','주문일시','주문상품','구분','수량','금액','주문자/수취인','연락처','📦 송장번호','주문상태','빠른변경','상세'])+'<tbody>'
     +sorted.map(function(o){
       var stat = o['주문상태']||'주문완료';
-      // 상품명 (실제 시트: 주문상품명)
-      var prodName = getField(o, ['주문상품명','상품명','품명','상품','item']);
+      // 주문상품명 (실제 시트: 주문상품명)
+      var prodName = getField(o, ['주문상품명','상품명','품명','주문상품','상품','item']);
       if(!prodName) prodName = '-';
-      // 수취인 (실제 시트: 받는분 / 주문자명)
+      // 수취인
       var receiver = getField(o, ['받는분','수취인명','수취인','주문자명','주문자','성명','이름']);
       if(!receiver) receiver = '-';
-      // 연락처 (실제 시트: 받는분연락처 / 연락처)
+      // 연락처
       var phone = getField(o, ['받는분연락처','연락처','전화번호','휴대폰','수취인연락처']);
       if(!phone) phone = '-';
+      // ★ 상품 구분: 대리점ID가 내 ID면 내상품, 아니면 본사
+      var dealerId = getField(o, ['대리점ID','가맹점ID','dealerId']);
+      var typeTag = (dealerId && dealerId === DEALER.id)
+        ? '<span style="background:#e8f4fd;color:#1565c0;padding:2px 7px;border-radius:10px;font-size:10px;font-weight:700;">내상품</span>'
+        : '<span style="background:#fef3e2;color:#e65100;padding:2px 7px;border-radius:10px;font-size:10px;font-weight:700;">본사</span>';
+      // ★ 송장번호/택배사
+      var tracking = o['송장번호']||'';
+      var carrier  = o['택배사']||'';
+      var safeNo   = String(o['주문번호']||'').replace(/'/g,"\'");
+      var trackCell = tracking
+        ? '<div style="font-size:11px;"><span style="color:#888;">'+carrier+'</span><br><strong style="color:var(--accent);">'+tracking+'</strong></div>'
+          +'<button onclick="openDTrackingModal(\''+safeNo+'\')" style="margin-top:3px;padding:2px 6px;font-size:10px;border:1px solid #ddd;border-radius:4px;background:#f5f5f5;cursor:pointer;">✏️ 수정</button>'
+        : '<button onclick="openDTrackingModal(\''+safeNo+'\')" style="padding:3px 9px;font-size:11px;border:none;border-radius:5px;background:#e8f5e9;color:#1b5e20;cursor:pointer;font-weight:600;">📦 입력</button>';
       return '<tr>'
         +'<td style="font-size:11px;font-weight:600;">'+(o['주문번호']||'-')+'</td>'
         +'<td style="font-size:11px;">'+(o['주문일시']||'-').substring(0,16)+'</td>'
-        +'<td><div style="max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="'+prodName+'">'+prodName+'</div></td>'
+        +'<td><div style="max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="'+prodName+'">'+prodName+'</div></td>'
+        +'<td>'+typeTag+'</td>'
         +'<td style="text-align:center;">'+(o['수량']||o['qty']||1)+'</td>'
         +'<td style="font-weight:700;color:var(--accent);">'+fmt(o['결제금액']||o['payment_amount']||o['금액'])+'</td>'
         +'<td>'+receiver+'</td>'
         +'<td style="font-size:12px;">'+phone+'</td>'
+        +'<td style="min-width:100px;">'+trackCell+'</td>'
         +'<td><span class="os os-'+stat+'">'+stat+'</span></td>'
-        // ★ 빠른 상태 변경 드롭다운
         +'<td>'
-          +'<select class="quick-status-sel" onchange="quickStatusChange(this,\''+o['주문번호']+'\')">'
-            +'<option value="">변경...</option>'
-            +'<option value="주문완료"'+(stat==='주문완료'?' selected':'')+'>주문완료</option>'
-            +'<option value="결제완료"'+(stat==='결제완료'?' selected':'')+'>결제완료</option>'
-            +'<option value="상품준비"'+(stat==='상품준비'?' selected':'')+'>상품준비</option>'
-            +'<option value="배송중"'+(stat==='배송중'?' selected':'')+'>배송중</option>'
-            +'<option value="배송완료"'+(stat==='배송완료'?' selected':'')+'>배송완료</option>'
-            +'<option value="취소">취소/반품</option>'
-          +'</select>'
-        +'</td>'
-        +'<td><button class="btn btn-outline btn-sm" onclick="viewOrder(\''+o['주문번호']+'\')">상세</button></td>'
+          +'<select class="quick-status-sel" onchange="quickStatusChange(this,\''+o['주문번호']+'\')">'            +'<option value="">변경...</option>'            +'<option value="주문완료"'+(stat==='주문완료'?' selected':'')+'>주문완료</option>'            +'<option value="결제완료"'+(stat==='결제완료'?' selected':'')+'>결제완료</option>'            +'<option value="상품준비"'+(stat==='상품준비'?' selected':'')+'>상품준비</option>'            +'<option value="배송중"'+(stat==='배송중'?' selected':'')+'>배송중</option>'            +'<option value="배송완료"'+(stat==='배송완료'?' selected':'')+'>배송완료</option>'            +'<option value="취소">취소/반품</option>'          +'</select>'        +'</td>'        +'<td><button class="btn btn-outline btn-sm" onclick="viewOrder(\''+o['주문번호']+'\')">상세</button></td>'
         +'</tr>';
     }).join('')+'</tbody></table>';
+}
+
+// ★ 대리점 송장번호 입력 모달
+function openDTrackingModal(orderId) {
+  var order = allOrders.find(function(o){ return o['주문번호']===orderId; });
+  if(!order) return;
+  var tracking = order['송장번호']||'';
+  var carrier  = order['택배사']||'';
+
+  // 기존 모달 제거
+  var old = document.getElementById('d-tracking-modal');
+  if(old) old.remove();
+
+  var carriers = ['CJ대한통운','한진택배','롯데택배','우체국택배','로젠택배','쿠팡로켓','직접배송'];
+  var opts = carriers.map(function(c){
+    return '<option value="'+c+'"'+(carrier===c?' selected':'')+'>'+c+'</option>';
+  }).join('');
+
+  var modal = document.createElement('div');
+  modal.id = 'd-tracking-modal';
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9999;display:flex;align-items:center;justify-content:center;';
+  modal.innerHTML = '<div style="background:#fff;border-radius:12px;padding:28px;width:360px;box-shadow:0 8px 32px rgba(0,0,0,0.2);">'
+    +'<h3 style="margin:0 0 16px;font-size:16px;">📦 송장번호 입력</h3>'
+    +'<p style="font-size:12px;color:#888;margin:0 0 16px;">주문번호: '+orderId+'</p>'
+    +'<label style="font-size:13px;font-weight:600;display:block;margin-bottom:6px;">택배사</label>'
+    +'<select id="dt-carrier" style="width:100%;padding:9px;border:1px solid #ddd;border-radius:7px;font-size:13px;margin-bottom:14px;">'
+      +'<option value="">택배사 선택</option>'+opts
+    +'</select>'
+    +'<label style="font-size:13px;font-weight:600;display:block;margin-bottom:6px;">송장번호</label>'
+    +'<input id="dt-tracking" value="'+tracking+'" placeholder="예: 1234567890123" style="width:100%;box-sizing:border-box;padding:9px;border:1px solid #ddd;border-radius:7px;font-size:13px;margin-bottom:20px;">'
+    +'<div style="display:flex;gap:10px;">'
+      +'<button onclick="saveDTracking(\''+orderId+'\')" style="flex:1;padding:10px;background:var(--primary,#1e2336);color:#fff;border:none;border-radius:7px;font-size:14px;font-weight:600;cursor:pointer;">저장</button>'
+      +'<button onclick="document.getElementById(\'d-tracking-modal\').remove()" style="flex:1;padding:10px;background:#f5f5f5;color:#333;border:none;border-radius:7px;font-size:14px;cursor:pointer;">취소</button>'
+    +'</div>'
+  +'</div>';
+  document.body.appendChild(modal);
+  document.getElementById('dt-tracking').focus();
+}
+
+function saveDTracking(orderId) {
+  var carrier  = document.getElementById('dt-carrier').value;
+  var tracking = document.getElementById('dt-tracking').value.trim();
+  if(!carrier || !tracking) { alert('택배사와 송장번호를 모두 입력해주세요.'); return; }
+
+  fetch(SCRIPT_URL, {
+    method:'POST', mode:'no-cors',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({
+      action: 'updateOrderStatus',
+      data: { 주문번호: orderId, 주문상태: '배송중', 송장번호: tracking, 택배사: carrier, 가맹점ID: DEALER.id }
+    })
+  }).then(function(){
+    var order = allOrders.find(function(o){ return o['주문번호']===orderId; });
+    if(order){ order['송장번호']=tracking; order['택배사']=carrier; order['주문상태']='배송중'; }
+    document.getElementById('d-tracking-modal').remove();
+    showToast('송장번호가 저장됐습니다 (배송중 처리)', 'ok');
+    updateTabCounts(allOrders);
+    applyFilter();
+  }).catch(function(){ showToast('저장 중 오류가 발생했습니다',''); });
 }
 
 // ★ 빠른 상태 변경 (드롭다운에서 바로 변경)
