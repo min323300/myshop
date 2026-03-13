@@ -181,7 +181,7 @@ function loadCats(){
 }
 
 // ============================================================
-// 주문
+// 주문 ★송장번호/택배사 기능 포함★
 // ============================================================
 var orderTabF = 'all';
 
@@ -229,7 +229,7 @@ function applyOrderFilter(){
       if(dateTo   && d > dateTo)   return false;
     }
     if(keyword){
-      var searchTarget = [o['주문번호'],o['주문자명'],o['연락처'],o['이메일'],o['주문상품']].join(' ').toLowerCase();
+      var searchTarget = [o['주문번호'],o['주문자명'],o['연락처'],o['이메일'],o['주문상품'],o['송장번호']].join(' ').toLowerCase();
       if(!searchTarget.includes(keyword)) return false;
     }
     return true;
@@ -247,6 +247,74 @@ function clearOrderFilter(){
   renderOrders(allOrders);
 }
 
+// ★ 송장입력 모달 열기
+function openTrackingModal(orderNo, currentCarrier, currentTracking) {
+  // 모달이 없으면 동적 생성
+  var modal = document.getElementById('tracking-modal');
+  if (!modal) {
+    modal = document.createElement('div');
+    modal.id = 'tracking-modal';
+    modal.style.cssText = 'display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:9999;align-items:center;justify-content:center;';
+    modal.innerHTML =
+      '<div style="background:#fff;border-radius:16px;padding:28px;width:380px;max-width:90vw;box-shadow:0 20px 60px rgba(0,0,0,0.3);">' +
+        '<div style="font-size:17px;font-weight:800;margin-bottom:20px;">📦 송장번호 입력</div>' +
+        '<div style="margin-bottom:14px;">' +
+          '<label style="font-size:12px;font-weight:700;color:#666;display:block;margin-bottom:6px;">택배사</label>' +
+          '<select id="tm-carrier" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;font-size:14px;">' +
+            '<option value="">-- 택배사 선택 --</option>' +
+            '<option>CJ대한통운</option><option>한진택배</option><option>롯데택배</option>' +
+            '<option>우체국택배</option><option>로젠택배</option><option>쿠팡로켓</option><option>직접배송</option>' +
+          '</select>' +
+        '</div>' +
+        '<div style="margin-bottom:20px;">' +
+          '<label style="font-size:12px;font-weight:700;color:#666;display:block;margin-bottom:6px;">송장번호</label>' +
+          '<input id="tm-tracking" type="text" placeholder="송장번호를 입력하세요" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;font-size:14px;box-sizing:border-box;">' +
+        '</div>' +
+        '<div style="display:flex;gap:10px;">' +
+          '<button onclick="closeTrackingModal()" style="flex:1;padding:11px;border:1px solid #ddd;border-radius:8px;background:#f5f5f5;font-size:14px;cursor:pointer;">취소</button>' +
+          '<button onclick="saveTracking()" style="flex:2;padding:11px;border:none;border-radius:8px;background:#FF5733;color:#fff;font-weight:700;font-size:14px;cursor:pointer;">📦 저장</button>' +
+        '</div>' +
+      '</div>';
+    document.body.appendChild(modal);
+  }
+  // 현재 값 세팅
+  document.getElementById('tm-carrier').value = currentCarrier || '';
+  document.getElementById('tm-tracking').value = currentTracking || '';
+  modal.setAttribute('data-orderno', orderNo);
+  modal.style.display = 'flex';
+  setTimeout(function(){ document.getElementById('tm-tracking').focus(); }, 100);
+}
+
+function closeTrackingModal() {
+  var modal = document.getElementById('tracking-modal');
+  if (modal) modal.style.display = 'none';
+}
+
+function saveTracking() {
+  var modal = document.getElementById('tracking-modal');
+  var orderNo  = modal.getAttribute('data-orderno');
+  var carrier  = document.getElementById('tm-carrier').value.trim();
+  var tracking = document.getElementById('tm-tracking').value.trim();
+  if (!tracking) { alert('송장번호를 입력하세요'); return; }
+  if (!carrier)  { alert('택배사를 선택하세요'); return; }
+  var url = (typeof CONFIG!=='undefined') ? CONFIG.PG.API_PROXY_URL : '';
+  if(!url){ alert('API URL 없음'); return; }
+  fetch(url, {
+    method:'POST', mode:'no-cors',
+    headers:{'Content-Type':'text/plain'},
+    body: JSON.stringify({action:'updateOrderStatus', data:{
+      '주문번호': orderNo,
+      '주문상태': '배송중',
+      '송장번호': tracking,
+      '택배사':   carrier
+    }})
+  }).then(function(){
+    closeTrackingModal();
+    showToast('송장번호가 저장됐습니다! (상태→배송중)','ok');
+    setTimeout(loadOrders, 800);
+  }).catch(function(e){ console.log(e); });
+}
+
 function renderOrders(rows){
   if(!rows.length){ document.getElementById('order-tw').innerHTML=EMPTY('🛒','주문 내역 없음'); return; }
   function getVal(row, candidates) {
@@ -258,37 +326,49 @@ function renderOrders(rows){
   var statusColor = {'결제대기':'#fff3cd','결제완료':'#d1fae5','배송중':'#dbeafe','배송완료':'#e0e7ff','취소':'#fee2e2'};
   var statusText  = {'결제대기':'#856404','결제완료':'#065f46','배송중':'#1e40af','배송완료':'#3730a3','취소':'#991b1b'};
   var statuses = ['결제대기','결제완료','상품준비','배송중','배송완료','취소'];
+  // ★ 송장번호/택배사 컬럼 추가
   var html = '<div style="overflow-x:auto;"><table><thead><tr>'
     + '<th>주문번호</th><th>주문일시</th><th>주문자명</th><th>연락처</th>'
-    + '<th>이메일</th><th>주문상품</th><th>결제금액</th><th>대리점ID</th><th>주문상태</th><th>상태변경</th>'
+    + '<th>주문상품</th><th>결제금액</th><th>대리점ID</th>'
+    + '<th>📦 송장번호</th><th>주문상태</th><th>상태변경</th>'
     + '</tr></thead><tbody>';
   rows.forEach(function(row){
     var orderNo  = getVal(row, ['주문번호']);
     var orderDt  = getVal(row, ['주문일시','저장일시','주문날짜']);
-    var orderer  = getVal(row, ['주문자명','주문자이름','이름','name','ordererName']);
-    var phone    = getVal(row, ['연락처','전화번호','phone','ordererPhone']);
-    var email    = getVal(row, ['이메일','email','ordererEmail']);
-    var items    = getVal(row, ['주문상품','상품명','items']);
-    var amount   = getVal(row, ['결제금액','amount','금액']);
-    var dealer   = getVal(row, ['대리점ID','가맹점ID','dealerId']);
-    var st       = getVal(row, ['주문상태','status','상태']);
+    var orderer  = getVal(row, ['주문자명','주문자이름','이름']);
+    var phone    = getVal(row, ['연락처','전화번호']);
+    var items    = getVal(row, ['주문상품명','주문상품','상품명']);
+    var amount   = getVal(row, ['결제금액','금액']);
+    var dealer   = getVal(row, ['대리점ID','가맹점ID']);
+    var st       = getVal(row, ['주문상태','status']);
+    // ★ 송장번호/택배사
+    var tracking = row['송장번호'] || '';
+    var carrier  = row['택배사']   || '';
     if(st==='-') st = '결제대기';
     var bg = statusColor[st] || '#f3f4f6';
     var tc = statusText[st]  || '#374151';
     var amt = (amount && amount !== '-') ? Number(String(amount).replace(/[^0-9]/g,'')).toLocaleString() + '원' : '-';
     var safeNo = String(orderNo).replace(/"/g,'').replace(/'/g,'');
+    var safeCarrier  = carrier.replace(/'/g,'');
+    var safeTracking = tracking.replace(/'/g,'');
+    // ★ 상태변경 드롭다운
     var sel = '<select data-no="' + safeNo + '" onchange="changeOrderStatus(this)" style="padding:4px 6px;border:1px solid var(--border);border-radius:6px;font-size:11px;cursor:pointer;">';
     statuses.forEach(function(s){ sel += '<option value="'+s+'"'+(s===st?' selected':'')+'>'+s+'</option>'; });
     sel += '</select>';
+    // ★ 송장번호 표시 + 입력 버튼
+    var trackCell = tracking
+      ? '<div style="font-size:11px;"><span style="color:var(--gray);">'+carrier+'</span><br><strong style="color:var(--accent);">'+tracking+'</strong></div>'
+        + '<button onclick="openTrackingModal(\''+safeNo+'\',\''+safeCarrier+'\',\''+safeTracking+'\')" style="margin-top:4px;padding:2px 7px;font-size:10px;border:1px solid var(--border);border-radius:4px;background:#f5f5f5;cursor:pointer;">✏️ 수정</button>'
+      : '<button onclick="openTrackingModal(\''+safeNo+'\',\'\',\'\')" style="padding:3px 9px;font-size:11px;border:none;border-radius:5px;background:#e8f5e9;color:#1b5e20;cursor:pointer;font-weight:600;">📦 입력</button>';
     html += '<tr>'
       + '<td style="font-size:11px;color:var(--accent);font-weight:700;">' + orderNo + '</td>'
       + '<td style="font-size:11px;color:var(--gray);">' + orderDt + '</td>'
       + '<td style="font-weight:600;">' + orderer + '</td>'
       + '<td>' + phone + '</td>'
-      + '<td style="font-size:11px;">' + email + '</td>'
-      + '<td style="max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="'+items+'">' + items + '</td>'
+      + '<td style="max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="'+items+'">' + items + '</td>'
       + '<td style="font-weight:700;color:var(--accent);">' + amt + '</td>'
       + '<td style="font-size:11px;">' + (dealer==='본사'||dealer==='-'?'<span style="color:var(--gray)">본사</span>':dealer) + '</td>'
+      + '<td style="min-width:110px;">' + trackCell + '</td>'
       + '<td><span style="padding:3px 9px;border-radius:20px;font-size:11px;font-weight:700;background:'+bg+';color:'+tc+';">'+st+'</span></td>'
       + '<td>' + sel + '</td>'
       + '</tr>';
@@ -303,6 +383,15 @@ function changeOrderStatus(sel){
   if(!orderNo) return;
   var url = (typeof CONFIG!=='undefined') ? CONFIG.PG.API_PROXY_URL : '';
   if(!url){ alert('API URL 없음'); return; }
+  // ★ 배송중으로 변경 시 송장번호 입력 유도
+  if (status === '배송중') {
+    var row = allOrders.find(function(o){ return String(o['주문번호']).trim() === orderNo; }) || {};
+    openTrackingModal(orderNo, row['택배사']||'', row['송장번호']||'');
+    // select를 이전 상태로 복원
+    var prevStatus = (row['주문상태']||'결제대기');
+    sel.value = prevStatus;
+    return;
+  }
   fetch(url, {
     method:'POST', mode:'no-cors',
     headers:{'Content-Type':'text/plain'},
@@ -324,13 +413,14 @@ function downloadOrderExcel(){
       if(dateTo   && d > dateTo)   return false;
     }
     if(keyword){
-      var t = [o['주문번호'],o['주문자명'],o['연락처'],o['이메일'],o['주문상품']].join(' ').toLowerCase();
+      var t = [o['주문번호'],o['주문자명'],o['연락처'],o['이메일'],o['주문상품'],o['송장번호']].join(' ').toLowerCase();
       if(!t.includes(keyword)) return false;
     }
     return true;
   });
   if(!rows.length){ alert('필터 결과가 없습니다'); return; }
-  var cols = ['주문번호','주문일시','주문자명','연락처','이메일','받는분','배송주소','주문상품','결제금액','결제방법','대리점ID','추천인코드','회원구분','주문상태','저장일시'];
+  // ★ 송장번호/택배사 포함
+  var cols = ['주문번호','주문일시','주문자명','연락처','이메일','받는분','배송주소','주문상품','수량','결제금액','결제방법','대리점ID','추천인코드','회원구분','주문상태','송장번호','택배사','메모','저장일시'];
   var csv = '\uFEFF' + cols.join(',') + '\n';
   csv += rows.map(function(row){
     return cols.map(function(c){ var v = String(row[c]||'').replace(/"/g,'""'); return '"'+v+'"'; }).join(',');
