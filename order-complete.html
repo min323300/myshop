@@ -30,6 +30,8 @@
     .spinner { display:inline-block; width:40px; height:40px; border:4px solid #ddd;
       border-top-color:#FF5733; border-radius:50%; animation:spin .8s linear infinite; margin-bottom:12px; }
     @keyframes spin { to { transform:rotate(360deg); } }
+    .test-badge { display:inline-block; background:#fff3cd; color:#856404; border-radius:20px;
+      padding:4px 14px; font-size:12px; font-weight:700; margin-bottom:16px; }
   </style>
 </head>
 <body>
@@ -43,124 +45,139 @@
 <script src="js/config.js"></script>
 <script>
 /**
- * order-complete.html
- * 윈글로벌페이 결제 완료 후 3가지 방식으로 결과가 도착함:
+ * order-complete.html v2.0
  *
- * [방식 A] PC 성공 후 winpay.js의 _saveAndRedirect() 가 직접 이동
+ * [방식 A] order.html 테스트 모드 직접 이동
+ *   → ?no=ORD...&method=신용카드
+ *
+ * [방식 B] winpay.js _saveAndRedirect() 직접 이동
  *   → ?orderNo=ORD...&amt=...&goodsName=...&ordNm=...
  *
- * [방식 B] redirectUrl (PC/모바일 공통) - PG가 GET 파라미터로 결과 전달
- *   → ?paymentData=JSON인코딩  또는
- *   → ?success=true&tid=...&wTid=...&amt=...&goodsName=...&ordNm=...
+ * [방식 C] redirectUrl - PG가 GET 파라미터로 결과 전달
+ *   → ?paymentData=JSON인코딩
+ *   → ?success=true&tid=...&amt=...
  *
- * [방식 C] 모바일 userResultUrl - PG가 tid만 넘겨줌
- *   → ?tid=...  (JWT 토큰 + status API 로 직접 조회)
+ * [방식 D] 모바일 userResultUrl - tid만 전달
+ *   → ?tid=...
  */
 (async function() {
 
-  const SERVER_URL  = 'https://jh.winglobalpay.com';
-  const area        = document.getElementById('area');
-  const p           = new URLSearchParams(location.search);
-  const dealer      = p.get('dealer') || localStorage.getItem('dealerId') || '';
-  const shopUrl     = dealer ? `index.html?dealer=${dealer}` : 'index.html';
+  var SERVER_URL  = 'https://jh.winglobalpay.com';
+  var area        = document.getElementById('area');
+  var p           = new URLSearchParams(location.search);
+  var dealer      = p.get('dealer') || '';
+  var shopUrl     = dealer ? 'index.html?dealer=' + dealer : 'index.html';
+  var SCRIPT_URL  = (typeof CONFIG !== 'undefined') ? CONFIG.PG.API_PROXY_URL : '';
 
-  // ── 방식 A: winpay.js가 주문 저장 후 직접 이동 ──────────
-  const orderNo = p.get('orderNo');
-  if (orderNo) {
+  // ── 방식 A: order.html 테스트 모드 (?no= 파라미터) ──────
+  var noParam = p.get('no');
+  if (noParam) {
     renderSuccess({
-      orderNo,
-      amt:       p.get('amt') || '0',
-      goodsName: decodeURIComponent(p.get('goodsName') || ''),
-      ordNm:     decodeURIComponent(p.get('ordNm') || ''),
+      orderNo:   noParam,
+      amt:       '0',
+      goodsName: '',
+      ordNm:     '',
+      method:    decodeURIComponent(p.get('method') || '신용카드'),
+      isTest:    true
     });
     return;
   }
 
-  // ── 방식 B: redirectUrl - PG가 결과 파라미터 전달 ────────
-  const paymentDataRaw = p.get('paymentData');
+  // ── 방식 B: winpay.js 직접 이동 (?orderNo= 파라미터) ────
+  var orderNo = p.get('orderNo');
+  if (orderNo) {
+    renderSuccess({
+      orderNo:   orderNo,
+      amt:       p.get('amt') || '0',
+      goodsName: decodeURIComponent(p.get('goodsName') || ''),
+      ordNm:     decodeURIComponent(p.get('ordNm') || ''),
+      method:    decodeURIComponent(p.get('method') || '신용카드'),
+      isTest:    false
+    });
+    return;
+  }
+
+  // ── 방식 C-1: ?paymentData=JSON ─────────────────────────
+  var paymentDataRaw = p.get('paymentData');
   if (paymentDataRaw) {
-    // JSON 형식
     try {
-      const pg = JSON.parse(decodeURIComponent(paymentDataRaw));
+      var pg = JSON.parse(decodeURIComponent(paymentDataRaw));
       if (pg.success === true) {
         await saveAndRender(pg.tid, pg);
       } else {
         renderFail(pg.message || '결제 실패');
       }
-    } catch(e) { renderFail('결제 데이터 파싱 오류'); }
+    } catch(e) {
+      renderFail('결제 데이터 파싱 오류');
+    }
     return;
   }
 
-  const successParam = p.get('success');
-  const tidParam     = p.get('tid');
+  // ── 방식 C-2: ?success=true&tid=... ─────────────────────
+  var successParam = p.get('success');
+  var tidParam     = p.get('tid');
   if (successParam !== null) {
-    // 개별 파라미터 형식
     if (successParam === 'true' && tidParam) {
-      const pg = {
-        success: true,
-        tid:      tidParam,
-        wTid:     p.get('wTid') || '',
-        amt:      p.get('amt') || '0',
+      await saveAndRender(tidParam, {
+        success:   true,
+        tid:       tidParam,
+        wTid:      p.get('wTid')      || '',
+        amt:       p.get('amt')       || '0',
         goodsName: decodeURIComponent(p.get('goodsName') || ''),
-        ordNm:    decodeURIComponent(p.get('ordNm') || ''),
-        appDtm:   p.get('appDtm') || '',
-        van:      p.get('van') || '',
-        issuer:   p.get('issuer') || '',
-        message:  p.get('message') || '',
-      };
-      await saveAndRender(tidParam, pg);
+        ordNm:     decodeURIComponent(p.get('ordNm')     || ''),
+        appDtm:    p.get('appDtm')    || '',
+        van:       p.get('van')       || '',
+        issuer:    p.get('issuer')    || '',
+        message:   p.get('message')  || '',
+      });
     } else {
       renderFail(decodeURIComponent(p.get('message') || '결제가 완료되지 않았습니다.'));
     }
     return;
   }
 
-  // ── 방식 C: 모바일 userResultUrl → tid만 전달 ────────────
+  // ── 방식 D: 모바일 ?tid= ─────────────────────────────────
   if (tidParam) {
-    // 자동 로그인 후 status API 조회 (mobile_result.html 방식)
     await handleMobileResult(tidParam);
     return;
   }
 
-  // 아무 파라미터도 없음 → 잘못된 접근
+  // 파라미터 없음
   renderFail('주문 정보를 찾을 수 없습니다.');
 
-  // ──────────────────────────────────────────────────────────
-  // 함수 정의
-  // ──────────────────────────────────────────────────────────
+  // ─────────────────────────────────────────────────────────
+  // 내부 함수
+  // ─────────────────────────────────────────────────────────
 
   /** 모바일: JWT 로그인 → status 조회 */
   async function handleMobileResult(tid) {
     try {
-      // 세션에 저장된 토큰 우선 사용
-      let jwt = getValidJwt();
+      var jwt = getValidJwt();
 
       if (!jwt) {
-        // 토큰 없으면 Apps Script에서 payKey 가져와 자동 로그인
-        const cfgRes  = await fetch(CONFIG.APPS_SCRIPT_URL + '?action=getPGConfig');
-        const cfg     = await cfgRes.json();
+        if (!SCRIPT_URL) throw new Error('SCRIPT_URL 없음');
+        var cfgRes  = await fetch(SCRIPT_URL + '?action=getPGConfig');
+        var cfg     = await cfgRes.json();
         if (!cfg.tmnId || !cfg.payKey) throw new Error('PG 설정 없음');
 
-        const loginRes  = await fetch(`${SERVER_URL}/api/auth/login`, {
+        var loginRes  = await fetch(SERVER_URL + '/api/auth/login', {
           method: 'POST',
           headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${cfg.payKey}`
+            'Content-Type':  'application/json',
+            'Authorization': 'Bearer ' + cfg.payKey
           },
           body: JSON.stringify({ tmnId: cfg.tmnId })
         });
-        const loginData = await loginRes.json();
+        var loginData = await loginRes.json();
         if (!loginData.token) throw new Error('로그인 실패');
-
         jwt = loginData.token;
         sessionStorage.setItem('wp_jwt', jwt);
       }
 
-      // status API 조회
-      const statusRes  = await fetch(`${SERVER_URL}/api/payment/status/${tid}`, {
-        headers: { 'Authorization': `Bearer ${jwt}` }
+      var statusRes  = await fetch(SERVER_URL + '/api/payment/status/' + tid, {
+        headers: { 'Authorization': 'Bearer ' + jwt }
       });
-      const statusData = await statusRes.json();
+      var statusData = await statusRes.json();
 
       if (statusData.success === true) {
         await saveAndRender(tid, statusData);
@@ -173,102 +190,107 @@
     }
   }
 
-  /** JWT 토큰 유효성 체크 */
+  /** JWT 유효성 체크 */
   function getValidJwt() {
-    const token = sessionStorage.getItem('wp_jwt') || localStorage.getItem('jwtToken');
+    var token = sessionStorage.getItem('wp_jwt') || localStorage.getItem('jwtToken');
     if (!token) return '';
     try {
-      const payload = JSON.parse(atob(token.split('.')[1]));
+      var payload = JSON.parse(atob(token.split('.')[1]));
       if (payload.exp && payload.exp < Math.floor(Date.now()/1000)) return '';
       return token;
-    } catch(e) { return token; } // 파싱 실패해도 일단 사용
+    } catch(e) { return token; }
   }
 
-  /** Apps Script로 주문 저장 후 성공 화면 */
+  /** Apps Script 주문 저장 → 성공 화면 */
   async function saveAndRender(tid, pg) {
-    const saved   = JSON.parse(localStorage.getItem('wp_order') || '{}');
-    const orderNo = 'ORD' + Date.now();
+    var saved      = JSON.parse(localStorage.getItem('wp_order') || '{}');
+    var newOrderNo = 'ORD' + Date.now();
 
-    // 주문 저장
     try {
-      await fetch(CONFIG.APPS_SCRIPT_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action:       'saveOrder',
-          주문번호:     orderNo,
-          주문일시:     new Date().toLocaleString('ko-KR'),
-          대리점ID:     dealer,
-          주문자명:     pg.ordNm || saved.ordNm || '',
-          연락처:       saved.phone || '',
-          이메일:       saved.email || '',
-          받는분:       saved.receiverName || pg.ordNm || saved.ordNm || '',
-          받는분연락처: saved.receiverPhone || saved.phone || '',
-          배송주소:     saved.address || '',
-          우편번호:     saved.zipCode || '',
-          상품번호:     saved.productCode || '',
-          주문상품명:   pg.goodsName || saved.goodsName || '',
-          수량:         saved.qty || 1,
-          결제금액:     pg.amt || saved.amt || 0,
-          결제방법:     'card',
-          추천인코드:   saved.referralCode || '',
-          회원구분:     (saved.userId && saved.userId !== 'guest') ? '회원' : '비회원',
-          주문상태:     '결제완료',
-          메모:         saved.memo || '',
-          저장일시:     new Date().toISOString().split('T')[0],
-          PG주문번호:   tid,
-          PG거래번호:   pg.wTid || '',
-        })
-      });
+      if (SCRIPT_URL) {
+        await fetch(SCRIPT_URL, {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action:       'saveOrder',
+            주문번호:     newOrderNo,
+            주문일시:     new Date().toLocaleString('ko-KR'),
+            대리점ID:     dealer,
+            주문자명:     pg.ordNm              || saved.ordNm    || '',
+            연락처:       saved.phone           || '',
+            이메일:       saved.email           || '',
+            받는분:       saved.receiverName    || pg.ordNm || saved.ordNm || '',
+            받는분연락처: saved.receiverPhone   || saved.phone || '',
+            배송주소:     saved.address         || '',
+            우편번호:     saved.zipCode         || '',
+            상품번호:     saved.productCode     || '',
+            주문상품:     pg.goodsName          || saved.goodsName || '',
+            수량:         saved.qty             || 1,
+            결제금액:     pg.amt                || saved.amt || 0,
+            결제방법:     'card',
+            추천인코드:   saved.referralCode    || '',
+            회원구분:     (saved.userId && saved.userId !== 'guest') ? '회원' : '비회원',
+            주문상태:     '결제완료',
+            메모:         saved.memo            || '',
+            PG거래번호:   tid,
+            PG주문번호:   pg.wTid               || '',
+          })
+        });
+      }
     } catch(e) {
       console.warn('[order-complete] 주문 저장 실패 (결제는 성공):', e);
     }
 
-    // 정리
     localStorage.removeItem('cart');
     localStorage.removeItem('wp_tid');
     localStorage.removeItem('wp_order');
     sessionStorage.removeItem('wp_jwt');
 
     renderSuccess({
-      orderNo,
+      orderNo:   newOrderNo,
       amt:       pg.amt || saved.amt || '0',
       goodsName: pg.goodsName || saved.goodsName || '',
-      ordNm:     pg.ordNm || saved.ordNm || '',
+      ordNm:     pg.ordNm     || saved.ordNm     || '',
+      method:    'card',
+      isTest:    false
     });
   }
 
-  /** 성공 화면 */
-  function renderSuccess({ orderNo, amt, goodsName, ordNm }) {
-    area.innerHTML = `
-      <div class="icon">🎉</div>
-      <h1 class="title">주문이 완료되었습니다!</h1>
-      <p class="sub">주문해주셔서 감사합니다. 빠르게 배송해드릴게요.</p>
-      <div class="box">
-        <h3>📦 주문 정보</h3>
-        <div class="row"><span class="label">주문번호</span><span class="value">${orderNo}</span></div>
-        <div class="row"><span class="label">상품명</span><span class="value">${goodsName}</span></div>
-        <div class="row"><span class="label">주문자</span><span class="value">${ordNm}</span></div>
-        <div class="row"><span class="label">결제금액</span><span class="value price">₩${Number(amt).toLocaleString()}</span></div>
-        <div class="row"><span class="label">결제방법</span><span class="value">신용카드</span></div>
-        <div class="row"><span class="label">배송예정</span><span class="value">영업일 기준 2~3일</span></div>
-      </div>
-      <div class="btns">
-        <a href="${shopUrl}" class="btn-a">쇼핑 계속하기</a>
-        <a href="mypage.html" class="btn-b">주문 내역 확인</a>
-      </div>`;
+  /** 성공 화면 렌더 */
+  function renderSuccess(o) {
+    var amtNum  = Number(o.amt) || 0;
+    var amtText = amtNum > 0 ? '₩' + amtNum.toLocaleString() : '-';
+
+    area.innerHTML =
+      (o.isTest ? '<div class="test-badge">🔧 테스트 모드 (PG 미연동)</div>' : '')
+      + '<div class="icon">🎉</div>'
+      + '<h1 class="title">주문이 완료되었습니다!</h1>'
+      + '<p class="sub">주문해주셔서 감사합니다. 빠르게 배송해드릴게요.</p>'
+      + '<div class="box">'
+      + '<h3>📦 주문 정보</h3>'
+      + '<div class="row"><span class="label">주문번호</span><span class="value">' + o.orderNo + '</span></div>'
+      + (o.goodsName ? '<div class="row"><span class="label">상품명</span><span class="value">' + o.goodsName + '</span></div>' : '')
+      + (o.ordNm     ? '<div class="row"><span class="label">주문자</span><span class="value">' + o.ordNm     + '</span></div>' : '')
+      + '<div class="row"><span class="label">결제금액</span><span class="value price">' + amtText + '</span></div>'
+      + '<div class="row"><span class="label">결제방법</span><span class="value">' + (o.method || '신용카드') + '</span></div>'
+      + '<div class="row"><span class="label">배송예정</span><span class="value">영업일 기준 2~3일</span></div>'
+      + '</div>'
+      + '<div class="btns">'
+      + '<a href="' + shopUrl + '" class="btn-a">쇼핑 계속하기</a>'
+      + '<a href="mypage.html" class="btn-b">주문 내역 확인</a>'
+      + '</div>';
   }
 
-  /** 실패 화면 */
+  /** 실패 화면 렌더 */
   function renderFail(msg) {
-    area.innerHTML = `
-      <div class="icon">😢</div>
-      <h1 class="fail-title">결제가 완료되지 않았습니다</h1>
-      <div class="fail-box">${msg}</div>
-      <div class="btns">
-        <a href="javascript:history.back()" class="btn-a">다시 시도</a>
-        <a href="${shopUrl}" class="btn-b">쇼핑 계속</a>
-      </div>`;
+    area.innerHTML =
+      '<div class="icon">😢</div>'
+      + '<h1 class="fail-title">결제가 완료되지 않았습니다</h1>'
+      + '<div class="fail-box">' + msg + '</div>'
+      + '<div class="btns">'
+      + '<a href="javascript:history.back()" class="btn-a">다시 시도</a>'
+      + '<a href="' + shopUrl + '" class="btn-b">쇼핑 계속</a>'
+      + '</div>';
   }
 
 })();
