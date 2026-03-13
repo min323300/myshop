@@ -180,9 +180,7 @@
         <!-- ★ 포인트 사용 -->
         <div class="point-section">
           <h3>🎁 포인트 사용</h3>
-          <div id="point-login-check">
-            <!-- 로그인 상태에 따라 동적 렌더 -->
-          </div>
+          <div id="point-login-check"></div>
         </div>
 
         <!-- 결제 방법 -->
@@ -194,7 +192,6 @@
               <span class="pay-icon">💳</span><span>신용 / 체크카드</span>
               <span class="pay-sub">국내외 모든 카드</span>
             </div>
-            <!-- 포인트 전액 시 카드 숨김 처리됨 -->
           </div>
           <div id="point-only-notice" style="display:none;margin-top:10px;padding:10px 14px;background:#f0f4ff;border-radius:8px;font-size:13px;color:#4338ca;font-weight:700;">
             ✅ 포인트 전액 결제 · 추가 결제 수단 불필요
@@ -247,12 +244,13 @@
 <script src="js/config.js"></script>
 <script src="js/sheets.js"></script>
 <script src="js/app.js"></script>
+<script src="js/winpay.js"></script>
 <script>
 var selectedPay    = '신용카드';
-var orderRawAmount = 0;   // 배송비 포함 원래 금액
-var usedPoints     = 0;   // 실제 사용할 포인트
-var myPoints       = 0;   // 보유 포인트
-var MIN_POINT      = 3000; // 최소 사용 포인트
+var orderRawAmount = 0;
+var usedPoints     = 0;
+var myPoints       = 0;
+var MIN_POINT      = 3000;
 
 // ── 대리점ID ──
 function getCurrentDealerId() {
@@ -265,21 +263,24 @@ function getCurrentDealerId() {
 }
 
 function initDealerBadge() {
-  var id = getCurrentDealerId();
+  var id    = getCurrentDealerId();
   var badge = document.getElementById('dealer-badge');
   var nm    = document.getElementById('dealer-badge-name');
-  if (badge && nm && id && id !== '본사') { nm.textContent = id; badge.style.display = 'inline-flex'; }
+  if (badge && nm && id && id !== '본사') {
+    nm.textContent       = id;
+    badge.style.display  = 'inline-flex';
+  }
 }
 
 // ── 결제 방법 선택 ──
 function selectPay(el, type) {
   selectedPay = type;
-  document.querySelectorAll('.pay-method').forEach(m => m.classList.remove('active'));
+  document.querySelectorAll('.pay-method').forEach(function(m) { m.classList.remove('active'); });
   el.classList.add('active');
 }
 
 function toggleAll(el) {
-  document.querySelectorAll('.agree-check').forEach(c => c.checked = el.checked);
+  document.querySelectorAll('.agree-check').forEach(function(c) { c.checked = el.checked; });
 }
 
 function copySameAddress(el) {
@@ -306,99 +307,65 @@ function initPointSection() {
   myPoints = parseInt(sessionStorage.getItem('myPoints') || '0');
 
   var wrap = document.getElementById('point-login-check');
-
   if (!user) {
-    // 비로그인
-    wrap.innerHTML = `
-      <div class="point-not-login">
-        <a href="mypage.html">로그인</a>하시면 보유 포인트를 사용할 수 있습니다
-      </div>`;
+    wrap.innerHTML = '<div class="point-not-login"><a href="mypage.html">로그인</a>하시면 보유 포인트를 사용할 수 있습니다</div>';
     return;
   }
-
   if (myPoints < MIN_POINT) {
-    // 포인트 부족
-    wrap.innerHTML = `
-      <div class="point-balance-row">
-        <span class="point-balance-label">보유 포인트</span>
-        <span class="point-balance-num">${myPoints.toLocaleString()}P</span>
-      </div>
-      <div style="font-size:13px;color:var(--gray);padding:8px 0;">최소 ${MIN_POINT.toLocaleString()}P 이상부터 사용 가능합니다.</div>`;
+    wrap.innerHTML = '<div class="point-balance-row"><span class="point-balance-label">보유 포인트</span><span class="point-balance-num">' + myPoints.toLocaleString() + 'P</span></div>'
+      + '<div style="font-size:13px;color:var(--gray);padding:8px 0;">최소 ' + MIN_POINT.toLocaleString() + 'P 이상부터 사용 가능합니다.</div>';
     return;
   }
-
-  // 포인트 사용 가능
-  wrap.innerHTML = `
-    <div class="point-balance-row">
-      <span class="point-balance-label">보유 포인트</span>
-      <span class="point-balance-num" id="display-my-points">${myPoints.toLocaleString()}P</span>
-    </div>
-    <div class="point-use-btns">
-      <button class="btn-point-use" onclick="usePointAll()">💯 전액 사용</button>
-      <button class="btn-point-use" onclick="cancelPoint()">❌ 사용 안 함</button>
-    </div>
-    <div class="point-input-row">
-      <input type="number" id="point-input" placeholder="사용할 포인트 입력 (최소 ${MIN_POINT.toLocaleString()}P)" min="${MIN_POINT}" max="${myPoints}" step="1000">
-      <button class="btn-apply-point" onclick="applyPointInput()">적용</button>
-    </div>
-    <div class="point-result" id="point-result"></div>
-    <div class="point-notice">※ 최소 ${MIN_POINT.toLocaleString()}P 이상 / 1,000P 단위 사용 가능 · 잔여 포인트는 마이페이지에서 확인</div>`;
+  wrap.innerHTML = '<div class="point-balance-row"><span class="point-balance-label">보유 포인트</span><span class="point-balance-num" id="display-my-points">' + myPoints.toLocaleString() + 'P</span></div>'
+    + '<div class="point-use-btns"><button class="btn-point-use" onclick="usePointAll()">💯 전액 사용</button><button class="btn-point-use" onclick="cancelPoint()">❌ 사용 안 함</button></div>'
+    + '<div class="point-input-row"><input type="number" id="point-input" placeholder="사용할 포인트 입력 (최소 ' + MIN_POINT.toLocaleString() + 'P)" min="' + MIN_POINT + '" max="' + myPoints + '" step="1000"><button class="btn-apply-point" onclick="applyPointInput()">적용</button></div>'
+    + '<div class="point-result" id="point-result"></div>'
+    + '<div class="point-notice">※ 최소 ' + MIN_POINT.toLocaleString() + 'P 이상 / 1,000P 단위 사용 가능 · 잔여 포인트는 마이페이지에서 확인</div>';
 }
 
-// 포인트 전액 사용
 function usePointAll() {
-  var maxUsable = Math.min(myPoints, orderRawAmount); // 결제금액 초과 불가
-  maxUsable = Math.floor(maxUsable / 1000) * 1000;    // 1,000P 단위 절삭
+  var maxUsable = Math.min(myPoints, orderRawAmount);
+  maxUsable = Math.floor(maxUsable / 1000) * 1000;
   if (maxUsable < MIN_POINT) { alert('포인트가 부족합니다'); return; }
   applyPoint(maxUsable);
-  document.querySelectorAll('.btn-point-use').forEach(b => b.classList.remove('active'));
   document.querySelectorAll('.btn-point-use')[0].classList.add('active');
+  document.querySelectorAll('.btn-point-use')[1].classList.remove('active');
 }
 
-// 포인트 사용 취소
 function cancelPoint() {
   applyPoint(0);
-  document.querySelectorAll('.btn-point-use').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.btn-point-use')[0].classList.remove('active');
   document.querySelectorAll('.btn-point-use')[1].classList.add('active');
   var inp = document.getElementById('point-input');
   if (inp) inp.value = '';
   var res = document.getElementById('point-result');
-  if (res) { res.style.display = 'none'; }
+  if (res) res.style.display = 'none';
 }
 
-// 직접 입력 적용
 function applyPointInput() {
   var inp = document.getElementById('point-input');
   if (!inp) return;
   var val = parseInt(inp.value) || 0;
-  if (val < MIN_POINT) { alert(MIN_POINT.toLocaleString() + 'P 이상 입력해주세요'); inp.focus(); return; }
-  if (val > myPoints)  { alert('보유 포인트(' + myPoints.toLocaleString() + 'P)를 초과할 수 없습니다'); return; }
-  if (val > orderRawAmount) { alert('결제금액을 초과할 수 없습니다'); return; }
-  val = Math.floor(val / 1000) * 1000; // 1,000P 단위
+  if (val < MIN_POINT)          { alert(MIN_POINT.toLocaleString() + 'P 이상 입력해주세요'); inp.focus(); return; }
+  if (val > myPoints)           { alert('보유 포인트(' + myPoints.toLocaleString() + 'P)를 초과할 수 없습니다'); return; }
+  if (val > orderRawAmount)     { alert('결제금액을 초과할 수 없습니다'); return; }
+  val = Math.floor(val / 1000) * 1000;
   inp.value = val;
   applyPoint(val);
 }
 
-// 포인트 실제 적용
 function applyPoint(pts) {
   usedPoints = pts;
-  var finalAmt = Math.max(0, orderRawAmount - pts);
-
-  // 오른쪽 요약 업데이트
-  var rowDeduct = document.getElementById('row-point-deduct');
-  var sumDeduct = document.getElementById('sum-point-deduct');
+  var finalAmt   = Math.max(0, orderRawAmount - pts);
+  var rowDeduct  = document.getElementById('row-point-deduct');
+  var sumDeduct  = document.getElementById('sum-point-deduct');
   if (rowDeduct && sumDeduct) {
-    if (pts > 0) {
-      rowDeduct.style.display = 'flex';
-      sumDeduct.textContent   = '-' + pts.toLocaleString() + 'P';
-    } else {
-      rowDeduct.style.display = 'none';
-    }
+    rowDeduct.style.display = pts > 0 ? 'flex' : 'none';
+    if (pts > 0) sumDeduct.textContent = '-' + pts.toLocaleString() + 'P';
   }
-  document.getElementById('sum-total').textContent   = finalAmt.toLocaleString() + '원';
-  document.getElementById('btn-order').textContent   = finalAmt.toLocaleString() + '원 결제하기';
+  document.getElementById('sum-total').textContent = finalAmt.toLocaleString() + '원';
+  document.getElementById('btn-order').textContent = finalAmt.toLocaleString() + '원 결제하기';
 
-  // 포인트 결과 표시
   var res = document.getElementById('point-result');
   if (res) {
     if (pts > 0) {
@@ -411,11 +378,9 @@ function applyPoint(pts) {
     }
   }
 
-  // 포인트 전액이면 카드 선택 숨김
   var payWrap   = document.getElementById('pay-methods-wrap');
   var pointOnly = document.getElementById('point-only-notice');
   if (pts > 0 && finalAmt === 0) {
-    // 전액 포인트 결제
     if (payWrap)   payWrap.style.display   = 'none';
     if (pointOnly) pointOnly.style.display = 'block';
     selectedPay = '포인트전액';
@@ -428,7 +393,7 @@ function applyPoint(pts) {
 
 // ── 주문 상품 로드 ──
 function loadOrderItems() {
-  var items = Cart.getItems();
+  var items     = Cart.getItems();
   var container = document.getElementById('order-items');
   if (!items.length) {
     container.innerHTML = '<p style="color:var(--gray);font-size:13px;text-align:center;padding:20px;">장바구니가 비어있습니다</p>';
@@ -448,33 +413,35 @@ function loadOrderItems() {
       + '</div>';
   }).join('');
 
-  var delivery    = total >= 50000 ? 0 : 3000;
-  orderRawAmount  = total + delivery;
+  var delivery   = total >= 50000 ? 0 : 3000;
+  orderRawAmount = total + delivery;
   document.getElementById('sum-products').textContent = total.toLocaleString() + '원';
   document.getElementById('sum-delivery').textContent = delivery === 0 ? '무료' : delivery.toLocaleString() + '원';
   document.getElementById('sum-discount').textContent = '-0원';
   document.getElementById('sum-total').textContent    = orderRawAmount.toLocaleString() + '원';
   document.getElementById('btn-order').textContent    = orderRawAmount.toLocaleString() + '원 결제하기';
 
-  // 포인트 UI는 금액 계산 후 초기화
   initPointSection();
 }
 
 // ── 검증 ──
 function validateForm() {
-  var ordererName  = document.getElementById('orderer-name').value.trim();
-  var ordererPhone = document.getElementById('orderer-phone').value.trim();
-  var ordererPw    = document.getElementById('orderer-pw').value.trim();
-  var receiverName = document.getElementById('receiver-name').value.trim();
-  var receiverPhone= document.getElementById('receiver-phone').value.trim();
-  var addr         = document.getElementById('address1').value.trim();
-  if (!ordererName)  { alert('주문자 이름을 입력해주세요'); document.getElementById('orderer-name').focus(); return false; }
-  if (!ordererPhone) { alert('주문자 연락처를 입력해주세요'); document.getElementById('orderer-phone').focus(); return false; }
-  if (!ordererPw || ordererPw.length < 4) { alert('주문 조회 비밀번호 4자리를 입력해주세요'); document.getElementById('orderer-pw').focus(); return false; }
-  if (!receiverName) { alert('받는 분 이름을 입력해주세요'); document.getElementById('receiver-name').focus(); return false; }
-  if (!receiverPhone){ alert('받는 분 연락처를 입력해주세요'); document.getElementById('receiver-phone').focus(); return false; }
-  if (!addr)         { alert('배송지 주소를 입력해주세요'); return false; }
-  if (!document.getElementById('agree1').checked || !document.getElementById('agree2').checked || !document.getElementById('agree3').checked) {
+  var fields = [
+    { id: 'orderer-name',   msg: '주문자 이름을 입력해주세요' },
+    { id: 'orderer-phone',  msg: '주문자 연락처를 입력해주세요' },
+    { id: 'receiver-name',  msg: '받는 분 이름을 입력해주세요' },
+    { id: 'receiver-phone', msg: '받는 분 연락처를 입력해주세요' },
+    { id: 'address1',       msg: '배송지 주소를 입력해주세요' },
+  ];
+  for (var i = 0; i < fields.length; i++) {
+    var el = document.getElementById(fields[i].id);
+    if (!el.value.trim()) { alert(fields[i].msg); el.focus(); return false; }
+  }
+  var pw = document.getElementById('orderer-pw').value.trim();
+  if (!pw || pw.length < 4) { alert('주문 조회 비밀번호 4자리를 입력해주세요'); document.getElementById('orderer-pw').focus(); return false; }
+  if (!document.getElementById('agree1').checked ||
+      !document.getElementById('agree2').checked ||
+      !document.getElementById('agree3').checked) {
     alert('필수 약관에 동의해주세요'); return false;
   }
   return true;
@@ -495,9 +462,9 @@ function buildOrderData(orderNo) {
     '받는분연락처': document.getElementById('receiver-phone').value.trim(),
     '배송주소':     document.getElementById('address1').value.trim() + ' ' + document.getElementById('address2').value.trim(),
     '우편번호':     document.getElementById('post-code').value.trim(),
-    '상품번호':     items.map(i => i.id).join(', '),
-    '주문상품':     items.map(i => i.name + ' x' + (i.qty||1)).join(', '),
-    '수량':         items.reduce((s,i) => s+(i.qty||1), 0),
+    '상품번호':     items.map(function(i) { return i.id; }).join(', '),
+    '주문상품':     items.map(function(i) { return i.name + ' x' + (i.qty||1); }).join(', '),
+    '수량':         items.reduce(function(s,i) { return s+(i.qty||1); }, 0),
     '결제금액':     finalAmt,
     '결제방법':     selectedPay,
     '사용포인트':   usedPoints,
@@ -508,7 +475,7 @@ function buildOrderData(orderNo) {
   };
 }
 
-// ── 포인트 차감 저장 (Apps Script) ──
+// ── 포인트 차감 저장 ──
 function savePointDeduction(orderNo) {
   if (usedPoints <= 0) return;
   var SCRIPT_URL = (typeof CONFIG !== 'undefined') ? CONFIG.PG.API_PROXY_URL : '';
@@ -531,13 +498,10 @@ function savePointDeduction(orderNo) {
         일시:     new Date().toLocaleString('ko-KR')
       }
     })
-  }).catch(e => console.log('포인트 차감 기록 실패:', e));
+  }).catch(function(e) { console.log('포인트 차감 기록 실패:', e); });
 
-  // sessionStorage 포인트도 차감
   var remaining = Math.max(0, myPoints - usedPoints);
   sessionStorage.setItem('myPoints', String(remaining));
-
-  // 포인트 내역 추가
   try {
     var hist = JSON.parse(sessionStorage.getItem('pointHistory') || '[]');
     hist.push({ type:'minus', desc:'결제 포인트 사용 (' + orderNo + ')', amount: usedPoints, date: new Date().toLocaleDateString('ko-KR') });
@@ -545,7 +509,7 @@ function savePointDeduction(orderNo) {
   } catch(e) {}
 }
 
-// ── 주문 저장 ──
+// ── 주문 저장 (Sheets) ──
 function saveOrderToSheets(orderData) {
   var SCRIPT_URL = (typeof CONFIG !== 'undefined') ? CONFIG.PG.API_PROXY_URL : '';
   if (!SCRIPT_URL) { console.log('주문 데이터:', orderData); return; }
@@ -553,13 +517,14 @@ function saveOrderToSheets(orderData) {
     method: 'POST', mode: 'no-cors',
     headers: { 'Content-Type': 'text/plain' },
     body: JSON.stringify({ action: 'saveOrder', data: orderData })
-  }).catch(e => console.log('Sheets 저장 실패:', e));
+  }).catch(function(e) { console.log('Sheets 저장 실패:', e); });
 }
 
+// ── PG 결제 요청 ──
 function requestPG(orderData) {
   var PG_MERCHANT_ID = (typeof CONFIG !== 'undefined') ? CONFIG.PG.MERCHANT_ID : '';
 
-  // 포인트 전액 결제이면 PG 스킵
+  // ① 포인트 전액 결제 → PG 스킵
   if (usedPoints > 0 && orderData['결제금액'] === 0) {
     saveOrderToSheets(orderData);
     savePointDeduction(orderData['주문번호']);
@@ -568,29 +533,55 @@ function requestPG(orderData) {
     return;
   }
 
-  if (!PG_MERCHANT_ID) {
-    saveOrderToSheets(orderData);
-    savePointDeduction(orderData['주문번호']);
-    Cart.clear();
-    location.href = 'order-complete.html?no=' + orderData['주문번호'] + '&method=' + selectedPay;
+  // ② 윈글로벌페이 실결제 (MID 입력 후 활성화)
+  if (PG_MERCHANT_ID && typeof WinPay !== 'undefined') {
+    WinPay.pay({
+      orderNo:    orderData['주문번호'],
+      amount:     orderData['결제금액'],
+      goodsName:  orderData['주문상품'],
+      buyerName:  orderData['주문자명'],
+      buyerTel:   orderData['연락처'],
+      buyerEmail: orderData['이메일'],
+      onSuccess: function(tid) {
+        orderData['주문상태']    = '결제완료';
+        orderData['PG거래번호']  = tid;
+        saveOrderToSheets(orderData);
+        savePointDeduction(orderData['주문번호']);
+        Cart.clear();
+        location.href = 'order-complete.html?no=' + orderData['주문번호'] + '&method=' + selectedPay;
+      },
+      onFail: function(msg) {
+        alert('결제 실패: ' + msg);
+        var btn = document.getElementById('btn-order');
+        btn.disabled    = false;
+        btn.textContent = Math.max(0, orderRawAmount - usedPoints).toLocaleString() + '원 결제하기';
+      }
+    });
     return;
   }
-  // PG 연동 후 활성화
+
+  // ③ PG 미연동 (테스트 모드) → 바로 주문완료 이동
+  saveOrderToSheets(orderData);
+  savePointDeduction(orderData['주문번호']);
+  Cart.clear();
+  location.href = 'order-complete.html?no=' + orderData['주문번호'] + '&method=' + selectedPay;
 }
 
+// ── 결제하기 버튼 ──
 function submitOrder() {
   if (!validateForm()) return;
-  var btn = document.getElementById('btn-order');
+  var btn         = document.getElementById('btn-order');
   btn.disabled    = true;
   btn.textContent = '처리 중...';
   var orderNo = 'ORD' + Date.now();
   requestPG(buildOrderData(orderNo));
-  setTimeout(() => {
+  setTimeout(function() {
     btn.disabled    = false;
     btn.textContent = Math.max(0, orderRawAmount - usedPoints).toLocaleString() + '원 결제하기';
   }, 5000);
 }
 
+// ── PG 상태 배지 ──
 function updatePGStatusBadge() {
   var badge = document.getElementById('pg-status-badge');
   if (!badge) return;
@@ -600,6 +591,7 @@ function updatePGStatusBadge() {
   }
 }
 
+// ── 초기화 ──
 Cart.init();
 loadOrderItems();
 updatePGStatusBadge();
