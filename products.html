@@ -182,7 +182,7 @@ function createProductCard(p) {
   const discount = p.salePrice ? Math.round((1 - p.salePrice / p.price) * 100) : 0;
   const productJson = JSON.stringify(p).replace(/"/g, '&quot;');
   return `
-    <div class="product-card" onclick="location.href='product.html?id=${p.id}'">
+    <div class="product-card" onclick="location.href=dealerUrl('product.html?id=${p.id}')">
       <div class="product-img-wrap">
         <img src="${p.image}" alt="${p.name}" loading="lazy"
           onerror="this.src='https://via.placeholder.com/400x400?text=${encodeURIComponent(p.name)}'">
