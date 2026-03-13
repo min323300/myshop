@@ -278,4 +278,10 @@
   try {
     const userData = sessionStorage.getItem('user');
     if (!userData) return;
-    const user = JSON.parse(userData)
+    const user = JSON.parse(userData);
+    if (!user || !user.name) return;
+    const label = document.getElementById('login-label');
+    if (label) label.textContent = user.name + '님';
+  } catch(e) {}
+})();
+</script>
