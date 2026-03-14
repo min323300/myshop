@@ -409,7 +409,15 @@
       <input type="hidden" id="bm-id">
       <div class="fg"><label class="fl">제목 *</label><input class="fi" id="bm-title-input" placeholder="배너 제목"></div>
       <div class="fg"><label class="fl">부제목</label><input class="fi" id="bm-sub" placeholder="부제목 (선택)"></div>
-      <div class="fg"><label class="fl">이미지 URL</label><input class="fi" id="bm-img" placeholder="https://..."></div>
+      <div class="fg">
+        <label class="fl">이미지</label>
+        <div style="display:flex;gap:6px;align-items:center;">
+          <input class="fi" id="bm-img" placeholder="URL 자동입력 또는 직접 입력" oninput="pvBannerImg()" style="flex:1;">
+          <label class="upload-btn" title="Cloudinary 업로드"><span>📁</span><input type="file" accept="image/*" style="display:none" onchange="uploadImg(this,'bm-img','bm-img-pv')"></label>
+        </div>
+        <div id="bm-img-pv" class="img-pv-thumb"></div>
+        <div id="bm-upload-status" style="display:none;margin-top:6px;padding:8px 12px;border-radius:6px;font-size:12px;"></div>
+      </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
         <div class="fg"><label class="fl">배경색</label><input class="fi" id="bm-bg" type="color" value="#FF5733" style="height:40px;padding:4px;"></div>
         <div class="fg"><label class="fl">글자색</label><input class="fi" id="bm-color" type="color" value="#ffffff" style="height:40px;padding:4px;"></div>
@@ -440,7 +448,14 @@
       <input type="hidden" id="pm-id">
       <div class="fg"><label class="fl">제목 *</label><input class="fi" id="pm-title-input" placeholder="팝업 제목"></div>
       <div class="fg"><label class="fl">내용</label><textarea class="fi" id="pm-content" rows="3" style="resize:vertical;"></textarea></div>
-      <div class="fg"><label class="fl">이미지 URL</label><input class="fi" id="pm-img" placeholder="https://..."></div>
+      <div class="fg">
+        <label class="fl">이미지</label>
+        <div style="display:flex;gap:6px;align-items:center;">
+          <input class="fi" id="pm-img" placeholder="URL 자동입력 또는 직접 입력" style="flex:1;">
+          <label class="upload-btn" title="Cloudinary 업로드"><span>📁</span><input type="file" accept="image/*" style="display:none" onchange="uploadImg(this,'pm-img','pm-img-pv')"></label>
+        </div>
+        <div id="pm-img-pv" class="img-pv-thumb"></div>
+      </div>
       <div class="fg"><label class="fl">링크 URL</label><input class="fi" id="pm-link" placeholder="클릭 시 이동할 주소"></div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
         <div class="fg"><label class="fl">팝업 너비</label><input class="fi" id="pm-width" placeholder="500px" value="500px"></div>
