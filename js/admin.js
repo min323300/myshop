@@ -16,27 +16,91 @@ var CLOUDINARY_PRESET = 'damnuri_upload';
 var allProds=[], allOrders=[], editingId=null, curPage='dashboard';
 var srchQ='', catF='', statusF='', orderF='all';
 
+// ✅ 현재 로그인한 사용자 정보
+var currentUser = { type: '', dealerId: '', dealerName: '', raw: {} };
+
 // ============================================================
 // 로그인 (admin.html 인라인과 중복되지 않도록 조건부 정의)
 // ============================================================
-if (typeof doLogin === 'undefined') {
-  window.doLogin = function() {
-    var id = document.getElementById('lid').value.trim();
-    var pw = document.getElementById('lpw').value.trim();
-    if (id === ADMIN_ID && pw === ADMIN_PW) {
-      document.getElementById('login-screen').style.display = 'none';
-      document.getElementById('app').style.display = 'block';
-      var now = new Date();
-      var h = now.getHours(), am = h >= 12 ? '오후' : '오전', hh = (h % 12) || 12;
-      var dd = document.getElementById('hd-date');
-      var ds = document.getElementById('dash-date');
-      if (dd) dd.textContent = now.getFullYear() + '. ' + String(now.getMonth()+1).padStart(2,'0') + '. ' + String(now.getDate()).padStart(2,'0') + '. ' + am + ' ' + String(hh).padStart(2,'0') + ':' + String(now.getMinutes()).padStart(2,'0');
-      if (ds) ds.textContent = now.getFullYear() + '년 ' + (now.getMonth()+1) + '월 ' + now.getDate() + '일';
-      loadDash();
+// ============================================================
+// ✅ 로그인 - 본사 admin 또는 구글시트 대리점 계정
+// ============================================================
+window.doLogin = function() {
+  var id = document.getElementById('lid').value.trim();
+  var pw = document.getElementById('lpw').value.trim();
+  if (!id || !pw) { document.getElementById('lerr').style.display = 'block'; return; }
+
+  var errEl = document.getElementById('lerr');
+  errEl.style.display = 'none';
+  errEl.textContent = '아이디 또는 비밀번호가 올바르지 않습니다.';
+
+  // ① 본사 admin 계정 먼저 확인
+  if (id === ADMIN_ID && pw === ADMIN_PW) {
+    currentUser = { type: 'admin', dealerId: '', dealerName: '본사 관리자', raw: {} };
+    loginSuccess('본사 관리자');
+    return;
+  }
+
+  // ② 구글시트 가맹점 시트에서 대리점 계정 확인
+  var url = 'https://docs.google.com/spreadsheets/d/' + SHEET_ID
+    + '/gviz/tq?tqx=out:csv&sheet=' + encodeURIComponent('가맹점')
+    + '&t=' + Date.now();
+
+  errEl.textContent = '⏳ 로그인 확인 중...';
+  errEl.style.display = 'block';
+  errEl.style.color = '#666';
+
+  fetch(url).then(function(r){ return r.text(); }).then(function(csv) {
+    var rows = parseAdminCSV(csv);
+    var matched = rows.find(function(r) {
+      var sheetId = (r['관리자ID'] || r['아이디'] || '').trim();
+      var sheetPw = (r['관리자PW'] || r['비밀번호'] || '').trim();
+      var status  = (r['상태'] || '').trim();
+      return sheetId === id && sheetPw === pw && status !== '해지';
+    });
+
+    if (matched) {
+      var dealerId   = matched['가맹점ID'] || matched['대리점ID'] || '';
+      var dealerName = matched['가맹점명'] || matched['대리점명'] || dealerId;
+      currentUser = { type: 'dealer', dealerId: dealerId, dealerName: dealerName, raw: matched };
+      loginSuccess(dealerName);
     } else {
-      document.getElementById('lerr').style.display = 'block';
+      errEl.textContent = '아이디 또는 비밀번호가 올바르지 않습니다.';
+      errEl.style.color = '';
     }
-  };
+  }).catch(function() {
+    errEl.textContent = '로그인 확인 중 오류가 발생했습니다. 다시 시도해주세요.';
+    errEl.style.color = '#c0392b';
+  });
+};
+
+// 로그인 성공 처리
+function loginSuccess(name) {
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+  var now = new Date();
+  var h = now.getHours(), am = h >= 12 ? '오후' : '오전', hh = (h % 12) || 12;
+  var dd = document.getElementById('hd-date');
+  var ds = document.getElementById('dash-date');
+  if (dd) dd.textContent = now.getFullYear() + '. ' + String(now.getMonth()+1).padStart(2,'0') + '. ' + String(now.getDate()).padStart(2,'0') + '. ' + am + ' ' + String(hh).padStart(2,'0') + ':' + String(now.getMinutes()).padStart(2,'0');
+  if (ds) ds.textContent = now.getFullYear() + '년 ' + (now.getMonth()+1) + '월 ' + now.getDate() + '일';
+
+  // ✅ 헤더에 로그인한 사용자명 표시
+  var hdPanel = document.querySelector('.hd-panel');
+  if (hdPanel) hdPanel.textContent = name + ' 관리자';
+
+  // ✅ 대리점 로그인 시 본사 전용 메뉴 숨기기
+  if (currentUser.type === 'dealer') {
+    // 대리점 관리, 설정 메뉴 숨김
+    document.querySelectorAll('.sb-item').forEach(function(el) {
+      var txt = el.textContent.trim();
+      if (txt.includes('대리점 관리') || txt.includes('스토어 설정') || txt.includes('공지/매뉴얼')) {
+        el.style.display = 'none';
+      }
+    });
+  }
+
+  loadDash();
 }
 
 function doLogout() {
@@ -243,6 +307,11 @@ function applyOrderFilter() {
   var keyword  = document.getElementById('order-search')    ? document.getElementById('order-search').value.trim().toLowerCase() : '';
   orderTabF = status;
   var filtered = allOrders.filter(function(o) {
+    // ✅ 대리점 로그인 시 본인 주문만 표시
+    if (currentUser.type === 'dealer') {
+      var oDealerId = (o['대리점ID'] || o['가맹점ID'] || '').trim();
+      if (oDealerId !== currentUser.dealerId) return false;
+    }
     if (status !== 'all' && !(o['주문상태']||'').includes(status)) return false;
     if (dateFrom || dateTo) {
       var d = (o['주문일시']||o['저장일시']||'').substring(0,10).replace(/\./g,'-').replace(/ /g,'');
