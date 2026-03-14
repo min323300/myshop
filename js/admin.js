@@ -5,6 +5,7 @@ var ADMIN_ID = 'admin', ADMIN_PW = 'damnuri2026';
 var SCRIPT_URL = (typeof CONFIG!=='undefined') ? CONFIG.PG.API_PROXY_URL : '';
 var IMG_BASE = (typeof CONFIG!=='undefined') ? CONFIG.IMAGE_BASE : 'https://min323300.github.io/myshop/images/';
 var SHEET_URL = '';
+var SHEET_ID = '1t804fRO8HfQtmOzpDAz2IZfzRDQ7t8LYllFGZr3ftUI';
 
 // ============================================================
 // ☁️ Cloudinary 설정
@@ -843,17 +844,39 @@ function openManualModal(){ document.getElementById('nm-type').value='매뉴얼'
 // ============================================================
 function loadSettings(){
   if(typeof CONFIG==='undefined') return;
-  var s=CONFIG.STORE;
-  fetchSheet('PG설정').then(function(rows){
-    var hq=rows.find(function(r){ return (r['가맹점ID']||r['대리점ID']||'').trim()===''||r['가맹점ID']==='본사'; })||rows[0]||{};
-    document.getElementById('pg-provider').value=hq['PG사']||CONFIG.PG.PROVIDER||''; document.getElementById('pg-mid').value=hq['MID']||CONFIG.PG.MERCHANT_ID||''; document.getElementById('pg-apikey').value=hq['API키']||''; document.getElementById('pg-secret').value=hq['시크릿키']||''; document.getElementById('pg-script-url').value=hq['ScriptURL']||CONFIG.PG.API_PROXY_URL||'';
+  var s = CONFIG.STORE || {};
+
+  // ✅ [수정] fetchSheet → 직접 CSV fetch 로 교체 (fetchSheet is not defined 오류 해결)
+  var pgUrl = 'https://docs.google.com/spreadsheets/d/' + SHEET_ID + '/gviz/tq?tqx=out:csv&sheet=' + encodeURIComponent('PG설정') + '&t=' + Date.now();
+  fetch(pgUrl).then(function(r){ return r.text(); }).then(function(csv) {
+    var rows = parseAdminCSV(csv);
+    var hq = rows.find(function(r){ return (r['가맹점ID']||'').trim()==='' || r['가맹점ID']==='본사'; }) || rows[0] || {};
+    var pgProvEl = document.getElementById('pg-provider'); if(pgProvEl) pgProvEl.value = hq['PG사'] || CONFIG.PG.PROVIDER || '';
+    var pgMidEl  = document.getElementById('pg-mid');      if(pgMidEl)  pgMidEl.value  = hq['MID']  || CONFIG.PG.MERCHANT_ID || '';
+    var pgKeyEl  = document.getElementById('pg-apikey');   if(pgKeyEl)  pgKeyEl.value  = hq['API키'] || '';
+    var pgSecEl  = document.getElementById('pg-secret');   if(pgSecEl)  pgSecEl.value  = hq['시크릿키'] || '';
+    var pgUrlEl  = document.getElementById('pg-script-url'); if(pgUrlEl) pgUrlEl.value = hq['ScriptURL'] || CONFIG.PG.API_PROXY_URL || '';
+  }).catch(function() {
+    // PG설정 시트 없어도 config.js 값으로 폴백
+    var pgProvEl = document.getElementById('pg-provider'); if(pgProvEl) pgProvEl.value = CONFIG.PG.PROVIDER || '';
+    var pgMidEl  = document.getElementById('pg-mid');      if(pgMidEl)  pgMidEl.value  = CONFIG.PG.MERCHANT_ID || '';
+    var pgUrlEl  = document.getElementById('pg-script-url'); if(pgUrlEl) pgUrlEl.value = CONFIG.PG.API_PROXY_URL || '';
   });
-  document.getElementById('settings-wrap').innerHTML=
-    [['브랜드명',s.BRAND],['상호',s.NAME],['전화',s.PHONE],['이메일',s.EMAIL],['주소',s.ADDRESS],['PG사',CONFIG.PG.PROVIDER||'미설정'],['Merchant ID',CONFIG.PG.MERCHANT_ID||'미설정'],['Cloudinary Cloud',CLOUDINARY_CLOUD],['Upload Preset',CLOUDINARY_PRESET]].map(function(r){
+
+  document.getElementById('settings-wrap').innerHTML =
+    [['브랜드명',s.BRAND||'-'],['상호',s.NAME||'-'],['전화',s.PHONE||'-'],['이메일',s.EMAIL||'-'],['주소',s.ADDRESS||'-'],
+     ['PG사',CONFIG.PG.PROVIDER||'미설정'],['Merchant ID',CONFIG.PG.MERCHANT_ID||'미설정'],
+     ['Cloudinary Cloud',CLOUDINARY_CLOUD],['Upload Preset',CLOUDINARY_PRESET]
+    ].map(function(r){
       return '<div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);font-size:13px;"><span style="color:var(--gray);font-weight:600;">'+r[0]+'</span><span style="font-weight:500;'+(r[1]==='미설정'?'color:var(--red)':'')+'">'+r[1]+'</span></div>';
     }).join('');
-  document.getElementById('links-wrap').innerHTML=
-    [['🌐 쇼핑몰','https://gasway.shop'],['📦 GitHub','https://github.com/min323300/myshop'],['☁️ Cloudinary','https://console.cloudinary.com'],['📊 Google Sheets','https://docs.google.com/spreadsheets/d/1t804fRO8HfQtmOzpDAz2IZfzRDQ7t8LYllFGZr3ftUI'],['⚙️ Apps Script','https://script.google.com']].map(function(r){
+
+  document.getElementById('links-wrap').innerHTML =
+    [['🌐 쇼핑몰','https://gasway.shop'],['📦 GitHub','https://github.com/min323300/myshop'],
+     ['☁️ Cloudinary','https://console.cloudinary.com'],
+     ['📊 Google Sheets','https://docs.google.com/spreadsheets/d/'+SHEET_ID],
+     ['⚙️ Apps Script','https://script.google.com']
+    ].map(function(r){
       return '<div style="padding:10px 0;border-bottom:1px solid var(--border);"><a href="'+r[1]+'" target="_blank" style="color:var(--accent);font-weight:600;font-size:13px;">'+r[0]+'</a><div style="font-size:11px;color:var(--gray);margin-top:2px;">'+r[1]+'</div></div>';
     }).join('');
 }
@@ -866,6 +889,8 @@ function savePGSettings(){
   var data={ '가맹점ID':'본사','PG사':provider,'MID':mid,'API키':apikey,'시크릿키':secret,'ScriptURL':scriptUrl };
   fetch(scriptUrl,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'savePGConfig',data:data})}).then(function(){
     if(typeof CONFIG!=='undefined'){ CONFIG.PG.PROVIDER=provider; CONFIG.PG.MERCHANT_ID=mid; CONFIG.PG.API_PROXY_URL=scriptUrl; }
+    // ✅ SCRIPT_URL 전역 변수도 즉시 업데이트
+    SCRIPT_URL = scriptUrl;
     statusEl.innerHTML='<span style="color:var(--green);">✅ 저장 완료! (구글시트 PG설정 시트에 반영됨)</span>';
     showToast('PG 설정이 저장됐습니다!','ok');
     setTimeout(loadSettings,500);
