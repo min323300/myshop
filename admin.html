@@ -532,6 +532,28 @@
         <div class="fg"><label class="fl">상태</label><select class="fi" id="dm-status"><option value="운영중">🟢 운영중</option><option value="모집중">📋 모집중</option><option value="일시중지">⏸️ 일시중지</option><option value="해지">🔴 해지</option></select></div>
       </div>
       <div class="fg"><label class="fl">정산계좌</label><input class="fi" id="dm-bank" placeholder="은행명 계좌번호 예금주"></div>
+      <!-- ✅ 관리자 로그인 계정 -->
+      <div style="margin-top:16px;padding:16px;background:#f0f7ff;border:1px solid #bfdbfe;border-radius:10px;">
+        <div style="font-size:13px;font-weight:700;color:#1e40af;margin-bottom:12px;">🔐 관리자 로그인 계정</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <div class="fg">
+            <label class="fl">관리자 아이디</label>
+            <input class="fi" id="dm-admin-id" placeholder="예: seoul_01">
+            <div style="font-size:11px;color:var(--gray);margin-top:4px;">대리점 관리자 페이지 로그인 아이디</div>
+          </div>
+          <div class="fg">
+            <label class="fl">관리자 비밀번호</label>
+            <div style="display:flex;gap:6px;align-items:center;">
+              <input class="fi" id="dm-admin-pw" placeholder="예: pass1234" type="text" style="flex:1;">
+              <button onclick="genDealerPw()" style="padding:8px 10px;border:1px solid var(--border);border-radius:8px;background:#fff;font-size:12px;cursor:pointer;white-space:nowrap;" title="비밀번호 자동생성">🎲 생성</button>
+            </div>
+            <div style="font-size:11px;color:var(--gray);margin-top:4px;">대리점에 전달할 비밀번호</div>
+          </div>
+        </div>
+        <div style="margin-top:10px;padding:8px 12px;background:#eff6ff;border-radius:6px;font-size:12px;color:#1e40af;">
+          💡 저장 후 대리점에 아이디/비밀번호를 카카오톡 또는 문자로 전달하세요
+        </div>
+      </div>
     </div>
     <div class="modal-ft">
       <button class="btn btn-outline" onclick="closeDealerModal()">취소</button>
