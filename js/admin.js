@@ -834,12 +834,15 @@ function loadDealer(){
 
 function openDealerModal(){ clearDealerForm(); document.getElementById('dm-title').textContent='🏬 대리점 등록'; document.getElementById('dealer-modal').classList.add('open'); }
 function closeDealerModal(){ document.getElementById('dealer-modal').classList.remove('open'); }
-function clearDealerForm(){ ['dm-id','dm-fid','dm-name','dm-owner','dm-phone','dm-email','dm-address','dm-domain','dm-start','dm-end','dm-bank'].forEach(function(id){ var el=document.getElementById(id); if(el) el.value=''; }); document.getElementById('dm-commission').value='2'; document.getElementById('dm-status').value='모집중'; document.getElementById('dm-color').value='#FF5733'; }
+function clearDealerForm(){ ['dm-id','dm-fid','dm-name','dm-owner','dm-phone','dm-email','dm-address','dm-domain','dm-start','dm-end','dm-bank','dm-admin-id','dm-admin-pw'].forEach(function(id){ var el=document.getElementById(id); if(el) el.value=''; }); document.getElementById('dm-commission').value='2'; document.getElementById('dm-status').value='모집중'; document.getElementById('dm-color').value='#FF5733'; }
 
 function editDealer(btn){ var fid=btn.getAttribute('data-id');
   var d=dealerAllData.find(function(x){ return x['가맹점ID']===fid; }); if(!d) return;
   document.getElementById('dm-title').textContent='🏬 대리점 수정';
   document.getElementById('dm-id').value=d['가맹점ID']||''; document.getElementById('dm-fid').value=d['가맹점ID']||''; document.getElementById('dm-name').value=d['가맹점명']||''; document.getElementById('dm-owner').value=d['대표자명']||''; document.getElementById('dm-phone').value=d['연락처']||''; document.getElementById('dm-email').value=d['이메일']||''; document.getElementById('dm-address').value=d['주소']||''; document.getElementById('dm-domain').value=d['도메인']||''; document.getElementById('dm-color').value=d['테마색상']||'#FF5733'; document.getElementById('dm-start').value=d['계약일']||''; document.getElementById('dm-end').value=d['계약종료일']||''; document.getElementById('dm-commission').value=d['수수료율']||'2'; document.getElementById('dm-status').value=d['상태']||'모집중'; document.getElementById('dm-bank').value=d['정산계좌']||'';
+  // ✅ 관리자 계정 채우기
+  var adminIdEl = document.getElementById('dm-admin-id'); if(adminIdEl) adminIdEl.value = d['관리자ID'] || d['아이디'] || '';
+  var adminPwEl = document.getElementById('dm-admin-pw'); if(adminPwEl) adminPwEl.value = d['관리자PW'] || d['비밀번호'] || '';
   document.getElementById('dealer-modal').classList.add('open');
 }
 
@@ -847,7 +850,11 @@ function saveDealer(){
   var fid=document.getElementById('dm-fid').value.trim(), name=document.getElementById('dm-name').value.trim();
   if(!fid||!name){ showToast('대리점 ID와 대리점명은 필수입니다','warn'); return; }
   if(!SCRIPT_URL){ showToast('Apps Script URL이 config.js에 설정되어 있지 않습니다','warn'); return; }
-  var data={ 가맹점ID:fid, 가맹점명:name, 대표자명:document.getElementById('dm-owner').value, 연락처:document.getElementById('dm-phone').value, 이메일:document.getElementById('dm-email').value, 주소:document.getElementById('dm-address').value, 도메인:document.getElementById('dm-domain').value, 테마색상:document.getElementById('dm-color').value, 계약일:document.getElementById('dm-start').value, 계약종료일:document.getElementById('dm-end').value, 수수료율:document.getElementById('dm-commission').value, 상태:document.getElementById('dm-status').value, 정산계좌:document.getElementById('dm-bank').value };
+  var data={ 가맹점ID:fid, 가맹점명:name, 대표자명:document.getElementById('dm-owner').value, 연락처:document.getElementById('dm-phone').value, 이메일:document.getElementById('dm-email').value, 주소:document.getElementById('dm-address').value, 도메인:document.getElementById('dm-domain').value, 테마색상:document.getElementById('dm-color').value, 계약일:document.getElementById('dm-start').value, 계약종료일:document.getElementById('dm-end').value, 수수료율:document.getElementById('dm-commission').value, 상태:document.getElementById('dm-status').value, 정산계좌:document.getElementById('dm-bank').value,
+    // ✅ 관리자 계정 추가
+    관리자ID: (document.getElementById('dm-admin-id') ? document.getElementById('dm-admin-id').value.trim() : ''),
+    관리자PW: (document.getElementById('dm-admin-pw') ? document.getElementById('dm-admin-pw').value.trim() : '')
+  };
   fetch(SCRIPT_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'saveDealer',data:data})})
     .then(function(){ showToast('대리점이 저장됐습니다!','ok'); closeDealerModal(); setTimeout(loadDealer,1500); });
 }
@@ -907,6 +914,16 @@ function deleteNoticeItem(btn){ var id=btn.getAttribute('data-id'),title=btn.get
 }
 
 function openManualModal(){ document.getElementById('nm-type').value='매뉴얼'; openNoticeModal(); document.getElementById('nm-title').textContent='📖 매뉴얼 등록'; }
+
+// ✅ 대리점 비밀번호 자동생성
+function genDealerPw() {
+  var chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
+  var pw = '';
+  for (var i = 0; i < 8; i++) pw += chars[Math.floor(Math.random() * chars.length)];
+  var el = document.getElementById('dm-admin-pw');
+  if (el) { el.value = pw; el.type = 'text'; }
+  showToast('비밀번호 자동생성: ' + pw, 'ok');
+}
 
 // ============================================================
 // 설정
