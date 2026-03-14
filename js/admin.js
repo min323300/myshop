@@ -550,7 +550,7 @@ function renderPopupList() {
 
 function openBannerModal(){ clearBannerForm(); document.getElementById('bm-title').textContent='🎨 배너 등록'; document.getElementById('banner-modal').classList.add('open'); }
 function closeBannerModal(){ document.getElementById('banner-modal').classList.remove('open'); }
-function clearBannerForm(){ ['bm-id','bm-title-input','bm-sub','bm-img','bm-link','bm-btn','bm-start','bm-end'].forEach(function(id){ var el=document.getElementById(id); if(el) el.value=''; }); document.getElementById('bm-order').value='1'; document.getElementById('bm-active').value='TRUE'; document.getElementById('bm-bg').value='#FF5733'; document.getElementById('bm-color').value='#ffffff'; }
+function clearBannerForm(){ ['bm-id','bm-title-input','bm-sub','bm-img','bm-link','bm-btn','bm-start','bm-end'].forEach(function(id){ var el=document.getElementById(id); if(el) el.value=''; }); document.getElementById('bm-order').value='1'; document.getElementById('bm-active').value='TRUE'; document.getElementById('bm-bg').value='#FF5733'; document.getElementById('bm-color').value='#ffffff'; var pv=document.getElementById('bm-img-pv'); if(pv) pv.innerHTML=''; var st=document.getElementById('bm-upload-status'); if(st) st.style.display='none'; }
 
 function editBanner(btn) {
   var id = btn.getAttribute('data-id');
@@ -579,7 +579,7 @@ function deleteBannerItem(btn) {
 
 function openPopupModal(){ clearPopupForm(); document.getElementById('pm-title').textContent='📢 팝업 등록'; document.getElementById('popup-modal').classList.add('open'); }
 function closePopupModal(){ document.getElementById('popup-modal').classList.remove('open'); }
-function clearPopupForm(){ ['pm-id','pm-title-input','pm-content','pm-img','pm-link','pm-start','pm-end'].forEach(function(id){ var el=document.getElementById(id); if(el) el.value=''; }); document.getElementById('pm-width').value='500px'; document.getElementById('pm-active').value='TRUE'; }
+function clearPopupForm(){ ['pm-id','pm-title-input','pm-content','pm-img','pm-link','pm-start','pm-end'].forEach(function(id){ var el=document.getElementById(id); if(el) el.value=''; }); document.getElementById('pm-width').value='500px'; document.getElementById('pm-active').value='TRUE'; var pv=document.getElementById('pm-img-pv'); if(pv) pv.innerHTML=''; }
 
 function editPopup(btn) {
   var id = btn.getAttribute('data-id');
@@ -940,9 +940,12 @@ function updateDeliveryPreview(){
 function uploadImg(input,targetId,pvId){
   var file=input.files[0]; if(!file) return;
   var reader=new FileReader();
-  reader.onload=function(e){ var pvEl=document.getElementById(pvId); if(pvEl) pvEl.innerHTML='<img src="'+e.target.result+'">'; };
+  reader.onload=function(e){ var pvEl=document.getElementById(pvId); if(pvEl) pvEl.innerHTML='<img src="'+e.target.result+'" style="max-width:100%;max-height:120px;border-radius:6px;margin-top:6px;">'; };
   reader.readAsDataURL(file);
-  var statusEl=document.getElementById('upload-status');
+  // ✅ 배너/팝업 업로드는 별도 상태 엘리먼트, 상품은 upload-status 사용
+  var statusId = (pvId && (pvId.startsWith('bm-')||pvId.startsWith('pm-'))) ? 'bm-upload-status' : 'upload-status';
+  var statusEl = document.getElementById(statusId) || document.getElementById('upload-status');
+  if (!statusEl) return;
   statusEl.style.display='block'; statusEl.style.background='#fffbeb'; statusEl.style.border='1px solid #fde68a'; statusEl.style.color='#92400e';
   statusEl.innerHTML='<span class="uploading-spinner"></span> Cloudinary 업로드 중... '+file.name;
   var formData=new FormData();
