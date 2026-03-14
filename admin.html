@@ -6,9 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>담누리마켓 관리자 패널</title>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
-  <!-- ✅ 외부 CSS (분리됨) -->
   <link rel="stylesheet" href="css/admin.css">
-  <!-- ✅ 설정/데이터 스크립트 (순서 중요) -->
   <script src="js/config.js"></script>
   <script src="js/sheets.js"></script>
 </head>
@@ -22,7 +20,7 @@
     <div class="lbox-sub">관리자 패널</div>
     <input type="text" id="lid" placeholder="관리자 아이디" autocomplete="off">
     <input type="password" id="lpw" placeholder="비밀번호">
-    <button class="lbox-btn" onclick="(function(){var id=document.getElementById('lid').value.trim(),pw=document.getElementById('lpw').value.trim();if(id==='admin'&&pw==='damnuri2026'){document.getElementById('login-screen').style.display='none';document.getElementById('app').style.display='block';if(typeof loadDash==='function')loadDash();}else{document.getElementById('lerr').style.display='block';}})()">로그인</button>
+    <button class="lbox-btn" onclick="doLogin()">로그인</button>
     <div class="lbox-err" id="lerr">아이디 또는 비밀번호가 올바르지 않습니다.</div>
   </div>
 </div>
@@ -378,27 +376,11 @@
           <button class="btn btn-primary btn-sm" onclick="savePGSettings()">💾 저장</button>
         </div>
         <div style="padding:20px;display:grid;grid-template-columns:1fr 1fr;gap:16px;">
-          <div class="fg">
-            <label class="fl">PG사 <span style="color:var(--red);">*</span></label>
-            <select class="fi" id="pg-provider"><option value="">선택하세요</option><option value="winglobal">윈글로벌</option><option value="inicis">KG이니시스</option><option value="toss">토스페이먼츠</option><option value="kakaopay">카카오페이</option><option value="naverpay">네이버페이</option></select>
-          </div>
-          <div class="fg">
-            <label class="fl">Merchant ID (MID) <span style="color:var(--red);">*</span></label>
-            <input class="fi" id="pg-mid" placeholder="윈글로벌에서 발급받은 MID">
-          </div>
-          <div class="fg">
-            <label class="fl">API 키</label>
-            <input class="fi" id="pg-apikey" placeholder="PG사 API 키" type="password">
-          </div>
-          <div class="fg">
-            <label class="fl">시크릿 키</label>
-            <input class="fi" id="pg-secret" placeholder="PG사 시크릿 키" type="password">
-          </div>
-          <div class="fg" style="grid-column:1/-1;">
-            <label class="fl">Apps Script URL</label>
-            <input class="fi" id="pg-script-url" placeholder="https://script.google.com/macros/s/...">
-            <div style="font-size:11px;color:var(--gray);margin-top:4px;">⚠️ 새 배포 시마다 업데이트 필요</div>
-          </div>
+          <div class="fg"><label class="fl">PG사 <span style="color:var(--red);">*</span></label><select class="fi" id="pg-provider"><option value="">선택하세요</option><option value="winglobal">윈글로벌</option><option value="inicis">KG이니시스</option><option value="toss">토스페이먼츠</option><option value="kakaopay">카카오페이</option><option value="naverpay">네이버페이</option></select></div>
+          <div class="fg"><label class="fl">Merchant ID (MID) <span style="color:var(--red);">*</span></label><input class="fi" id="pg-mid" placeholder="윈글로벌에서 발급받은 MID"></div>
+          <div class="fg"><label class="fl">API 키</label><input class="fi" id="pg-apikey" placeholder="PG사 API 키" type="password"></div>
+          <div class="fg"><label class="fl">시크릿 키</label><input class="fi" id="pg-secret" placeholder="PG사 시크릿 키" type="password"></div>
+          <div class="fg" style="grid-column:1/-1;"><label class="fl">Apps Script URL</label><input class="fi" id="pg-script-url" placeholder="https://script.google.com/macros/s/..."><div style="font-size:11px;color:var(--gray);margin-top:4px;">⚠️ 새 배포 시마다 업데이트 필요</div></div>
         </div>
         <div id="pg-status" style="padding:0 20px 16px;font-size:12px;"></div>
       </div>
@@ -617,6 +599,8 @@
           <div class="img-pv" id="img-pv"></div>
         </div>
       </div>
+
+      <!-- ✅ 배송 정보 섹션 - 배송비 필드 추가 -->
       <div class="prod-section">
         <div class="prod-sec-hd"><div class="prod-sec-hd-title">배송 정보</div><span class="prod-sec-toggle">∧</span></div>
         <div class="prod-sec-body">
@@ -624,8 +608,36 @@
             <div><label class="flabel">색상 옵션</label><input type="text" class="finput" id="f-colors" placeholder="화이트|블랙|네이비"><div class="fhint">재고포함: 화이트:10|블랙:0</div></div>
             <div><label class="flabel">사이즈 옵션</label><input type="text" class="finput" id="f-sizes" placeholder="S|M|L|XL"></div>
           </div>
+          <!-- ✅ 배송비 설정 (신규 추가) -->
+          <div style="margin-top:16px;padding:16px;background:#f8fafc;border:1px solid var(--border);border-radius:10px;">
+            <div style="font-size:13px;font-weight:700;color:#444;margin-bottom:12px;">📦 배송비 설정</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;">
+              <div>
+                <label class="flabel">배송방법</label>
+                <select class="fselect" id="f-delivery-type" onchange="updateDeliveryPreview()">
+                  <option value="택배배송">🚚 택배배송</option>
+                  <option value="무료배송">🎉 무료배송</option>
+                  <option value="직접배송">🏃 직접배송</option>
+                </select>
+              </div>
+              <div>
+                <label class="flabel">배송비 (원)</label>
+                <input type="number" class="finput" id="f-delivery-fee" placeholder="예: 3000" value="3000" oninput="updateDeliveryPreview()">
+                <div class="fhint">0 입력 시 무료배송</div>
+              </div>
+              <div>
+                <label class="flabel">무료배송 기준 (원)</label>
+                <input type="number" class="finput" id="f-delivery-free" placeholder="예: 50000" value="50000" oninput="updateDeliveryPreview()">
+                <div class="fhint">0 입력 시 조건 없음</div>
+              </div>
+            </div>
+            <div id="delivery-preview" style="margin-top:10px;padding:8px 12px;background:#f0fdf4;border:1px solid #86efac;border-radius:6px;font-size:13px;font-weight:600;color:#1a7f4b;">
+              3,000원 (50,000원 이상 무료)
+            </div>
+          </div>
         </div>
       </div>
+
       <div class="prod-section">
         <div class="prod-sec-hd"><div class="prod-sec-hd-title">상품 정보 제공</div><span class="prod-sec-toggle">∧</span></div>
         <div class="prod-sec-body">
@@ -656,29 +668,8 @@
 
 <div class="toast" id="toast"></div>
 
-<!-- ✅ 관리자 JS (맨 마지막 로드 — HTML 요소 모두 준비된 후) -->
+<!-- ✅ admin.js 맨 마지막 로드 -->
 <script src="js/admin.js"></script>
-<script>
-// ✅ 로그인 함수 강제 재정의 (admin.js 버전 무관하게 항상 작동)
-function doLogin() {
-  var id = document.getElementById('lid').value.trim();
-  var pw = document.getElementById('lpw').value.trim();
-  var ok = (id === 'admin' && pw === 'damnuri2026');
-  if (ok) {
-    document.getElementById('login-screen').style.display = 'none';
-    document.getElementById('app').style.display = 'block';
-    var now = new Date();
-    var h = now.getHours(), am = h >= 12 ? '오후' : '오전', hh = (h % 12) || 12;
-    var dd = document.getElementById('hd-date');
-    var ds = document.getElementById('dash-date');
-    if (dd) dd.textContent = now.getFullYear() + '. ' + String(now.getMonth()+1).padStart(2,'0') + '. ' + String(now.getDate()).padStart(2,'0') + '. ' + am + ' ' + String(hh).padStart(2,'0') + ':' + String(now.getMinutes()).padStart(2,'0');
-    if (ds) ds.textContent = now.getFullYear() + '년 ' + (now.getMonth()+1) + '월 ' + now.getDate() + '일';
-    if (typeof loadDash === 'function') loadDash();
-  } else {
-    document.getElementById('lerr').style.display = 'block';
-  }
-}
-document.getElementById('lpw').addEventListener('keydown', function(e){ if(e.key==='Enter') doLogin(); });
-</script>
+
 </body>
 </html>
