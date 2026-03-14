@@ -4,7 +4,7 @@
 const CONFIG = {
   // ✅ Google Sheets ID
   SHEET_ID: '1t804fRO8HfQtmOzpDAz2IZfzRDQ7t8LYllFGZr3ftUI',
-  // ✅ 이미지 기본 URL (파일명만 입력하면 자동으로 앞에 붙음)
+  // ✅ 이미지 기본 URL
   IMAGE_BASE: 'https://min323300.github.io/myshop/images/',
   // 시트별 URL 자동 생성
   get SHEETS() {
@@ -25,10 +25,10 @@ const CONFIG = {
       사업자정보: base + encodeURIComponent('사업자정보'),
     };
   },
-  // ✅ 본사 기본 정보 (구글시트 '사업자정보' 로드 전 기본값)
+  // ✅ 본사 기본 정보 (구글시트 로드 전 기본값 - 구글시트가 덮어씀)
   STORE: {
-    BRAND:   '담누리마켓',       // ← 헤더 로고에 표시 (구글시트 브랜드명으로 덮어씀)
-    NAME:    '(주)비에스컴퍼니', // ← 푸터 사업자정보에만 표시 (구글시트 상호로 덮어씀)
+    BRAND:   '담누리마켓',
+    NAME:    '(주)비에스컴퍼니',
     LOGO:    '🏪',
     TAGLINE: '담누리마켓에서 모든 것을 담으세요',
     PHONE:   '031-876-6606',
@@ -46,8 +46,8 @@ const CONFIG = {
   FRANCHISE_NAME: '',
   // ✅ PG 설정
   PG: {
-    PROVIDER:      '',   // 윈글로벌 계약 후 입력 (예: 'winglobal')
-    MERCHANT_ID:   '',   // 윈글로벌 MID 입력
+    PROVIDER:      '',
+    MERCHANT_ID:   '',
     API_PROXY_URL: 'https://script.google.com/macros/s/AKfycbyBA3dBSsLwrmwlF3PCJj8sw4FZkH8Mq9W9uncGnqPq0a9As7CKtoSr5rIxXD1Ugm34GQ/exec',
   },
   // ✅ 기타 설정
@@ -55,3 +55,150 @@ const CONFIG = {
   CURRENCY: 'KRW',
   DEFAULT_THEME_COLOR: '#FF5733',
 };
+
+// ============================================================
+// ✅ 구글시트에서 스토어 정보 자동 로드
+// - 사업자정보 시트 → 본사 브랜드명/상호/전화/이메일/주소 자동 적용
+// - 가맹점 시트 → IS_FRANCHISE=true 일 때 가맹점명 자동 적용
+// ============================================================
+(function loadStoreInfoFromSheet() {
+  var SHEET_ID = CONFIG.SHEET_ID;
+
+  // CSV 파싱 함수
+  function parseCSV(csv) {
+    var lines = csv.trim().split('\n');
+    if (lines.length < 2) return [];
+    var headers = lines[0].split(',').map(function(h){ return h.trim().replace(/"/g,''); });
+    return lines.slice(1).map(function(line) {
+      var vals = [], cur = '', inQ = false;
+      for (var i = 0; i < line.length; i++) {
+        var ch = line[i];
+        if (ch === '"') { inQ = !inQ; }
+        else if (ch === ',' && !inQ) { vals.push(cur.trim()); cur = ''; }
+        else { cur += ch; }
+      }
+      vals.push(cur.trim());
+      var obj = {};
+      headers.forEach(function(h, i){ obj[h] = (vals[i]||'').replace(/"/g,'').trim(); });
+      return obj;
+    }).filter(function(r){ return Object.values(r).some(function(v){ return v; }); });
+  }
+
+  // ① 사업자정보 시트 로드 → CONFIG.STORE 자동 업데이트
+  var bizUrl = 'https://docs.google.com/spreadsheets/d/' + SHEET_ID
+    + '/gviz/tq?tqx=out:csv&sheet=' + encodeURIComponent('사업자정보')
+    + '&t=' + Date.now();
+
+  fetch(bizUrl)
+    .then(function(r){ return r.text(); })
+    .then(function(csv) {
+      var rows = parseCSV(csv);
+      if (!rows.length) return;
+
+      // 가맹점별 or 본사 행 찾기
+      var myId = CONFIG.FRANCHISE_ID || '본사';
+      var row = rows.find(function(r){
+        return (r['가맹점ID'] || r['대리점ID'] || '본사') === myId;
+      }) || rows.find(function(r){
+        return !r['가맹점ID'] || r['가맹점ID'] === '' || r['가맹점ID'] === '본사';
+      }) || rows[0];
+
+      if (!row) return;
+
+      // CONFIG.STORE 값 덮어쓰기
+      if (row['브랜드명'] || row['상호명'])  CONFIG.STORE.BRAND   = row['브랜드명'] || row['상호명'] || CONFIG.STORE.BRAND;
+      if (row['상호'])                        CONFIG.STORE.NAME    = row['상호']    || CONFIG.STORE.NAME;
+      if (row['전화'])                        CONFIG.STORE.PHONE   = row['전화']    || CONFIG.STORE.PHONE;
+      if (row['이메일'])                      CONFIG.STORE.EMAIL   = row['이메일']  || CONFIG.STORE.EMAIL;
+      if (row['주소'])                        CONFIG.STORE.ADDRESS = row['주소']    || CONFIG.STORE.ADDRESS;
+      if (row['태그라인'] || row['슬로건'])  CONFIG.STORE.TAGLINE = row['태그라인'] || row['슬로건'] || CONFIG.STORE.TAGLINE;
+      if (row['인스타그램'])                  CONFIG.STORE.SNS.INSTAGRAM = row['인스타그램'];
+      if (row['카카오'])                      CONFIG.STORE.SNS.KAKAO     = row['카카오'];
+      if (row['유튜브'])                      CONFIG.STORE.SNS.YOUTUBE   = row['유튜브'];
+
+      // 화면에 즉시 반영
+      applyStoreInfo();
+    })
+    .catch(function(e){ console.log('사업자정보 로드 실패:', e); });
+
+  // ② 가맹점 시트 로드 → IS_FRANCHISE=true 일 때 가맹점명 자동 적용
+  if (CONFIG.IS_FRANCHISE && CONFIG.FRANCHISE_ID) {
+    var franchiseUrl = 'https://docs.google.com/spreadsheets/d/' + SHEET_ID
+      + '/gviz/tq?tqx=out:csv&sheet=' + encodeURIComponent('가맹점')
+      + '&t=' + Date.now();
+
+    fetch(franchiseUrl)
+      .then(function(r){ return r.text(); })
+      .then(function(csv) {
+        var rows = parseCSV(csv);
+        var myRow = rows.find(function(r){
+          return (r['가맹점ID'] || r['대리점ID'] || '') === CONFIG.FRANCHISE_ID;
+        });
+        if (!myRow) return;
+
+        // ✅ 가맹점명 자동 적용
+        var franchiseName = myRow['가맹점명'] || myRow['대리점명'] || '';
+        if (franchiseName) {
+          CONFIG.FRANCHISE_NAME  = franchiseName;
+          CONFIG.STORE.BRAND     = franchiseName; // 헤더 로고에 표시
+          CONFIG.STORE.NAME      = franchiseName;
+        }
+        // 테마색상 적용
+        if (myRow['테마색상']) {
+          CONFIG.DEFAULT_THEME_COLOR = myRow['테마색상'];
+          document.documentElement.style.setProperty('--accent', myRow['테마색상']);
+        }
+        // 전화/이메일 등 가맹점 개별 정보 적용
+        if (myRow['연락처']) CONFIG.STORE.PHONE   = myRow['연락처'];
+        if (myRow['이메일']) CONFIG.STORE.EMAIL   = myRow['이메일'];
+        if (myRow['주소'])   CONFIG.STORE.ADDRESS = myRow['주소'];
+
+        // 화면에 즉시 반영
+        applyStoreInfo();
+      })
+      .catch(function(e){ console.log('가맹점 정보 로드 실패:', e); });
+  }
+
+  // ③ 화면 반영 함수 - 스토어명이 표시되는 모든 요소 업데이트
+  function applyStoreInfo() {
+    var name = CONFIG.IS_FRANCHISE ? CONFIG.STORE.BRAND : CONFIG.STORE.BRAND;
+
+    // 헤더 로고 / 스토어명
+    ['store-name', 'header-store-name', 'hd-title'].forEach(function(id) {
+      var el = document.getElementById(id);
+      if (el) el.textContent = name;
+    });
+
+    // 푸터 스토어명
+    ['footer-store-name', 'footer-brand'].forEach(function(id) {
+      var el = document.getElementById(id);
+      if (el) el.textContent = '🏪 ' + name;
+    });
+
+    // 푸터 사업자정보
+    var bizEl = document.getElementById('footer-biz');
+    if (bizEl) {
+      bizEl.textContent = '상호: ' + CONFIG.STORE.NAME
+        + ' | 전화: ' + CONFIG.STORE.PHONE
+        + ' | 이메일: ' + CONFIG.STORE.EMAIL;
+    }
+
+    // 푸터 주소
+    var addrEl = document.getElementById('footer-addr');
+    if (addrEl) addrEl.textContent = '주소: ' + CONFIG.STORE.ADDRESS;
+
+    // 푸터 전화번호 링크
+    var phoneEl = document.getElementById('footer-phone');
+    if (phoneEl) phoneEl.textContent = '📞 ' + CONFIG.STORE.PHONE;
+
+    // 페이지 타이틀
+    if (document.title && document.title.includes('담누리마켓')) {
+      document.title = document.title.replace('담누리마켓', name);
+    }
+
+    // admin 페이지 헤더
+    var hdTitle = document.querySelector('.hd-title');
+    if (hdTitle) hdTitle.textContent = name;
+  }
+
+})();
