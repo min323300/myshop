@@ -243,17 +243,104 @@ function renderProduct(p) {
   // 유튜브 영상
   renderYoutube(p.youtube);
 
-  // 배송 예정일
-  var tomorrow = new Date();
-  tomorrow.setDate(tomorrow.getDate() + 1);
-  var days = ['일','월','화','수','목','금','토'];
+  // ✅ [수정] 배송 예정일: 공동구매 여부 확인 후 분기 표시
   var dateEl = document.getElementById('delivery-date');
-  if (dateEl) dateEl.textContent = (tomorrow.getMonth()+1) + '/' + tomorrow.getDate() + '(' + days[tomorrow.getDay()] + ') 도착 예정';
+  if (dateEl) dateEl.textContent = '확인 중...';
+  updateDeliveryDate(p.id);
 
   updateTotal();
 
   // 상세이미지 + 스펙 + 인증 + 주의사항 렌더링
   renderDetailContent(p);
+}
+
+// ============================================================
+// ✅ [신규] 공동구매 배송예정일 분기 처리 함수
+// - 공동구매 시트에서 해당 상품번호 조회
+// - 현재 진행 중인 공동구매(사용여부=사용, 종료일 > 현재)면 → 공동구매 배송예정일 표시
+// - 아니면 → 일반 내일 도착 예정 표시
+// ============================================================
+function updateDeliveryDate(productId) {
+  var dateEl = document.getElementById('delivery-date');
+  if (!dateEl) return;
+
+  var SHEET_ID = '1t804fRO8HfQtmOzpDAz2IZfzRDQ7t8LYllFGZr3ftUI';
+  var url = 'https://docs.google.com/spreadsheets/d/' + SHEET_ID
+    + '/gviz/tq?tqx=out:csv&sheet=' + encodeURIComponent('공동구매');
+
+  fetch(url)
+    .then(function(r) { return r.text(); })
+    .then(function(csv) {
+      var lines = csv.trim().split('\n');
+      if (lines.length < 2) { setNormalDeliveryDate(dateEl); return; }
+
+      // 헤더 파싱
+      var headers = parseCSVLine(lines[0]).map(function(h) { return h.replace(/^"|"$/g, '').trim(); });
+      var idxProductId   = headers.indexOf('상품번호');
+      var idxStatus      = headers.indexOf('사용여부');
+      var idxEndDate     = headers.indexOf('종료일시');
+      var idxDelivDate   = headers.indexOf('배송예정일');
+
+      if (idxProductId < 0) { setNormalDeliveryDate(dateEl); return; }
+
+      var now = new Date();
+      var found = null;
+
+      for (var i = 1; i < lines.length; i++) {
+        var cols = parseCSVLine(lines[i]).map(function(c) { return c.replace(/^"|"$/g, '').trim(); });
+        if (!cols[idxProductId]) continue;
+
+        // 상품번호 일치 확인
+        if (String(cols[idxProductId]) !== String(productId)) continue;
+
+        // 사용여부 확인 (사용 or TRUE)
+        var status = (cols[idxStatus] || '').toLowerCase();
+        if (status !== '사용' && status !== 'true') continue;
+
+        // 종료일시 확인 (아직 안 끝났는지)
+        if (idxEndDate >= 0 && cols[idxEndDate]) {
+          var endDate = new Date(cols[idxEndDate]);
+          if (!isNaN(endDate) && endDate < now) continue; // 이미 종료
+        }
+
+        found = cols;
+        break;
+      }
+
+      if (found) {
+        // ✅ 공동구매 진행 중 → 공동구매 배송예정일 표시
+        var delivDate = (idxDelivDate >= 0 && found[idxDelivDate]) ? found[idxDelivDate] : '';
+        if (delivDate) {
+          // 날짜 포맷 정리 (2026-03-25 → 3/25)
+          var d = new Date(delivDate);
+          var dateStr = (!isNaN(d))
+            ? (d.getMonth() + 1) + '/' + d.getDate()
+            : delivDate;
+          dateEl.innerHTML = '<span style="color:#e65100;font-weight:700;">🛒 공동구매 마감 후 발송 예정</span>'
+            + '<br><small style="color:#888;font-size:12px;">배송예정일: ' + dateStr + ' 이후</small>';
+        } else {
+          dateEl.innerHTML = '<span style="color:#e65100;font-weight:700;">🛒 공동구매 마감 후 발송 예정</span>'
+            + '<br><small style="color:#888;font-size:12px;">정확한 날짜는 마감 후 안내드립니다</small>';
+        }
+      } else {
+        // ✅ 일반 상품 → 기존 내일 도착 예정 표시
+        setNormalDeliveryDate(dateEl);
+      }
+    })
+    .catch(function() {
+      // 공동구매 시트 조회 실패 시 → 일반 표시로 fallback
+      setNormalDeliveryDate(dateEl);
+    });
+}
+
+// 일반 배송 예정일 표시 (내일)
+function setNormalDeliveryDate(dateEl) {
+  if (!dateEl) return;
+  var tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  var days = ['일', '월', '화', '수', '목', '금', '토'];
+  dateEl.textContent = (tomorrow.getMonth() + 1) + '/' + tomorrow.getDate()
+    + '(' + days[tomorrow.getDay()] + ') 도착 예정';
 }
 
 function renderDetailContent(p) {
