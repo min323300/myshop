@@ -75,7 +75,7 @@ const DealerContext = {
     try {
       const SHEET_ID = CONFIG.SHEET_ID || '1t804fRO8HfQtmOzpDAz2IZfzRDQ7t8LYllFGZr3ftUI';
       const url = 'https://docs.google.com/spreadsheets/d/' + SHEET_ID
-        + '/gviz/tq?tqx=out:csv&sheet=' + encodeURIComponent('가맹점') + '&t=' + Date.now();
+        + '/gviz/tq?tqx=out:csv&sheet=' + encodeURIComponent('대리점') + '&t=' + Date.now();
       const rows = await SheetAPI.fetch(url);
       this._dealer = rows.find(r => (r['대리점ID'] || r['가맹점ID']) === id && r['상태'] !== '해지') || null;
     } catch(e) { this._dealer = null; }
@@ -87,7 +87,7 @@ const DealerContext = {
   async applyBranding() {
     const dealer = await this.load();
     if (!dealer) return;
-    const name = dealer['가맹점명'] || '';
+    const name = dealer['대리점명'] || '';
     if (!name) return;
 
     // 1) 헤더 로고 (#store-name) - app.js 덮어쓰기 방지용 MutationObserver 등록
@@ -431,15 +431,15 @@ const BannerAPI = {
 // ============================================================
 const FranchiseAPI = {
   async getById(id) {
-    const rows = await SheetAPI.fetchCached(CONFIG.SHEETS.가맹점);
+    const rows = await SheetAPI.fetchCached(CONFIG.SHEETS.대리점);
     return rows.find(row => row['대리점ID'] === id) || null;
   },
 
   async getAll() {
-    const rows = await SheetAPI.fetchCached(CONFIG.SHEETS.가맹점);
+    const rows = await SheetAPI.fetchCached(CONFIG.SHEETS.대리점);
     return rows.map(row => ({
       id: row['대리점ID'],
-      name: row['가맹점명'],
+      name: row['대리점명'],
       owner: row['대표자명'],
       phone: row['연락처'],
       email: row['이메일'],
