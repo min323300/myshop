@@ -12,9 +12,9 @@ const CONFIG = {
     return {
       상품목록:   base + encodeURIComponent('상품목록'),
       카테고리:   base + encodeURIComponent('카테고리'),
-      가맹점상품: base + encodeURIComponent('가맹점상품'),
+      대리점상품: base + encodeURIComponent('대리점상품'),
       리뷰:       base + encodeURIComponent('리뷰'),
-      가맹점:     base + encodeURIComponent('가맹점'),
+      대리점:     base + encodeURIComponent('대리점'),
       주문:       base + encodeURIComponent('주문'),
       정산:       base + encodeURIComponent('정산'),
       수수료:     base + encodeURIComponent('수수료'),
@@ -40,10 +40,10 @@ const CONFIG = {
       YOUTUBE:   'https://youtube.com/',
     }
   },
-  // ✅ 가맹점 설정
-  IS_FRANCHISE: false,
-  FRANCHISE_ID: '',
-  FRANCHISE_NAME: '',
+  // ✅ 대리점 설정
+  IS_DEALER: false,
+  DEALER_ID: '',
+  DEALER_NAME: '',
   // ✅ PG 설정
   PG: {
     PROVIDER:      '',
@@ -59,7 +59,7 @@ const CONFIG = {
 // ============================================================
 // ✅ 구글시트에서 스토어 정보 자동 로드
 // - 사업자정보 시트 → 본사 브랜드명/상호/전화/이메일/주소 자동 적용
-// - 가맹점 시트 → IS_FRANCHISE=true 일 때 가맹점명 자동 적용
+// - 대리점 시트 → IS_DEALER=true 일 때 대리점명 자동 적용
 // ============================================================
 (function loadStoreInfoFromSheet() {
   var SHEET_ID = CONFIG.SHEET_ID;
@@ -95,12 +95,12 @@ const CONFIG = {
       var rows = parseCSV(csv);
       if (!rows.length) return;
 
-      // 가맹점별 or 본사 행 찾기
-      var myId = CONFIG.FRANCHISE_ID || '본사';
+      // 대리점별 or 본사 행 찾기
+      var myId = CONFIG.DEALER_ID || '본사';
       var row = rows.find(function(r){
-        return (r['가맹점ID'] || r['대리점ID'] || '본사') === myId;
+        return (r['대리점ID'] || '본사') === myId;
       }) || rows.find(function(r){
-        return !r['가맹점ID'] || r['가맹점ID'] === '' || r['가맹점ID'] === '본사';
+        return !r['대리점ID'] || r['대리점ID'] === '' || r['대리점ID'] === '본사';
       }) || rows[0];
 
       if (!row) return;
@@ -121,34 +121,34 @@ const CONFIG = {
     })
     .catch(function(e){ console.log('사업자정보 로드 실패:', e); });
 
-  // ② 가맹점 시트 로드 → IS_FRANCHISE=true 일 때 가맹점명 자동 적용
-  if (CONFIG.IS_FRANCHISE && CONFIG.FRANCHISE_ID) {
-    var franchiseUrl = 'https://docs.google.com/spreadsheets/d/' + SHEET_ID
-      + '/gviz/tq?tqx=out:csv&sheet=' + encodeURIComponent('가맹점')
+  // ② 대리점 시트 로드 → IS_DEALER=true 일 때 대리점명 자동 적용
+  if (CONFIG.IS_DEALER && CONFIG.DEALER_ID) {
+    var dealerUrl = 'https://docs.google.com/spreadsheets/d/' + SHEET_ID
+      + '/gviz/tq?tqx=out:csv&sheet=' + encodeURIComponent('대리점')
       + '&t=' + Date.now();
 
-    fetch(franchiseUrl)
+    fetch(dealerUrl)
       .then(function(r){ return r.text(); })
       .then(function(csv) {
         var rows = parseCSV(csv);
         var myRow = rows.find(function(r){
-          return (r['가맹점ID'] || r['대리점ID'] || '') === CONFIG.FRANCHISE_ID;
+          return (r['대리점ID'] || '') === CONFIG.DEALER_ID;
         });
         if (!myRow) return;
 
-        // ✅ 가맹점명 자동 적용
-        var franchiseName = myRow['가맹점명'] || myRow['대리점명'] || '';
-        if (franchiseName) {
-          CONFIG.FRANCHISE_NAME  = franchiseName;
-          CONFIG.STORE.BRAND     = franchiseName; // 헤더 로고에 표시
-          CONFIG.STORE.NAME      = franchiseName;
+        // ✅ 대리점명 자동 적용
+        var dealerName = myRow['대리점명'] || '';
+        if (dealerName) {
+          CONFIG.DEALER_NAME     = dealerName;
+          CONFIG.STORE.BRAND     = dealerName; // 헤더 로고에 표시
+          CONFIG.STORE.NAME      = dealerName;
         }
         // 테마색상 적용
         if (myRow['테마색상']) {
           CONFIG.DEFAULT_THEME_COLOR = myRow['테마색상'];
           document.documentElement.style.setProperty('--accent', myRow['테마색상']);
         }
-        // 전화/이메일 등 가맹점 개별 정보 적용
+        // 전화/이메일 등 대리점 개별 정보 적용
         if (myRow['연락처']) CONFIG.STORE.PHONE   = myRow['연락처'];
         if (myRow['이메일']) CONFIG.STORE.EMAIL   = myRow['이메일'];
         if (myRow['주소'])   CONFIG.STORE.ADDRESS = myRow['주소'];
@@ -156,12 +156,12 @@ const CONFIG = {
         // 화면에 즉시 반영
         applyStoreInfo();
       })
-      .catch(function(e){ console.log('가맹점 정보 로드 실패:', e); });
+      .catch(function(e){ console.log('대리점 정보 로드 실패:', e); });
   }
 
   // ③ 화면 반영 함수 - 스토어명이 표시되는 모든 요소 업데이트
   function applyStoreInfo() {
-    var name = CONFIG.IS_FRANCHISE ? CONFIG.STORE.BRAND : CONFIG.STORE.BRAND;
+    var name = CONFIG.STORE.BRAND;
 
     // 헤더 로고 / 스토어명
     ['store-name', 'header-store-name', 'hd-title'].forEach(function(id) {
