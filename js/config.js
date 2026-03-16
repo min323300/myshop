@@ -48,7 +48,7 @@ const CONFIG = {
   PG: {
     PROVIDER:      '',
     MERCHANT_ID:   '',
-    API_PROXY_URL: 'https://script.google.com/macros/s/AKfycbyBA3dBSsLwrmwlF3PCJj8sw4FZkH8Mq9W9uncGnqPq0a9As7CKtoSr5rIxXD1Ugm34GQ/exec',
+    API_PROXY_URL: 'https://script.google.com/macros/s/AKfycbzWpT2On47R7_LTRiznH7qcPBYTPUV3i4UiywI8lkHUYt6KGzDevap7RfQHACwD7oxDzg/exec',
   },
   // ✅ 기타 설정
   PRODUCTS_PER_PAGE: 12,
