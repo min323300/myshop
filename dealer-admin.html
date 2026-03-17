@@ -176,34 +176,10 @@
     .settle-val.green { color: var(--green); }
 
     /* ── 주문 상태 변경 박스 ── */
-    .status-change-box {
-      background: #f8f9ff;
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 18px;
-      margin-top: 16px;
-    }
-    .status-change-box .scb-title {
-      font-size: 13px;
-      font-weight: 700;
-      color: var(--gray-dark);
-      margin-bottom: 12px;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
+    .status-change-box { background: #f8f9ff; border: 1px solid var(--border); border-radius: 12px; padding: 18px; margin-top: 16px; }
+    .status-change-box .scb-title { font-size: 13px; font-weight: 700; color: var(--gray-dark); margin-bottom: 12px; display: flex; align-items: center; gap: 6px; }
     .status-btns { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
-    .status-btn {
-      padding: 7px 14px;
-      border-radius: 8px;
-      border: 2px solid transparent;
-      font-size: 12px;
-      font-weight: 700;
-      cursor: pointer;
-      font-family: var(--font);
-      transition: all .15s;
-      background: var(--white);
-    }
+    .status-btn { padding: 7px 14px; border-radius: 8px; border: 2px solid transparent; font-size: 12px; font-weight: 700; cursor: pointer; font-family: var(--font); transition: all .15s; background: var(--white); }
     .status-btn:hover { opacity: 0.85; transform: translateY(-1px); }
     .status-btn.s-wait   { border-color: #93c5fd; color: #1d4ed8; }
     .status-btn.s-paid   { border-color: #86efac; color: #166534; }
@@ -233,16 +209,7 @@
     .os-취소,.os-반품 { background: #fef2f2; color: #991b1b; }
 
     /* 인라인 빠른변경 */
-    .quick-status-sel {
-      padding: 5px 8px;
-      border: 1px solid var(--border);
-      border-radius: 7px;
-      font-size: 11px;
-      font-family: var(--font);
-      outline: none;
-      background: var(--white);
-      cursor: pointer;
-    }
+    .quick-status-sel { padding: 5px 8px; border: 1px solid var(--border); border-radius: 7px; font-size: 11px; font-family: var(--font); outline: none; background: var(--white); cursor: pointer; }
 
     /* 상품 모달 섹션 */
     .prod-section { border: 1px solid var(--border); border-radius: 10px; margin-bottom: 14px; overflow: hidden; }
@@ -346,7 +313,7 @@
           <div class="ph-sub" id="dash-sub">안녕하세요! 오늘도 좋은 하루 되세요 😊</div>
         </div>
       </div>
-      <!-- ★ 내 쇼핑몰 링크 박스 -->
+      <!-- 내 쇼핑몰 링크 박스 -->
       <div id="my-shop-link-box" style="background:linear-gradient(135deg,#1e2336 0%,#2d3561 100%);border-radius:12px;padding:18px 22px;margin-bottom:20px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
         <div style="font-size:22px;">🌐</div>
         <div style="flex:1;min-width:0;">
@@ -413,7 +380,7 @@
       </div>
     </div>
 
-    <!-- ④ 주문/배송 관리 ★ 개선됨 ★ -->
+    <!-- ④ 주문/배송 관리 -->
     <div id="page-orders" class="page">
       <div class="ph">
         <div><div class="ph-title">🛒 주문/배송 관리</div><div class="ph-sub" id="orders-sub">내 쇼핑몰 주문 내역</div></div>
@@ -422,8 +389,6 @@
           <button class="excel-btn" onclick="downloadExcel()">📥 엑셀 다운로드</button>
         </div>
       </div>
-
-      <!-- 필터 -->
       <div class="card" style="margin-bottom:0;border-radius:var(--radius) var(--radius) 0 0;">
         <div style="padding:14px 20px;display:flex;gap:12px;flex-wrap:wrap;align-items:center;">
           <input class="srch" id="order-search" placeholder="주문번호/이름 검색..." oninput="applyFilter()">
@@ -433,7 +398,6 @@
           <button class="btn btn-outline btn-sm" onclick="clearOrderFilter()">초기화</button>
           <span id="order-count" style="margin-left:auto;font-size:12px;color:var(--gray);font-weight:600;"></span>
         </div>
-        <!-- 상태 탭 -->
         <div class="stabs">
           <div class="stab active" onclick="setTab('',this)">전체 <span class="tc" id="tc-all">0</span></div>
           <div class="stab" onclick="setTab('주문완료',this)">주문완료 <span class="tc" id="tc-주문완료">0</span></div>
@@ -444,7 +408,6 @@
           <div class="stab" onclick="setTab('취소',this)">취소/반품 <span class="tc" id="tc-취소">0</span></div>
         </div>
       </div>
-
       <div class="card" style="border-radius:0 0 var(--radius) var(--radius);margin-top:0;">
         <div class="tw" id="orders-tw"><div class="loading"><div class="lspin">⏳</div></div></div>
       </div>
@@ -454,9 +417,7 @@
     <div id="page-settlement" class="page">
       <div class="ph">
         <div><div class="ph-title">💰 정산 내역</div><div class="ph-sub">내 쇼핑몰 정산 현황</div></div>
-        <div class="ph-acts">
-          <button class="btn btn-outline" onclick="loadSettlement()">🔄 새로고침</button>
-        </div>
+        <div class="ph-acts"><button class="btn btn-outline" onclick="loadSettlement()">🔄 새로고침</button></div>
       </div>
       <div class="stat-grid">
         <div class="sc c-blue"><div class="sc-top"><div class="sc-icon">💳</div></div><div class="sc-val" id="settle-total">0원</div><div class="sc-label">총 매출</div></div>
@@ -704,18 +665,14 @@
   </div>
 </div>
 
-<!-- ★ 주문 상세 모달 (개선됨) ★ -->
+<!-- 주문 상세 모달 -->
 <div class="modal-ov" id="order-modal">
   <div class="modal" style="max-width:580px;">
     <div class="modal-hd"><span>🛒 주문 상세</span><button onclick="closeOrderModal()">✕</button></div>
     <div class="modal-body">
-      <!-- 주문 정보 -->
       <div id="order-detail-body"></div>
-
-      <!-- 주문 상태 변경 박스 -->
       <div class="status-change-box">
         <div class="scb-title">🔄 주문 상태 변경</div>
-        <!-- 상태 버튼들 -->
         <div class="status-btns">
           <button class="status-btn s-wait"   onclick="selectStatus('주문완료',this)">주문완료</button>
           <button class="status-btn s-paid"   onclick="selectStatus('결제완료',this)">결제완료</button>
@@ -724,11 +681,10 @@
           <button class="status-btn s-done"   onclick="selectStatus('배송완료',this)">배송완료</button>
           <button class="status-btn s-cancel" onclick="selectStatus('취소',this)">취소/반품</button>
         </div>
-        <!-- 송장번호 입력 (배송중 선택 시 활성화) -->
         <div class="fg">
           <label class="fl">📦 송장번호 <span id="tracking-hint-label" style="color:var(--gray);font-weight:400;">(배송중 선택 시 입력)</span></label>
           <div class="tracking-row">
-            <input class="fi" id="modal-tracking" placeholder="예: 1234567890123" id="modal-tracking">
+            <input class="fi" id="modal-tracking" placeholder="예: 1234567890123">
             <select class="fi" id="modal-carrier" style="width:140px;flex-shrink:0;">
               <option value="">택배사 선택</option>
               <option value="CJ대한통운">CJ대한통운</option>
@@ -742,7 +698,6 @@
           </div>
           <div class="tracking-hint">입력하면 고객 주문내역에 송장번호가 표시됩니다</div>
         </div>
-        <!-- 메모 -->
         <div class="fg" style="margin-bottom:0;">
           <label class="fl">📝 처리 메모 <span style="color:var(--gray);font-weight:400;">(선택)</span></label>
           <input class="fi" id="modal-memo" placeholder="예: 고객 요청으로 취소 처리">
@@ -751,9 +706,7 @@
     </div>
     <div class="modal-ft">
       <button class="btn btn-outline" onclick="closeOrderModal()">닫기</button>
-      <button class="btn btn-primary" id="order-save-btn" onclick="saveOrderStatus()" style="min-width:120px;">
-        💾 상태 저장
-      </button>
+      <button class="btn btn-primary" id="order-save-btn" onclick="saveOrderStatus()" style="min-width:120px;">💾 상태 저장</button>
     </div>
   </div>
 </div>
@@ -785,8 +738,6 @@ var DEALER = null;
 var CLOUDINARY_CLOUD = 'dmefdyags';
 var CLOUDINARY_PRESET = 'damnuri_upload';
 var curPage = 'dashboard';
-
-// 주문 상태 관련 전역
 var allOrders = [];
 var filteredOrders = [];
 var curTab = '';
@@ -834,7 +785,6 @@ function EMPTY(ico, txt, sub) {
 }
 function fmt(n) { return (parseInt(n)||0).toLocaleString()+'원'; }
 
-// ★ 여러 컬럼명 후보를 순서대로 시도해서 첫 번째 값을 반환
 function getField(obj, candidates) {
   for(var i=0;i<candidates.length;i++){
     var v = obj[candidates[i]];
@@ -852,7 +802,7 @@ function updateDate() {
 setInterval(updateDate, 1000); updateDate();
 
 // ============================================================
-// 로그인
+// ★ 로그인 (수정됨: 대리점ID 컬럼명 지원)
 // ============================================================
 function doLogin() {
   var id = document.getElementById('lid').value.trim();
@@ -860,11 +810,14 @@ function doLogin() {
   if(!id||!pw){ document.getElementById('lerr').style.display='block'; return; }
   document.getElementById('lloading').style.display='block';
   document.getElementById('lerr').style.display='none';
-  fetch(sheetUrl('가맹점')).then(function(r){return r.text();}).then(function(csv){
+  fetch(sheetUrl('대리점')).then(function(r){return r.text();}).then(function(csv){
     var rows = parseCSV(csv);
+    // 디버그: 컬럼명 확인
+    if(rows.length > 0) console.log('[대리점 시트 컬럼명]', Object.keys(rows[0]));
     var found = rows.find(function(r){
-      var rowId = String(r['번호']||'').trim();
-      var customId = (r['아이디']||r['대리점ID']||'').trim();
+      var rowId   = String(r['번호']||'').trim();
+      // ★ 수정: 아이디, 대리점ID 모두 지원
+      var customId = (r['아이디']||r['대리점ID']||r['대리점ID']||'').trim();
       var idMatch = rowId === id || customId === id;
       var phone = String(r['연락처']||'').replace(/[^0-9]/g,'');
       var phoneLast4 = phone.slice(-4);
@@ -874,13 +827,14 @@ function doLogin() {
     });
     document.getElementById('lloading').style.display='none';
     if(found) {
+      // ★ 수정: 대리점ID 컬럼명 지원
       DEALER = {
-        id: found['대리점ID'] || found['아이디'],
-        name: found['가맹점명'] || id,
-        owner: found['대표자명'] || '',
-        domain: found['도메인'] || '',
+        id:         found['대리점ID'] || found['대리점ID'] || found['아이디'] || id,
+        name:       found['대리점명'] || found['상호명'] || id,
+        owner:      found['대표자명'] || '',
+        domain:     found['도메인'] || '',
         commission: parseFloat(found['수수료율']) || 2,
-        status: found['상태'] || ''
+        status:     found['상태'] || ''
       };
       sessionStorage.setItem('dealer', JSON.stringify(DEALER));
       startApp();
@@ -916,11 +870,11 @@ function startApp() {
   document.getElementById('sb-dealer-name').textContent = DEALER.name + ' (' + DEALER.id + ')';
   var did = DEALER.id || '';
   var shopLink = document.getElementById('shop-link');
-  if (shopLink && did) shopLink.href = 'index.html?dealer=' + did;
+  if(shopLink && did) shopLink.href = 'index.html?dealer=' + did;
   var prodsLink = document.getElementById('products-link');
-  if (prodsLink && did) prodsLink.href = 'products.html?dealer=' + did;
+  if(prodsLink && did) prodsLink.href = 'products.html?dealer=' + did;
 
-  // ★ 내 쇼핑몰 링크 박스 업데이트
+  // 내 쇼핑몰 링크 박스 업데이트
   var baseUrl = window.location.origin + window.location.pathname.replace('dealer-admin.html','');
   var fullShopUrl = baseUrl + 'index.html?dealer=' + did;
   var urlEl = document.getElementById('my-shop-url');
@@ -966,15 +920,21 @@ function loadDashboard() {
     fetch(sheetUrl('공지사항')).then(function(r){return r.text();})
   ]).then(function(results){
     var myProds = parseCSV(results[0]).filter(function(p){
-      return (p['대리점ID']||p['가맹점ID']||'').toString().trim() === (DEALER.id||'').toString().trim();
+      return (p['대리점ID']||p['대리점ID']||'').toString().trim() === (DEALER.id||'').toString().trim();
     });
-    var myOrders = parseCSV(results[1]).filter(function(o){ return o['대리점ID']===DEALER.id; });
+    var allOrd = parseCSV(results[1]);
+    // ★ 대리점ID 기준 매칭
+    var myOrders = allOrd.filter(function(o){
+      return o['대리점ID']===DEALER.id || o['대리점ID']===DEALER.id;
+    });
     var today = new Date().toISOString().split('T')[0];
     var todayOrders = myOrders.filter(function(o){ return (o['주문일시']||'').startsWith(today); });
     var thisMonth = new Date().toISOString().substring(0,7);
     var monthSales = myOrders.filter(function(o){ return (o['주문일시']||'').startsWith(thisMonth); })
       .reduce(function(s,o){ return s+(parseInt(o['결제금액'])||0); }, 0);
-    var myReviews = parseCSV(results[2]).filter(function(r){ return r['대리점ID']===DEALER.id; });
+    var myReviews = parseCSV(results[2]).filter(function(r){
+      return r['대리점ID']===DEALER.id || r['대리점ID']===DEALER.id;
+    });
 
     document.getElementById('dash-orders').textContent = todayOrders.length;
     document.getElementById('dash-sales').textContent = monthSales.toLocaleString()+'원';
@@ -987,7 +947,7 @@ function loadDashboard() {
       ? '<table>'+TH(['주문번호','상품','금액','상태'])+'<tbody>'
         +recent.map(function(o){
           return '<tr><td style="font-size:11px;">'+(o['주문번호']||'-')+'</td>'
-            +'<td>'+(o['상품명']||'-')+'</td>'
+            +'<td>'+(o['상품명']||o['주문상품명']||'-')+'</td>'
             +'<td style="font-weight:700;color:var(--accent);">'+fmt(o['결제금액'])+'</td>'
             +'<td><span class="os os-'+(o['주문상태']||'')+'">'+(o['주문상태']||'-')+'</span></td></tr>';
         }).join('')+'</tbody></table>'
@@ -1001,7 +961,7 @@ function loadDashboard() {
             +'<div style="font-size:11px;color:var(--gray);margin-top:3px;">'+(n['작성일']||'')+'</div></div>';
         }).join('')
       : EMPTY('📢','공지 없음');
-  }).catch(function(){ });
+  }).catch(function(e){ console.error(e); });
 }
 
 // ============================================================
@@ -1061,7 +1021,7 @@ function loadMyProducts() {
   fetch(sheetUrl('대리점상품')).then(function(r){return r.text();}).then(function(csv){
     var allProds = parseCSV(csv);
     myProducts = allProds.filter(function(p){
-      return (p['대리점ID']||p['가맹점ID']||'').toString().trim() === (DEALER.id||'').toString().trim();
+      return (p['대리점ID']||p['대리점ID']||'').toString().trim() === (DEALER.id||'').toString().trim();
     });
     renderMyProducts();
   }).catch(function(){
@@ -1246,22 +1206,24 @@ function saveMyProduct(){
 function deleteMyProduct(btn){
   var id = btn.getAttribute('data-id'); var name = btn.getAttribute('data-name');
   if(!confirm('['+name+'] 상품을 삭제하시겠습니까?')) return;
-  fetch(SCRIPT_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'deleteDealerProduct',data:{번호:id,가맹점ID:DEALER.id}})})
+  fetch(SCRIPT_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'deleteDealerProduct',data:{번호:id,대리점ID:DEALER.id}})})
     .then(function(){ showToast('삭제됐습니다','ok'); setTimeout(loadMyProducts,1500); });
 }
 
 // ============================================================
-// ★ 주문/배송 관리 (전면 개선) ★
+// 주문/배송 관리
 // ============================================================
 function loadOrders() {
   if(!DEALER) return;
   document.getElementById('orders-tw').innerHTML = '<div class="loading"><div class="lspin">⏳</div></div>';
   fetch(sheetUrl('주문')).then(function(r){return r.text();}).then(function(csv){
-    allOrders = parseCSV(csv).filter(function(o){ return o['대리점ID']===DEALER.id; });
-    // 실제 컬럼명 확인용 (F12 콘솔에서 확인 가능)
+    var all = parseCSV(csv);
+    // ★ 대리점ID 기준 필터
+    allOrders = all.filter(function(o){
+      return o['대리점ID']===DEALER.id || o['대리점ID']===DEALER.id;
+    });
     if(allOrders.length > 0) {
       console.log('[주문 시트 컬럼명]', Object.keys(allOrders[0]));
-      console.log('[주문 첫번째 행]', allOrders[0]);
     }
     updateTabCounts(allOrders);
     applyFilter();
@@ -1270,7 +1232,6 @@ function loadOrders() {
   });
 }
 
-// 탭별 건수 업데이트
 function updateTabCounts(list) {
   var statuses = ['주문완료','결제완료','상품준비','배송중','배송완료','취소'];
   document.getElementById('tc-all').textContent = list.length;
@@ -1280,7 +1241,6 @@ function updateTabCounts(list) {
   });
 }
 
-// 탭 클릭
 function setTab(status, el) {
   curTab = status;
   document.querySelectorAll('.stab').forEach(function(t){ t.classList.remove('active'); });
@@ -1288,7 +1248,6 @@ function setTab(status, el) {
   applyFilter();
 }
 
-// 검색+탭 필터 통합
 function applyFilter() {
   var search = (document.getElementById('order-search').value||'').toLowerCase();
   var from = document.getElementById('order-date-from').value;
@@ -1328,24 +1287,16 @@ function renderOrders(list) {
   el.innerHTML = '<table>'+TH(['주문번호','주문일시','주문상품','구분','수량','금액','주문자/수취인','연락처','📦 송장번호','주문상태','빠른변경','상세'])+'<tbody>'
     +sorted.map(function(o){
       var stat = o['주문상태']||'주문완료';
-      // 주문상품명 (실제 시트: 주문상품명)
-      var prodName = getField(o, ['주문상품명','상품명','품명','주문상품','상품','item']);
-      if(!prodName) prodName = '-';
-      // 수취인
-      var receiver = getField(o, ['받는분','수취인명','수취인','주문자명','주문자','성명','이름']);
-      if(!receiver) receiver = '-';
-      // 연락처
-      var phone = getField(o, ['받는분연락처','연락처','전화번호','휴대폰','수취인연락처']);
-      if(!phone) phone = '-';
-      // ★ 상품 구분: 대리점ID가 내 ID면 내상품, 아니면 본사
-      var dealerId = getField(o, ['대리점ID','가맹점ID','dealerId']);
-      var typeTag = (dealerId && dealerId === DEALER.id)
+      var prodName = getField(o, ['주문상품명','상품명','품명','주문상품','상품','item']) || '-';
+      var receiver = getField(o, ['받는분','수취인명','수취인','주문자명','주문자','성명','이름']) || '-';
+      var phone    = getField(o, ['받는분연락처','연락처','전화번호','휴대폰','수취인연락처']) || '-';
+      var dealerId = getField(o, ['대리점ID','dealerId']);
+      var typeTag  = (dealerId && dealerId === DEALER.id)
         ? '<span style="background:#e8f4fd;color:#1565c0;padding:2px 7px;border-radius:10px;font-size:10px;font-weight:700;">내상품</span>'
         : '<span style="background:#fef3e2;color:#e65100;padding:2px 7px;border-radius:10px;font-size:10px;font-weight:700;">본사</span>';
-      // ★ 송장번호/택배사
       var tracking = o['송장번호']||'';
       var carrier  = o['택배사']||'';
-      var safeNo   = String(o['주문번호']||'').replace(/'/g,"\'");
+      var safeNo   = String(o['주문번호']||'').replace(/'/g,"\\'");
       var trackCell = tracking
         ? '<div style="font-size:11px;"><span style="color:#888;">'+carrier+'</span><br><strong style="color:var(--accent);">'+tracking+'</strong></div>'
           +'<button onclick="openDTrackingModal(\''+safeNo+'\')" style="margin-top:3px;padding:2px 6px;font-size:10px;border:1px solid #ddd;border-radius:4px;background:#f5f5f5;cursor:pointer;">✏️ 수정</button>'
@@ -1362,12 +1313,21 @@ function renderOrders(list) {
         +'<td style="min-width:100px;">'+trackCell+'</td>'
         +'<td><span class="os os-'+stat+'">'+stat+'</span></td>'
         +'<td>'
-          +'<select class="quick-status-sel" onchange="quickStatusChange(this,\''+o['주문번호']+'\')">'            +'<option value="">변경...</option>'            +'<option value="주문완료"'+(stat==='주문완료'?' selected':'')+'>주문완료</option>'            +'<option value="결제완료"'+(stat==='결제완료'?' selected':'')+'>결제완료</option>'            +'<option value="상품준비"'+(stat==='상품준비'?' selected':'')+'>상품준비</option>'            +'<option value="배송중"'+(stat==='배송중'?' selected':'')+'>배송중</option>'            +'<option value="배송완료"'+(stat==='배송완료'?' selected':'')+'>배송완료</option>'            +'<option value="취소">취소/반품</option>'          +'</select>'        +'</td>'        +'<td><button class="btn btn-outline btn-sm" onclick="viewOrder(\''+o['주문번호']+'\')">상세</button></td>'
+          +'<select class="quick-status-sel" onchange="quickStatusChange(this,\''+o['주문번호']+'\')">'
+            +'<option value="">변경...</option>'
+            +'<option value="주문완료"'+(stat==='주문완료'?' selected':'')+'>주문완료</option>'
+            +'<option value="결제완료"'+(stat==='결제완료'?' selected':'')+'>결제완료</option>'
+            +'<option value="상품준비"'+(stat==='상품준비'?' selected':'')+'>상품준비</option>'
+            +'<option value="배송중"'+(stat==='배송중'?' selected':'')+'>배송중</option>'
+            +'<option value="배송완료"'+(stat==='배송완료'?' selected':'')+'>배송완료</option>'
+            +'<option value="취소">취소/반품</option>'
+          +'</select>'
+        +'</td>'
+        +'<td><button class="btn btn-outline btn-sm" onclick="viewOrder(\''+o['주문번호']+'\')">상세</button></td>'
         +'</tr>';
     }).join('')+'</tbody></table>';
 }
 
-// ★ 쇼핑몰 링크 복사
 function copyShopLink() {
   var urlEl = document.getElementById('my-shop-url');
   if(!urlEl) return;
@@ -1378,31 +1338,23 @@ function copyShopLink() {
     });
   } else {
     var ta = document.createElement('textarea');
-    ta.value = url;
-    document.body.appendChild(ta);
-    ta.select();
-    document.execCommand('copy');
-    document.body.removeChild(ta);
+    ta.value = url; document.body.appendChild(ta); ta.select();
+    document.execCommand('copy'); document.body.removeChild(ta);
     showToast('쇼핑몰 링크가 복사됐습니다!', 'ok');
   }
 }
 
-// ★ 대리점 송장번호 입력 모달
 function openDTrackingModal(orderId) {
   var order = allOrders.find(function(o){ return o['주문번호']===orderId; });
   if(!order) return;
   var tracking = order['송장번호']||'';
   var carrier  = order['택배사']||'';
-
-  // 기존 모달 제거
   var old = document.getElementById('d-tracking-modal');
   if(old) old.remove();
-
   var carriers = ['CJ대한통운','한진택배','롯데택배','우체국택배','로젠택배','쿠팡로켓','직접배송'];
   var opts = carriers.map(function(c){
     return '<option value="'+c+'"'+(carrier===c?' selected':'')+'>'+c+'</option>';
   }).join('');
-
   var modal = document.createElement('div');
   modal.id = 'd-tracking-modal';
   modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9999;display:flex;align-items:center;justify-content:center;';
@@ -1416,7 +1368,7 @@ function openDTrackingModal(orderId) {
     +'<label style="font-size:13px;font-weight:600;display:block;margin-bottom:6px;">송장번호</label>'
     +'<input id="dt-tracking" value="'+tracking+'" placeholder="예: 1234567890123" style="width:100%;box-sizing:border-box;padding:9px;border:1px solid #ddd;border-radius:7px;font-size:13px;margin-bottom:20px;">'
     +'<div style="display:flex;gap:10px;">'
-      +'<button onclick="saveDTracking(\''+orderId+'\')" style="flex:1;padding:10px;background:var(--primary,#1e2336);color:#fff;border:none;border-radius:7px;font-size:14px;font-weight:600;cursor:pointer;">저장</button>'
+      +'<button onclick="saveDTracking(\''+orderId+'\')" style="flex:1;padding:10px;background:#1e2336;color:#fff;border:none;border-radius:7px;font-size:14px;font-weight:600;cursor:pointer;">저장</button>'
       +'<button onclick="document.getElementById(\'d-tracking-modal\').remove()" style="flex:1;padding:10px;background:#f5f5f5;color:#333;border:none;border-radius:7px;font-size:14px;cursor:pointer;">취소</button>'
     +'</div>'
   +'</div>';
@@ -1428,13 +1380,12 @@ function saveDTracking(orderId) {
   var carrier  = document.getElementById('dt-carrier').value;
   var tracking = document.getElementById('dt-tracking').value.trim();
   if(!carrier || !tracking) { alert('택배사와 송장번호를 모두 입력해주세요.'); return; }
-
   fetch(SCRIPT_URL, {
     method:'POST', mode:'no-cors',
     headers:{'Content-Type':'application/json'},
     body: JSON.stringify({
       action: 'updateOrderStatus',
-      data: { 주문번호: orderId, 주문상태: '배송중', 송장번호: tracking, 택배사: carrier, 가맹점ID: DEALER.id }
+      data: { 주문번호: orderId, 주문상태: '배송중', 송장번호: tracking, 택배사: carrier, 대리점ID: DEALER.id }
     })
   }).then(function(){
     var order = allOrders.find(function(o){ return o['주문번호']===orderId; });
@@ -1446,51 +1397,39 @@ function saveDTracking(orderId) {
   }).catch(function(){ showToast('저장 중 오류가 발생했습니다',''); });
 }
 
-// ★ 빠른 상태 변경 (드롭다운에서 바로 변경)
 function quickStatusChange(sel, orderId) {
   var newStatus = sel.value;
   if(!newStatus) return;
   if(!confirm('['+orderId+'] 주문을 "'+newStatus+'"으로 변경하시겠습니까?')) {
-    sel.value = '';
-    return;
+    sel.value = ''; return;
   }
   fetch(SCRIPT_URL, {
     method: 'POST', mode: 'no-cors',
     headers: {'Content-Type':'application/json'},
-    body: JSON.stringify({
-      action: 'updateOrderStatus',
-      data: { 주문번호: orderId, 주문상태: newStatus, 가맹점ID: DEALER.id }
-    })
+    body: JSON.stringify({ action: 'updateOrderStatus', data: { 주문번호: orderId, 주문상태: newStatus, 대리점ID: DEALER.id } })
   }).then(function(){
     showToast('주문번호 '+orderId+' → ['+newStatus+'] 변경됐습니다', 'ok');
-    // 로컬 데이터 업데이트
     var order = allOrders.find(function(o){ return o['주문번호']===orderId; });
     if(order) order['주문상태'] = newStatus;
     updateTabCounts(allOrders);
     applyFilter();
-  }).catch(function(){
-    showToast('저장 중 오류가 발생했습니다', '');
-    sel.value = '';
-  });
+  }).catch(function(){ showToast('저장 중 오류가 발생했습니다', ''); sel.value = ''; });
 }
 
-// ★ 주문 상세 보기
 function viewOrder(orderId) {
   var o = allOrders.find(function(x){ return x['주문번호']===orderId; });
   if(!o) return;
   curOrderId = orderId;
   curSelectedStatus = '';
-
-  // 상세 정보 렌더
   var body = document.getElementById('order-detail-body');
-  var prodName  = getField(o, ['주문상품명','상품명','품명','상품']) || '-';
-  var receiver  = getField(o, ['받는분','수취인명','수취인','주문자명','주문자']) || '-';
-  var phone     = getField(o, ['받는분연락처','연락처','전화번호','휴대폰']) || '-';
-  var address   = getField(o, ['배송주소','주소','배송지']) || '-';
-  var zipcode   = getField(o, ['우편번호','zip','postcode']) || '-';
-  var memo      = getField(o, ['메모','배송메모','요청사항']) || '없음';
-  var qty       = o['수량']||o['qty']||1;
-  var amount    = o['결제금액']||o['payment_amount']||o['금액']||0;
+  var prodName = getField(o, ['주문상품명','상품명','품명','상품']) || '-';
+  var receiver = getField(o, ['받는분','수취인명','수취인','주문자명','주문자']) || '-';
+  var phone    = getField(o, ['받는분연락처','연락처','전화번호','휴대폰']) || '-';
+  var address  = getField(o, ['배송주소','주소','배송지']) || '-';
+  var zipcode  = getField(o, ['우편번호','zip','postcode']) || '-';
+  var memo     = getField(o, ['메모','배송메모','요청사항']) || '없음';
+  var qty    = o['수량']||o['qty']||1;
+  var amount = o['결제금액']||o['payment_amount']||o['금액']||0;
   var fields = [
     ['주문번호', o['주문번호']], ['주문일시', o['주문일시']||o['작성일시']],
     ['상품명', prodName], ['수량', qty],
@@ -1513,7 +1452,6 @@ function viewOrder(orderId) {
       }).join('')
     +'</div>';
 
-  // 현재 상태에 맞는 버튼 highlight
   var stat = o['주문상태']||'주문완료';
   document.querySelectorAll('.status-btn').forEach(function(btn){
     btn.classList.remove('selected');
@@ -1522,21 +1460,16 @@ function viewOrder(orderId) {
     }
   });
   curSelectedStatus = stat;
-
-  // 기존 송장번호/택배사 채우기
   document.getElementById('modal-tracking').value = o['송장번호']||'';
   document.getElementById('modal-carrier').value = o['택배사']||'';
   document.getElementById('modal-memo').value = '';
-
   document.getElementById('order-modal').classList.add('active');
 }
 
-// ★ 상태 버튼 선택
 function selectStatus(status, btn) {
   document.querySelectorAll('.status-btn').forEach(function(b){ b.classList.remove('selected'); });
   btn.classList.add('selected');
   curSelectedStatus = status;
-  // 배송중 선택 시 송장번호 강조
   var hint = document.getElementById('tracking-hint-label');
   if(status==='배송중') {
     hint.textContent = '(배송중 선택됨 — 송장번호를 입력해주세요)';
@@ -1548,62 +1481,38 @@ function selectStatus(status, btn) {
   }
 }
 
-// ★ 상태 저장
 function saveOrderStatus() {
   if(!curOrderId){ showToast('주문 정보 오류','warn'); return; }
   if(!curSelectedStatus){ showToast('변경할 상태를 선택해주세요','warn'); return; }
-
   var tracking = document.getElementById('modal-tracking').value.trim();
-  var carrier = document.getElementById('modal-carrier').value;
-  var memo = document.getElementById('modal-memo').value.trim();
-
+  var carrier  = document.getElementById('modal-carrier').value;
+  var memo     = document.getElementById('modal-memo').value.trim();
   var btn = document.getElementById('order-save-btn');
-  btn.textContent = '⏳ 저장 중...';
-  btn.disabled = true;
-
+  btn.textContent = '⏳ 저장 중...'; btn.disabled = true;
   fetch(SCRIPT_URL, {
     method: 'POST', mode: 'no-cors',
     headers: {'Content-Type':'application/json'},
     body: JSON.stringify({
       action: 'updateOrderStatus',
-      data: {
-        주문번호: curOrderId,
-        주문상태: curSelectedStatus,
-        송장번호: tracking,
-        택배사: carrier,
-        처리메모: memo,
-        가맹점ID: DEALER.id,
-        처리자: DEALER.name,
-        처리일시: new Date().toISOString()
-      }
+      data: { 주문번호: curOrderId, 주문상태: curSelectedStatus, 송장번호: tracking, 택배사: carrier, 처리메모: memo, 대리점ID: DEALER.id, 처리자: DEALER.name, 처리일시: new Date().toISOString() }
     })
   }).then(function(){
     showToast('주문번호 '+curOrderId+' → ['+curSelectedStatus+'] 저장됐습니다', 'ok');
-    // 로컬 데이터 업데이트
     var order = allOrders.find(function(o){ return o['주문번호']===curOrderId; });
-    if(order) {
-      order['주문상태'] = curSelectedStatus;
-      if(tracking) order['송장번호'] = tracking;
-      if(carrier) order['택배사'] = carrier;
-    }
+    if(order) { order['주문상태']=curSelectedStatus; if(tracking) order['송장번호']=tracking; if(carrier) order['택배사']=carrier; }
     updateTabCounts(allOrders);
     applyFilter();
     closeOrderModal();
   }).catch(function(){
     showToast('저장 중 오류가 발생했습니다', '');
-  }).finally(function(){
-    btn.textContent = '💾 상태 저장';
-    btn.disabled = false;
-  });
+  }).finally(function(){ btn.textContent='💾 상태 저장'; btn.disabled=false; });
 }
 
 function closeOrderModal(){
   document.getElementById('order-modal').classList.remove('active');
-  curOrderId = '';
-  curSelectedStatus = '';
+  curOrderId = ''; curSelectedStatus = '';
 }
 
-// ✅ 엑셀 다운로드
 function downloadExcel(){
   if(!filteredOrders.length){ showToast('다운로드할 주문이 없습니다','warn'); return; }
   var headers = ['주문번호','주문일시','상품명','수량','결제금액','수취인명','연락처','배송주소','우편번호','배송메모','주문상태','송장번호','택배사'];
@@ -1615,10 +1524,8 @@ function downloadExcel(){
   var blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
   var url = URL.createObjectURL(blob);
   var a = document.createElement('a');
-  a.href = url;
-  a.download = DEALER.name+'_주문내역_'+new Date().toISOString().split('T')[0]+'.csv';
-  document.body.appendChild(a); a.click();
-  document.body.removeChild(a); URL.revokeObjectURL(url);
+  a.href = url; a.download = DEALER.name+'_주문내역_'+new Date().toISOString().split('T')[0]+'.csv';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
   showToast('엑셀 파일 다운로드 완료!','ok');
 }
 
@@ -1629,9 +1536,9 @@ function loadSettlement() {
   if(!DEALER) return;
   document.getElementById('settlement-tw').innerHTML = '<div class="loading"><div class="lspin">⏳</div></div>';
   fetch(sheetUrl('정산')).then(function(r){return r.text();}).then(function(csv){
-    var rows = parseCSV(csv).filter(function(r){ return r['대리점ID']===DEALER.id; });
+    var rows = parseCSV(csv).filter(function(r){ return r['대리점ID']===DEALER.id || r['대리점ID']===DEALER.id; });
     var totalSales=0,totalPg=0,totalHq=0,totalMine=0;
-    rows.forEach(function(r){ totalSales+=parseInt(r['총매출'])||0; totalPg+=parseInt(r['PG수수료'])||0; totalHq+=parseInt(r['본사마진'])||0; totalMine+=parseInt(r['가맹점수령액'])||0; });
+    rows.forEach(function(r){ totalSales+=parseInt(r['총매출'])||0; totalPg+=parseInt(r['PG수수료'])||0; totalHq+=parseInt(r['본사마진'])||0; totalMine+=parseInt(r['대리점수령액'])||0; });
     document.getElementById('settle-total').textContent = totalSales.toLocaleString()+'원';
     document.getElementById('settle-pg').textContent = totalPg.toLocaleString()+'원';
     document.getElementById('settle-hq').textContent = totalHq.toLocaleString()+'원';
@@ -1642,7 +1549,7 @@ function loadSettlement() {
           return '<tr><td>'+(r['정산번호']||'-')+'</td><td>'+(r['정산기간']||'-')+'</td>'
             +'<td>'+fmt(r['총매출'])+'</td><td style="color:#e53935;">-'+fmt(r['PG수수료'])+'</td>'
             +'<td style="color:#e53935;">-'+fmt(r['본사마진'])+'</td>'
-            +'<td style="font-weight:700;color:var(--green);">'+fmt(r['가맹점수령액'])+'</td>'
+            +'<td style="font-weight:700;color:var(--green);">'+fmt(r['대리점수령액'])+'</td>'
             +'<td><span class="bdg bdg-new">'+(r['상태']||'정산완료')+'</span></td></tr>';
         }).join('')+'</tbody></table>'
       : EMPTY('💰','정산 내역 없음','매출 발생 후 본사에서 등록됩니다');
@@ -1659,7 +1566,7 @@ function loadReviews() {
   if(!DEALER) return;
   document.getElementById('reviews-tw').innerHTML = '<div class="loading"><div class="lspin">⏳</div></div>';
   fetch(sheetUrl('리뷰')).then(function(r){return r.text();}).then(function(csv){
-    allReviews = parseCSV(csv).filter(function(r){ return r['대리점ID']===DEALER.id; });
+    allReviews = parseCSV(csv).filter(function(r){ return r['대리점ID']===DEALER.id || r['대리점ID']===DEALER.id; });
     renderReviews(allReviews);
   }).catch(function(){ document.getElementById('reviews-tw').innerHTML = EMPTY('⭐','리뷰 없음'); });
 }
