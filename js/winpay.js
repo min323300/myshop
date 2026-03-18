@@ -1,5 +1,5 @@
 /**
- * 윈글로벌페이 연동 모듈 (winpay.js) v3.7
+ * 윈글로벌페이 연동 모듈 (winpay.js) v3.8
  * 실제 PG 샘플 6개 파일 완전 분석 기반
  *
  * ▶ PC  : 팝업 오픈 → 닫힘 감지 → 2초 대기 → /api/payment/status/{tid} 조회
@@ -11,7 +11,8 @@
  * v3.4: CORS 수정 - mode:'no-cors' + Content-Type:'text/plain'
  * v3.5: keepalive:true + 300ms 딜레이 추가
  * v3.6: 팝업 열기 전 주문 선저장(결제대기) → 결제 완료 후 상태만 업데이트
- * v3.7: 팝업 닫힘 후 2초 대기 추가 (결제 승인 완료 전 조회 방지)
+ * v3.7: 팝업 닫힘 후 2초 대기 + 재조회 로직 추가
+ * v3.8: 팝업 포커스 유지 (팝업이 뒤로 숨는 문제 해결)
  *
  * 설치 위치: js/winpay.js
  */
@@ -99,7 +100,7 @@ const WinPay = {
     // order.html 파라미터명 양쪽 모두 수용
     const amt       = Number(orderInfo.amt       || orderInfo.amount    || 0);
     const ordNm     = orderInfo.ordNm            || orderInfo.buyerName  || '';
-    const email     = orderInfo.email            || orderInfo.buyerEmail || '';
+    const email     = orderInfo.email            || orderInfo.buyerEmail || 'order@gasway.shop';
     const userId    = orderInfo.userId           || orderInfo.buyerTel   || 'guest';
     const goodsName = orderInfo.goodsName        || orderInfo.goodsname  || '';
     const prodCode  = 'P001';
@@ -108,12 +109,7 @@ const WinPay = {
 
     // 주문 정보 구성
     const orderData = {
-      tid,
-      amt,
-      goodsName,
-      ordNm,
-      email,
-      userId,
+      tid, amt, goodsName, ordNm, email, userId,
       phone:         orderInfo.buyerTel      || orderInfo.phone      || '',
       receiverName:  orderInfo.receiverName  || ordNm,
       receiverPhone: orderInfo.receiverPhone || orderInfo.buyerTel   || '',
@@ -168,23 +164,13 @@ const WinPay = {
 
     // PG 결제 요청
     const payload = {
-      tmnId:             this.tmnId,
-      tid,
-      amt,
-      goodsName,
-      ordNm,
-      email,
-      userId,
-      productCode:       prodCode,
-      productType:       '2',
-      payMethod,
-      taxFreeCd:         '00',
-      cashReceipt:       '0',
-      cashReceiptInfo:   '',
+      tmnId: this.tmnId, tid, amt, goodsName, ordNm, email, userId,
+      productCode: prodCode, productType: '2', payMethod,
+      taxFreeCd: '00', cashReceipt: '0', cashReceiptInfo: '',
       isMandatoryIssuer: false,
-      redirectUrl:       this.COMPLETE_URL,
-      returnUrl:         this.COMPLETE_URL,
-      userResultUrl:     mobileResultUrl,
+      redirectUrl:   this.COMPLETE_URL,
+      returnUrl:     this.COMPLETE_URL,
+      userResultUrl: mobileResultUrl,
     };
 
     console.log('[WinPay] 결제 요청 payload:', JSON.stringify(payload));
@@ -239,6 +225,7 @@ const WinPay = {
 
   // ─────────────────────────────────────────────────
   // PC - 키움페이 팝업
+  // ✅ v3.8: popup.focus() 추가로 팝업 항상 앞으로
   // ─────────────────────────────────────────────────
   _openPaymentPopup(paymentUrl, tid) {
     const W = 700, H = 1000;
@@ -250,13 +237,24 @@ const WinPay = {
       alert('팝업이 차단되었습니다. 브라우저 팝업 허용 후 다시 시도해주세요.');
       return;
     }
+
+    // ✅ v3.8: 팝업 열린 직후 즉시 포커스
+    setTimeout(() => { try { popup.focus(); } catch(e) {} }, 500);
+
     const timer = setInterval(() => {
-      if (popup.closed) { clearInterval(timer); this._onPopupClosed(tid); }
+      if (popup.closed) {
+        clearInterval(timer);
+        this._onPopupClosed(tid);
+      } else {
+        // ✅ v3.8: 팝업이 열려있는 동안 주기적으로 앞으로 가져오기
+        try { popup.focus(); } catch(e) {}
+      }
     }, 1000);
   },
 
   // ─────────────────────────────────────────────────
   // PC - 뱅크페이 팝업
+  // ✅ v3.8: popup.focus() 추가
   // ─────────────────────────────────────────────────
   _openBankPayPopup(urlData, tid) {
     const W = 720, H = 600;
@@ -267,8 +265,17 @@ const WinPay = {
       return;
     }
     this._postForm(urlData, 'BankPayPopup');
+
+    // ✅ v3.8: 팝업 포커스
+    setTimeout(() => { try { popup.focus(); } catch(e) {} }, 500);
+
     const timer = setInterval(() => {
-      if (popup.closed) { clearInterval(timer); this._onPopupClosed(tid); }
+      if (popup.closed) {
+        clearInterval(timer);
+        this._onPopupClosed(tid);
+      } else {
+        try { popup.focus(); } catch(e) {}
+      }
     }, 1000);
   },
 
@@ -295,10 +302,9 @@ const WinPay = {
 
   // ─────────────────────────────────────────────────
   // PC - 팝업 닫힌 후 결제 결과 조회
-  // ✅ v3.7: 2초 대기 후 조회 (결제 승인 완료 전 조회 방지)
   // ─────────────────────────────────────────────────
   async _onPopupClosed(tid) {
-    // ✅ v3.7: 결제 승인 서버 처리 완료 대기 (2초)
+    // 결제 승인 서버 처리 완료 대기 (2초)
     await new Promise(resolve => setTimeout(resolve, 2000));
 
     try {
@@ -315,8 +321,8 @@ const WinPay = {
           await this._saveToSheets({
             action: 'updateOrderStatus',
             data: {
-              주문번호:  saved.orderNo || tid,
-              주문상태:  '결제완료',
+              주문번호:   saved.orderNo || tid,
+              주문상태:   '결제완료',
               PG거래번호: data.wTid || '',
             }
           });
@@ -329,12 +335,12 @@ const WinPay = {
         await this._redirectToComplete(tid, data);
 
       } else {
-        // ✅ v3.7: "진행 중" 메시지면 3초 후 재조회
+        // "진행 중" 메시지면 3초 후 재조회
         const msg = data.message || '';
         if (msg.includes('진행') || msg.includes('처리')) {
           console.log('[WinPay] 결제 처리 중... 3초 후 재조회');
           await new Promise(resolve => setTimeout(resolve, 3000));
-          return this._onPopupClosed(tid); // 재귀 재조회
+          return this._onPopupClosed(tid);
         }
 
         alert('결제가 완료되지 않았습니다.\n' + msg);
