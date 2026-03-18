@@ -6,7 +6,7 @@ const CONFIG = {
   SHEET_ID: '1t804fRO8HfQtmOzpDAz2IZfzRDQ7t8LYllFGZr3ftUI',
 
   // ✅ Apps Script URL (주문저장 / PG설정 로드 / 포인트 등 모든 백엔드 통신)
-  APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbyBA3dBSsLwrmwlF3PCJi8sw4FZkH8Mq9W9uncGnqPq0a9As7CKtoSr5rIxXD1Ugm34GQ/exec',
+  APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbzWpT2On47R7_LTRiznH7qcPBYTPUV3i4UiywI8lkHUYt6KGzDevap7RfQHACwD7oxDzg/exec',
 
   // ✅ 이미지 기본 URL
   IMAGE_BASE: 'https://min323300.github.io/myshop/images/',
@@ -57,7 +57,7 @@ const CONFIG = {
   PG: {
     PROVIDER:      'winglobalpay',
     MERCHANT_ID:   'WGA000002',
-    API_PROXY_URL: 'https://script.google.com/macros/s/AKfycbyBA3dBSsLwrmwlF3PCJi8sw4FZkH8Mq9W9uncGnqPq0a9As7CKtoSr5rIxXD1Ugm34GQ/exec',
+    API_PROXY_URL: 'https://script.google.com/macros/s/AKfycbzWpT2On47R7_LTRiznH7qcPBYTPUV3i4UiywI8lkHUYt6KGzDevap7RfQHACwD7oxDzg/exec',
   },
 
   // ✅ 기타 설정
