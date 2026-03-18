@@ -1,8 +1,8 @@
 /**
- * 윈글로벌페이 연동 모듈 (winpay.js) v3.6
+ * 윈글로벌페이 연동 모듈 (winpay.js) v3.7
  * 실제 PG 샘플 6개 파일 완전 분석 기반
  *
- * ▶ PC  : 팝업 오픈 → 닫힘 감지 → /api/payment/status/{tid} 조회
+ * ▶ PC  : 팝업 오픈 → 닫힘 감지 → 2초 대기 → /api/payment/status/{tid} 조회
  * ▶ 모바일 : window.location.href 페이지 이동 → userResultUrl?tid={tid} 로 리다이렉트
  *
  * v3.1: taxFreeCd '0000'→'00', cashReceipt 0→'0', btn id 수정
@@ -10,8 +10,8 @@
  * v3.3: saveOrder data 키로 감싸기
  * v3.4: CORS 수정 - mode:'no-cors' + Content-Type:'text/plain'
  * v3.5: keepalive:true + 300ms 딜레이 추가
- * v3.6: ★ 팝업 열기 전 주문 선저장(결제대기) → 결제 완료 후 상태만 업데이트
- *         (팝업 닫힘 후 저장 실패 문제 완전 해결)
+ * v3.6: 팝업 열기 전 주문 선저장(결제대기) → 결제 완료 후 상태만 업데이트
+ * v3.7: 팝업 닫힘 후 2초 대기 추가 (결제 승인 완료 전 조회 방지)
  *
  * 설치 위치: js/winpay.js
  */
@@ -126,7 +126,7 @@ const WinPay = {
       qty:           orderInfo.qty           || 1,
     };
 
-    // ✅ v3.6 핵심: 팝업 열기 전 주문 먼저 저장 (결제대기)
+    // ✅ 팝업 열기 전 주문 먼저 저장 (결제대기)
     const orderNo = 'ORD' + Date.now();
     const dealer  = orderData.dealerId || localStorage.getItem('dealerId') || '';
     try {
@@ -150,7 +150,7 @@ const WinPay = {
           결제방법:     'card',
           추천인코드:   orderData.referralCode,
           회원구분:     (userId && userId !== 'guest') ? '회원' : '비회원',
-          주문상태:     '결제대기',    // ← 먼저 결제대기로 저장
+          주문상태:     '결제대기',
           메모:         orderData.memo,
           PG주문번호:   tid,
           PG거래번호:   '',
@@ -162,7 +162,7 @@ const WinPay = {
       console.warn('[WinPay] 주문 선저장 실패:', e);
     }
 
-    // localStorage에 주문정보 + orderNo 저장
+    // localStorage에 주문정보 저장
     localStorage.setItem('wp_tid',   tid);
     localStorage.setItem('wp_order', JSON.stringify({ ...orderData, orderNo, dealer }));
 
@@ -294,24 +294,29 @@ const WinPay = {
   },
 
   // ─────────────────────────────────────────────────
-  // PC - 팝업 닫힌 후 결제 결과 조회 → 상태 업데이트
+  // PC - 팝업 닫힌 후 결제 결과 조회
+  // ✅ v3.7: 2초 대기 후 조회 (결제 승인 완료 전 조회 방지)
   // ─────────────────────────────────────────────────
   async _onPopupClosed(tid) {
+    // ✅ v3.7: 결제 승인 서버 처리 완료 대기 (2초)
+    await new Promise(resolve => setTimeout(resolve, 2000));
+
     try {
       const res  = await fetch(`${this.SERVER_URL}/api/payment/status/${tid}`, {
         headers: { 'Authorization': `Bearer ${this.jwtToken}` }
       });
       const data = await res.json();
+      console.log('[WinPay] status 조회 결과:', JSON.stringify(data));
 
       if (data.success) {
-        // ✅ v3.6: 상태만 결제완료로 업데이트
+        // 상태 결제완료로 업데이트
         const saved = JSON.parse(localStorage.getItem('wp_order') || '{}');
         try {
           await this._saveToSheets({
             action: 'updateOrderStatus',
             data: {
-              주문번호: saved.orderNo || tid,
-              주문상태: '결제완료',
+              주문번호:  saved.orderNo || tid,
+              주문상태:  '결제완료',
               PG거래번호: data.wTid || '',
             }
           });
@@ -322,8 +327,17 @@ const WinPay = {
         }
 
         await this._redirectToComplete(tid, data);
+
       } else {
-        alert('결제가 완료되지 않았습니다.\n' + (data.message || ''));
+        // ✅ v3.7: "진행 중" 메시지면 3초 후 재조회
+        const msg = data.message || '';
+        if (msg.includes('진행') || msg.includes('처리')) {
+          console.log('[WinPay] 결제 처리 중... 3초 후 재조회');
+          await new Promise(resolve => setTimeout(resolve, 3000));
+          return this._onPopupClosed(tid); // 재귀 재조회
+        }
+
+        alert('결제가 완료되지 않았습니다.\n' + msg);
         const btn = document.getElementById('btn-order');
         if (btn) { btn.disabled = false; btn.textContent = '결제하기'; }
       }
