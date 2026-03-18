@@ -56,7 +56,7 @@ const CONFIG = {
   // tmnId / payKey 는 보안상 구글시트 PG설정 시트에서 로드 (winpay.js > loadConfig)
   PG: {
     PROVIDER:      'winglobalpay',
-    MERCHANT_ID:   'WGA000002',
+    MERCHANT_ID:   '',
     API_PROXY_URL: 'https://script.google.com/macros/s/AKfycbzWpT2On47R7_LTRiznH7qcPBYTPUV3i4UiywI8lkHUYt6KGzDevap7RfQHACwD7oxDzg/exec',
   },
 
