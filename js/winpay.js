@@ -1,13 +1,14 @@
 /**
- * 윈글로벌페이 연동 모듈 (winpay.js) v3.3
+ * 윈글로벌페이 연동 모듈 (winpay.js) v3.4
  * 실제 PG 샘플 6개 파일 완전 분석 기반
  *
  * ▶ PC  : 팝업 오픈 → 닫힘 감지 → /api/payment/status/{tid} 조회
  * ▶ 모바일 : window.location.href 페이지 이동 → userResultUrl?tid={tid} 로 리다이렉트
  *
  * v3.1: taxFreeCd '0000'→'00', cashReceipt 0→'0', btn id 수정
- * v3.2: order.html 파라미터명 불일치 수정 (amt/amount, ordNm/buyerName 등)
- * v3.3: saveOrder 호출 시 data 키로 감싸기 수정 (구글 시트 주문 저장 안 되는 문제 수정)
+ * v3.2: order.html 파라미터명 불일치 수정
+ * v3.3: saveOrder data 키로 감싸기
+ * v3.4: CORS 수정 - mode:'no-cors' + Content-Type:'text/plain' (구글 시트 저장 안 되는 문제 수정)
  *
  * 설치 위치: js/winpay.js
  */
@@ -260,7 +261,7 @@ const WinPay = {
 
   // ─────────────────────────────────────────────────
   // 주문 저장 → 완료 페이지 이동
-  // ✅ v3.3 핵심 수정: action + data 구조로 감싸기
+  // ✅ v3.4 핵심 수정: mode:'no-cors' + Content-Type:'text/plain'
   // ─────────────────────────────────────────────────
   async _saveAndRedirect(tid, pgResult) {
     const saved   = JSON.parse(localStorage.getItem('wp_order') || '{}');
@@ -270,10 +271,11 @@ const WinPay = {
     try {
       await fetch(CONFIG.APPS_SCRIPT_URL, {
         method:  'POST',
-        headers: { 'Content-Type': 'application/json' },
+        mode:    'no-cors',                        // ✅ v3.4 수정
+        headers: { 'Content-Type': 'text/plain' }, // ✅ v3.4 수정
         body: JSON.stringify({
           action: 'saveOrder',
-          data: {                                           // ✅ v3.3 수정: data 키로 감싸기
+          data: {
             주문번호:     orderNo,
             주문일시:     new Date().toLocaleString('ko-KR'),
             대리점ID:     dealer,
@@ -298,7 +300,7 @@ const WinPay = {
           }
         })
       });
-      console.log('[WinPay] 주문 저장 완료:', orderNo);
+      console.log('[WinPay] 주문 저장 요청 완료:', orderNo);
     } catch (e) {
       console.warn('[WinPay] 주문 저장 실패 (결제는 성공):', e);
     }
