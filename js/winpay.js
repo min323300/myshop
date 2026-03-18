@@ -1,15 +1,17 @@
 /**
- * 윈글로벌페이 연동 모듈 (winpay.js) v3.1
+ * 윈글로벌페이 연동 모듈 (winpay.js) v3.2
  * 실제 PG 샘플 6개 파일 완전 분석 기반
  *
  * ▶ PC  : 팝업 오픈 → 닫힘 감지 → /api/payment/status/{tid} 조회
  * ▶ 모바일 : window.location.href 페이지 이동 → userResultUrl?tid={tid} 로 리다이렉트
  *            → order-complete.html에서 자동 로그인 후 status API 조회
  *
- * v3.1 수정사항:
- *   - taxFreeCd: '0000' → '00' (매뉴얼 기준, HTTP 400 오류 수정)
- *   - cashReceipt: 0 → '0' (문자열로 수정)
- *   - btn id: 'btn-payment' → 'btn-order' (order.html 실제 ID 반영)
+ * v3.1 수정: taxFreeCd '0000'→'00', cashReceipt 0→'0', btn id 수정
+ * v3.2 수정: order.html 파라미터명 불일치 수정
+ *   - amt:      orderInfo.amt      || orderInfo.amount
+ *   - ordNm:    orderInfo.ordNm    || orderInfo.buyerName
+ *   - email:    orderInfo.email    || orderInfo.buyerEmail
+ *   - userId:   orderInfo.userId   || orderInfo.buyerTel
  *
  * 설치 위치: js/winpay.js
  */
@@ -42,10 +44,6 @@ const WinPay = {
 
   // ─────────────────────────────────────────────────
   // 2. 터미널 로그인 → JWT 발급
-  // POST /api/auth/login
-  // Header: Authorization: Bearer {payKey}
-  // Body:   { tmnId }
-  // Response: { token: '...' }
   // ─────────────────────────────────────────────────
   async login() {
     try {
@@ -84,28 +82,39 @@ const WinPay = {
     const isMobile  = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
     const payMethod = orderInfo.payMethod || 'CARD';
 
-    // 모바일: userResultUrl에 tid 포함
     const mobileResultUrl = `${this.COMPLETE_URL}?tid=${tid}`;
+
+    // ✅ v3.2: order.html 파라미터명 양쪽 모두 수용
+    const amt      = Number(orderInfo.amt       || orderInfo.amount    || 0);
+    const ordNm    = orderInfo.ordNm            || orderInfo.buyerName  || '';
+    const email    = orderInfo.email            || orderInfo.buyerEmail || '';
+    const userId   = orderInfo.userId           || orderInfo.buyerTel   || 'guest';
+    const goodsName= orderInfo.goodsName        || orderInfo.goodsname  || '';
+    const prodCode = orderInfo.productCode      || orderInfo.orderNo    || '001';
+
+    if (!amt || amt <= 0) throw new Error('결제 금액이 올바르지 않습니다 (amt: ' + amt + ')');
 
     const payload = {
       tmnId:             this.tmnId,
       tid,
-      amt:               Number(orderInfo.amt),
-      goodsName:         orderInfo.goodsName,
-      ordNm:             orderInfo.ordNm,
-      email:             orderInfo.email       || '',
-      userId:            orderInfo.userId       || 'guest',
-      productCode:       orderInfo.productCode  || '001',
+      amt,
+      goodsName,
+      ordNm,
+      email,
+      userId,
+      productCode:       prodCode,
       productType:       '2',     // 2: 실물상품
       payMethod,
-      taxFreeCd:         '00',    // ✅ v3.1 수정: '0000' → '00' (과세, HTTP 400 수정)
-      cashReceipt:       '0',     // ✅ v3.1 수정: 숫자 0 → 문자열 '0'
+      taxFreeCd:         '00',    // 과세
+      cashReceipt:       '0',
       cashReceiptInfo:   '',
       isMandatoryIssuer: false,
-      redirectUrl:       this.COMPLETE_URL,  // PC: GET 파라미터로 결과 전달
-      returnUrl:         this.COMPLETE_URL,  // Webhook (비동기)
-      userResultUrl:     mobileResultUrl,    // 모바일: ?tid={tid} 형식
+      redirectUrl:       this.COMPLETE_URL,
+      returnUrl:         this.COMPLETE_URL,
+      userResultUrl:     mobileResultUrl,
     };
+
+    console.log('[WinPay] 결제 요청 payload:', JSON.stringify(payload));
 
     // API 엔드포인트 (결제수단 + 모바일 여부)
     const apiUrl = payMethod === 'BPAY'
@@ -126,17 +135,36 @@ const WinPay = {
       sessionStorage.removeItem('wp_jwt');
       throw new Error('인증이 만료되었습니다. 다시 시도해주세요.');
     }
-    if (!res.ok) throw new Error(`결제요청 HTTP ${res.status}`);
+    if (!res.ok) {
+      const errText = await res.text().catch(() => '');
+      throw new Error(`결제요청 HTTP ${res.status}: ${errText}`);
+    }
 
     const data = await res.json();
     if (!data.success) throw new Error(data.message || '결제요청 실패');
 
-    // 임시 주문 정보 저장 (완료 페이지에서 사용)
+    // 임시 주문 정보 저장
     localStorage.setItem('wp_tid',   tid);
-    localStorage.setItem('wp_order', JSON.stringify({ tid, ...orderInfo }));
+    localStorage.setItem('wp_order', JSON.stringify({
+      tid,
+      amt,
+      goodsName,
+      ordNm,
+      email,
+      userId,
+      phone:         orderInfo.buyerTel      || orderInfo.phone      || '',
+      receiverName:  orderInfo.receiverName  || ordNm,
+      receiverPhone: orderInfo.receiverPhone || orderInfo.buyerTel   || '',
+      address:       orderInfo.address       || '',
+      zipCode:       orderInfo.zipCode       || '',
+      productCode:   prodCode,
+      dealerId:      orderInfo.dealerId      || '',
+      referralCode:  orderInfo.referralCode  || '',
+      memo:          orderInfo.memo          || '',
+      qty:           orderInfo.qty           || 1,
+    }));
 
     if (isMobile) {
-      // ── 모바일: 페이지 이동 ──────────────────────
       const paymentUrl = data.paymentUrl;
       if (payMethod === 'BPAY') {
         let pd = paymentUrl;
@@ -146,7 +174,6 @@ const WinPay = {
         window.location.href = paymentUrl;
       }
     } else {
-      // ── PC: 팝업 오픈 ───────────────────────────
       if (payMethod === 'BPAY') {
         let pd = data.paymentUrl;
         if (typeof pd === 'string') pd = JSON.parse(pd);
@@ -195,13 +222,12 @@ const WinPay = {
   },
 
   // ─────────────────────────────────────────────────
-  // 모바일 - 뱅크페이 form POST (페이지 이동)
+  // 모바일 - 뱅크페이 form POST
   // ─────────────────────────────────────────────────
   _submitMobileBankPayForm(urlData) {
     this._postForm(urlData, '_self');
   },
 
-  // form 공통 생성/제출
   _postForm(urlData, target) {
     const form = document.createElement('form');
     form.method = 'post';
@@ -220,7 +246,7 @@ const WinPay = {
   },
 
   // ─────────────────────────────────────────────────
-  // PC - 팝업 닫힌 후 결제 결과 조회 (status API)
+  // PC - 팝업 닫힌 후 결제 결과 조회
   // ─────────────────────────────────────────────────
   async _onPopupClosed(tid) {
     try {
@@ -313,7 +339,6 @@ const WinPay = {
       if (btn) btn.textContent = '결제창 열기...';
       await this.requestPayment(orderInfo);
 
-      // PC는 팝업 대기, 모바일은 이미 페이지 이동
       const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
       if (!isMobile && btn) btn.textContent = '결제 진행 중...';
 
