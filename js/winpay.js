@@ -1,5 +1,5 @@
 /**
- * 윈글로벌페이 연동 모듈 (winpay.js) v3.8
+ * 윈글로벌페이 연동 모듈 (winpay.js) v3.9
  * 실제 PG 샘플 6개 파일 완전 분석 기반
  *
  * ▶ PC  : 팝업 오픈 → 닫힘 감지 → 2초 대기 → /api/payment/status/{tid} 조회
@@ -13,6 +13,8 @@
  * v3.6: 팝업 열기 전 주문 선저장(결제대기) → 결제 완료 후 상태만 업데이트
  * v3.7: 팝업 닫힘 후 2초 대기 + 재조회 로직 추가
  * v3.8: 팝업 포커스 유지 (팝업이 뒤로 숨는 문제 해결)
+ * v3.9: _onPopupClosed에서 localStorage 삭제 전 데이터 추출
+ *       → 완료 페이지 goodsName/ordNm 정상 표시 + updateOrderStatus 정상 작동
  *
  * 설치 위치: js/winpay.js
  */
@@ -224,8 +226,7 @@ const WinPay = {
   },
 
   // ─────────────────────────────────────────────────
-  // PC - 키움페이 팝업
-  // ✅ v3.8: popup.focus() 추가로 팝업 항상 앞으로
+  // PC - 키움페이 팝업 (포커스 유지)
   // ─────────────────────────────────────────────────
   _openPaymentPopup(paymentUrl, tid) {
     const W = 700, H = 1000;
@@ -237,24 +238,19 @@ const WinPay = {
       alert('팝업이 차단되었습니다. 브라우저 팝업 허용 후 다시 시도해주세요.');
       return;
     }
-
-    // ✅ v3.8: 팝업 열린 직후 즉시 포커스
     setTimeout(() => { try { popup.focus(); } catch(e) {} }, 500);
-
     const timer = setInterval(() => {
       if (popup.closed) {
         clearInterval(timer);
         this._onPopupClosed(tid);
       } else {
-        // ✅ v3.8: 팝업이 열려있는 동안 주기적으로 앞으로 가져오기
         try { popup.focus(); } catch(e) {}
       }
     }, 1000);
   },
 
   // ─────────────────────────────────────────────────
-  // PC - 뱅크페이 팝업
-  // ✅ v3.8: popup.focus() 추가
+  // PC - 뱅크페이 팝업 (포커스 유지)
   // ─────────────────────────────────────────────────
   _openBankPayPopup(urlData, tid) {
     const W = 720, H = 600;
@@ -265,10 +261,7 @@ const WinPay = {
       return;
     }
     this._postForm(urlData, 'BankPayPopup');
-
-    // ✅ v3.8: 팝업 포커스
     setTimeout(() => { try { popup.focus(); } catch(e) {} }, 500);
-
     const timer = setInterval(() => {
       if (popup.closed) {
         clearInterval(timer);
@@ -302,10 +295,21 @@ const WinPay = {
 
   // ─────────────────────────────────────────────────
   // PC - 팝업 닫힌 후 결제 결과 조회
+  // ✅ v3.9: localStorage 삭제 전 데이터 추출 → 완료 페이지 정상 표시
   // ─────────────────────────────────────────────────
   async _onPopupClosed(tid) {
     // 결제 승인 서버 처리 완료 대기 (2초)
     await new Promise(resolve => setTimeout(resolve, 2000));
+
+    // ✅ v3.9: 먼저 데이터 추출 (삭제 전)
+    const saved     = JSON.parse(localStorage.getItem('wp_order') || '{}');
+    const orderNo   = saved.orderNo   || ('ORD' + Date.now());
+    const dealer    = saved.dealer    || '';
+    const goodsName = saved.goodsName || '';
+    const ordNm     = saved.ordNm     || '';
+    const amt       = saved.amt       || 0;
+
+    console.log('[WinPay] 팝업 닫힘 - 주문번호:', orderNo, 'tid:', tid);
 
     try {
       const res  = await fetch(`${this.SERVER_URL}/api/payment/status/${tid}`, {
@@ -315,24 +319,35 @@ const WinPay = {
       console.log('[WinPay] status 조회 결과:', JSON.stringify(data));
 
       if (data.success) {
-        // 상태 결제완료로 업데이트
-        const saved = JSON.parse(localStorage.getItem('wp_order') || '{}');
+        // ✅ 상태 결제완료로 업데이트
         try {
           await this._saveToSheets({
             action: 'updateOrderStatus',
             data: {
-              주문번호:   saved.orderNo || tid,
+              주문번호:   orderNo,           // ✅ 정확한 주문번호 사용
               주문상태:   '결제완료',
               PG거래번호: data.wTid || '',
             }
           });
-          await new Promise(resolve => setTimeout(resolve, 200));
-          console.log('[WinPay] 주문 상태 업데이트 완료');
+          await new Promise(resolve => setTimeout(resolve, 300));
+          console.log('[WinPay] 주문 상태 업데이트 완료:', orderNo);
         } catch (e) {
           console.warn('[WinPay] 상태 업데이트 실패:', e);
         }
 
-        await this._redirectToComplete(tid, data);
+        // ✅ localStorage 삭제
+        localStorage.removeItem('cart');
+        localStorage.removeItem('wp_tid');
+        localStorage.removeItem('wp_order');
+
+        // ✅ 완료 페이지 이동 (추출한 데이터 사용)
+        const q = `?orderNo=${orderNo}`
+          + `&amt=${data.amt || amt}`
+          + `&goodsName=${encodeURIComponent(goodsName)}`
+          + `&ordNm=${encodeURIComponent(ordNm)}`
+          + (dealer ? `&dealer=${dealer}` : '');
+
+        window.location.href = `order-complete.html${q}`;
 
       } else {
         // "진행 중" 메시지면 3초 후 재조회
@@ -351,27 +366,6 @@ const WinPay = {
       console.error('[WinPay] 결제결과 확인 실패:', e);
       alert('결제 결과를 확인할 수 없습니다.\n마이페이지에서 주문 내역을 확인해주세요.');
     }
-  },
-
-  // ─────────────────────────────────────────────────
-  // 완료 페이지 이동
-  // ─────────────────────────────────────────────────
-  async _redirectToComplete(tid, pgResult) {
-    const saved   = JSON.parse(localStorage.getItem('wp_order') || '{}');
-    const orderNo = saved.orderNo || ('ORD' + Date.now());
-    const dealer  = saved.dealer  || '';
-
-    localStorage.removeItem('cart');
-    localStorage.removeItem('wp_tid');
-    localStorage.removeItem('wp_order');
-
-    const q = `?orderNo=${orderNo}`
-      + `&amt=${pgResult.amt || saved.amt || 0}`
-      + `&goodsName=${encodeURIComponent(saved.goodsName || '')}`
-      + `&ordNm=${encodeURIComponent(saved.ordNm || '')}`
-      + (dealer ? `&dealer=${dealer}` : '');
-
-    window.location.href = `order-complete.html${q}`;
   },
 
   // ─────────────────────────────────────────────────
