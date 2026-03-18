@@ -1,5 +1,5 @@
 /**
- * 윈글로벌페이 연동 모듈 (winpay.js) v3.4
+ * 윈글로벌페이 연동 모듈 (winpay.js) v3.5
  * 실제 PG 샘플 6개 파일 완전 분석 기반
  *
  * ▶ PC  : 팝업 오픈 → 닫힘 감지 → /api/payment/status/{tid} 조회
@@ -8,7 +8,8 @@
  * v3.1: taxFreeCd '0000'→'00', cashReceipt 0→'0', btn id 수정
  * v3.2: order.html 파라미터명 불일치 수정
  * v3.3: saveOrder data 키로 감싸기
- * v3.4: CORS 수정 - mode:'no-cors' + Content-Type:'text/plain' (구글 시트 저장 안 되는 문제 수정)
+ * v3.4: CORS 수정 - mode:'no-cors' + Content-Type:'text/plain'
+ * v3.5: keepalive:true + 300ms 딜레이 추가 (페이지 이동 전 저장 완료 보장)
  *
  * 설치 위치: js/winpay.js
  */
@@ -261,7 +262,7 @@ const WinPay = {
 
   // ─────────────────────────────────────────────────
   // 주문 저장 → 완료 페이지 이동
-  // ✅ v3.4 핵심 수정: mode:'no-cors' + Content-Type:'text/plain'
+  // ✅ v3.5: keepalive:true + 300ms 딜레이 추가
   // ─────────────────────────────────────────────────
   async _saveAndRedirect(tid, pgResult) {
     const saved   = JSON.parse(localStorage.getItem('wp_order') || '{}');
@@ -270,9 +271,10 @@ const WinPay = {
 
     try {
       await fetch(CONFIG.APPS_SCRIPT_URL, {
-        method:  'POST',
-        mode:    'no-cors',                        // ✅ v3.4 수정
-        headers: { 'Content-Type': 'text/plain' }, // ✅ v3.4 수정
+        method:    'POST',
+        mode:      'no-cors',
+        keepalive: true,                           // ✅ v3.5: 페이지 이동 후에도 요청 완료 보장
+        headers:   { 'Content-Type': 'text/plain' },
         body: JSON.stringify({
           action: 'saveOrder',
           data: {
@@ -308,6 +310,9 @@ const WinPay = {
     localStorage.removeItem('cart');
     localStorage.removeItem('wp_tid');
     localStorage.removeItem('wp_order');
+
+    // ✅ v3.5: 저장 요청 완료 후 300ms 대기 후 이동
+    await new Promise(resolve => setTimeout(resolve, 300));
 
     const q = `?orderNo=${orderNo}`
       + `&amt=${pgResult.amt || saved.amt || 0}`
