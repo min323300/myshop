@@ -4,8 +4,13 @@
 const CONFIG = {
   // ✅ Google Sheets ID
   SHEET_ID: '1t804fRO8HfQtmOzpDAz2IZfzRDQ7t8LYllFGZr3ftUI',
+
+  // ✅ Apps Script URL (주문저장 / PG설정 로드 / 포인트 등 모든 백엔드 통신)
+  APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbyBA3dBSsLwrmwlF3PCJi8sw4FZkH8Mq9W9uncGnqPq0a9As7CKtoSr5rIxXD1Ugm34GQ/exec',
+
   // ✅ 이미지 기본 URL
   IMAGE_BASE: 'https://min323300.github.io/myshop/images/',
+
   // 시트별 URL 자동 생성
   get SHEETS() {
     const base = `https://docs.google.com/spreadsheets/d/${this.SHEET_ID}/gviz/tq?tqx=out:csv&sheet=`;
@@ -25,6 +30,7 @@ const CONFIG = {
       사업자정보: base + encodeURIComponent('사업자정보'),
     };
   },
+
   // ✅ 본사 기본 정보 (구글시트 로드 전 기본값 - 구글시트가 덮어씀)
   STORE: {
     BRAND:   '담누리마켓',
@@ -40,19 +46,23 @@ const CONFIG = {
       YOUTUBE:   'https://youtube.com/',
     }
   },
+
   // ✅ 대리점 설정
-  IS_DEALER: false,
-  DEALER_ID: '',
+  IS_DEALER:   false,
+  DEALER_ID:   '',
   DEALER_NAME: '',
-  // ✅ PG 설정
+
+  // ✅ PG 설정 (윈글로벌페이)
+  // tmnId / payKey 는 보안상 구글시트 PG설정 시트에서 로드 (winpay.js > loadConfig)
   PG: {
-    PROVIDER:      '',
-    MERCHANT_ID:   '',
-    API_PROXY_URL: 'https://script.google.com/macros/s/AKfycbzWpT2On47R7_LTRiznH7qcPBYTPUV3i4UiywI8lkHUYt6KGzDevap7RfQHACwD7oxDzg/exec',
+    PROVIDER:      'winglobalpay',
+    MERCHANT_ID:   'WGA000002',
+    API_PROXY_URL: 'https://script.google.com/macros/s/AKfycbyBA3dBSsLwrmwlF3PCJi8sw4FZkH8Mq9W9uncGnqPq0a9As7CKtoSr5rIxXD1Ugm34GQ/exec',
   },
+
   // ✅ 기타 설정
-  PRODUCTS_PER_PAGE: 12,
-  CURRENCY: 'KRW',
+  PRODUCTS_PER_PAGE:   12,
+  CURRENCY:            'KRW',
   DEFAULT_THEME_COLOR: '#FF5733',
 };
 
@@ -140,7 +150,7 @@ const CONFIG = {
         var dealerName = myRow['대리점명'] || '';
         if (dealerName) {
           CONFIG.DEALER_NAME     = dealerName;
-          CONFIG.STORE.BRAND     = dealerName; // 헤더 로고에 표시
+          CONFIG.STORE.BRAND     = dealerName;
           CONFIG.STORE.NAME      = dealerName;
         }
         // 테마색상 적용
