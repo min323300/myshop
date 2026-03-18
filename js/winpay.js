@@ -90,7 +90,7 @@ const WinPay = {
     const email    = orderInfo.email            || orderInfo.buyerEmail || '';
     const userId   = orderInfo.userId           || orderInfo.buyerTel   || 'guest';
     const goodsName= orderInfo.goodsName        || orderInfo.goodsname  || '';
-    const prodCode = orderInfo.productCode      || orderInfo.orderNo    || '001';
+    const prodCode = String(orderInfo.productCode || '001').slice(0, 10);
 
     if (!amt || amt <= 0) throw new Error('결제 금액이 올바르지 않습니다 (amt: ' + amt + ')');
 
