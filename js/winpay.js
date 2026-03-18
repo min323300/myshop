@@ -1,5 +1,5 @@
 /**
- * 윈글로벌페이 연동 모듈 (winpay.js) v3.5
+ * 윈글로벌페이 연동 모듈 (winpay.js) v3.6
  * 실제 PG 샘플 6개 파일 완전 분석 기반
  *
  * ▶ PC  : 팝업 오픈 → 닫힘 감지 → /api/payment/status/{tid} 조회
@@ -9,7 +9,9 @@
  * v3.2: order.html 파라미터명 불일치 수정
  * v3.3: saveOrder data 키로 감싸기
  * v3.4: CORS 수정 - mode:'no-cors' + Content-Type:'text/plain'
- * v3.5: keepalive:true + 300ms 딜레이 추가 (페이지 이동 전 저장 완료 보장)
+ * v3.5: keepalive:true + 300ms 딜레이 추가
+ * v3.6: ★ 팝업 열기 전 주문 선저장(결제대기) → 결제 완료 후 상태만 업데이트
+ *         (팝업 닫힘 후 저장 실패 문제 완전 해결)
  *
  * 설치 위치: js/winpay.js
  */
@@ -22,6 +24,19 @@ const WinPay = {
   tmnId:    '',
   payKey:   '',
   jwtToken: '',
+
+  // ─────────────────────────────────────────────────
+  // 공통 Sheets 저장 유틸
+  // ─────────────────────────────────────────────────
+  _saveToSheets(payload) {
+    return fetch(CONFIG.APPS_SCRIPT_URL, {
+      method:    'POST',
+      mode:      'no-cors',
+      keepalive: true,
+      headers:   { 'Content-Type': 'text/plain' },
+      body:      JSON.stringify(payload)
+    });
+  },
 
   // ─────────────────────────────────────────────────
   // 1. PG설정 시트에서 tmnId / payKey 로드
@@ -81,16 +96,77 @@ const WinPay = {
     const payMethod = orderInfo.payMethod || 'CARD';
     const mobileResultUrl = `${this.COMPLETE_URL}?tid=${tid}`;
 
-    // ✅ order.html 파라미터명 양쪽 모두 수용
+    // order.html 파라미터명 양쪽 모두 수용
     const amt       = Number(orderInfo.amt       || orderInfo.amount    || 0);
     const ordNm     = orderInfo.ordNm            || orderInfo.buyerName  || '';
     const email     = orderInfo.email            || orderInfo.buyerEmail || '';
     const userId    = orderInfo.userId           || orderInfo.buyerTel   || 'guest';
     const goodsName = orderInfo.goodsName        || orderInfo.goodsname  || '';
-    const prodCode  = 'P001'; // 상품코드 고정 (최대 10자 제한)
+    const prodCode  = 'P001';
 
     if (!amt || amt <= 0) throw new Error('결제 금액이 올바르지 않습니다 (amt: ' + amt + ')');
 
+    // 주문 정보 구성
+    const orderData = {
+      tid,
+      amt,
+      goodsName,
+      ordNm,
+      email,
+      userId,
+      phone:         orderInfo.buyerTel      || orderInfo.phone      || '',
+      receiverName:  orderInfo.receiverName  || ordNm,
+      receiverPhone: orderInfo.receiverPhone || orderInfo.buyerTel   || '',
+      address:       orderInfo.address       || '',
+      zipCode:       orderInfo.zipCode       || '',
+      productCode:   prodCode,
+      dealerId:      orderInfo.dealerId      || '',
+      referralCode:  orderInfo.referralCode  || '',
+      memo:          orderInfo.memo          || '',
+      qty:           orderInfo.qty           || 1,
+    };
+
+    // ✅ v3.6 핵심: 팝업 열기 전 주문 먼저 저장 (결제대기)
+    const orderNo = 'ORD' + Date.now();
+    const dealer  = orderData.dealerId || localStorage.getItem('dealerId') || '';
+    try {
+      await this._saveToSheets({
+        action: 'saveOrder',
+        data: {
+          주문번호:     orderNo,
+          주문일시:     new Date().toLocaleString('ko-KR'),
+          대리점ID:     dealer,
+          주문자명:     ordNm,
+          연락처:       orderData.phone,
+          이메일:       email,
+          받는분:       orderData.receiverName,
+          받는분연락처: orderData.receiverPhone,
+          배송주소:     orderData.address,
+          우편번호:     orderData.zipCode,
+          상품번호:     prodCode,
+          주문상품:     goodsName,
+          수량:         orderData.qty,
+          결제금액:     amt,
+          결제방법:     'card',
+          추천인코드:   orderData.referralCode,
+          회원구분:     (userId && userId !== 'guest') ? '회원' : '비회원',
+          주문상태:     '결제대기',    // ← 먼저 결제대기로 저장
+          메모:         orderData.memo,
+          PG주문번호:   tid,
+          PG거래번호:   '',
+        }
+      });
+      await new Promise(resolve => setTimeout(resolve, 300));
+      console.log('[WinPay] 주문 선저장 완료:', orderNo);
+    } catch (e) {
+      console.warn('[WinPay] 주문 선저장 실패:', e);
+    }
+
+    // localStorage에 주문정보 + orderNo 저장
+    localStorage.setItem('wp_tid',   tid);
+    localStorage.setItem('wp_order', JSON.stringify({ ...orderData, orderNo, dealer }));
+
+    // PG 결제 요청
     const payload = {
       tmnId:             this.tmnId,
       tid,
@@ -138,27 +214,6 @@ const WinPay = {
 
     const data = await res.json();
     if (!data.success) throw new Error(data.message || '결제요청 실패');
-
-    // 임시 주문 정보 저장
-    localStorage.setItem('wp_tid',   tid);
-    localStorage.setItem('wp_order', JSON.stringify({
-      tid,
-      amt,
-      goodsName,
-      ordNm,
-      email,
-      userId,
-      phone:         orderInfo.buyerTel      || orderInfo.phone      || '',
-      receiverName:  orderInfo.receiverName  || ordNm,
-      receiverPhone: orderInfo.receiverPhone || orderInfo.buyerTel   || '',
-      address:       orderInfo.address       || '',
-      zipCode:       orderInfo.zipCode       || '',
-      productCode:   prodCode,
-      dealerId:      orderInfo.dealerId      || '',
-      referralCode:  orderInfo.referralCode  || '',
-      memo:          orderInfo.memo          || '',
-      qty:           orderInfo.qty           || 1,
-    }));
 
     if (isMobile) {
       const paymentUrl = data.paymentUrl;
@@ -239,7 +294,7 @@ const WinPay = {
   },
 
   // ─────────────────────────────────────────────────
-  // PC - 팝업 닫힌 후 결제 결과 조회
+  // PC - 팝업 닫힌 후 결제 결과 조회 → 상태 업데이트
   // ─────────────────────────────────────────────────
   async _onPopupClosed(tid) {
     try {
@@ -247,8 +302,26 @@ const WinPay = {
         headers: { 'Authorization': `Bearer ${this.jwtToken}` }
       });
       const data = await res.json();
+
       if (data.success) {
-        await this._saveAndRedirect(tid, data);
+        // ✅ v3.6: 상태만 결제완료로 업데이트
+        const saved = JSON.parse(localStorage.getItem('wp_order') || '{}');
+        try {
+          await this._saveToSheets({
+            action: 'updateOrderStatus',
+            data: {
+              주문번호: saved.orderNo || tid,
+              주문상태: '결제완료',
+              PG거래번호: data.wTid || '',
+            }
+          });
+          await new Promise(resolve => setTimeout(resolve, 200));
+          console.log('[WinPay] 주문 상태 업데이트 완료');
+        } catch (e) {
+          console.warn('[WinPay] 상태 업데이트 실패:', e);
+        }
+
+        await this._redirectToComplete(tid, data);
       } else {
         alert('결제가 완료되지 않았습니다.\n' + (data.message || ''));
         const btn = document.getElementById('btn-order');
@@ -261,58 +334,16 @@ const WinPay = {
   },
 
   // ─────────────────────────────────────────────────
-  // 주문 저장 → 완료 페이지 이동
-  // ✅ v3.5: keepalive:true + 300ms 딜레이 추가
+  // 완료 페이지 이동
   // ─────────────────────────────────────────────────
-  async _saveAndRedirect(tid, pgResult) {
+  async _redirectToComplete(tid, pgResult) {
     const saved   = JSON.parse(localStorage.getItem('wp_order') || '{}');
-    const orderNo = 'ORD' + Date.now();
-    const dealer  = saved.dealerId || localStorage.getItem('dealerId') || '';
-
-    try {
-      await fetch(CONFIG.APPS_SCRIPT_URL, {
-        method:    'POST',
-        mode:      'no-cors',
-        keepalive: true,                           // ✅ v3.5: 페이지 이동 후에도 요청 완료 보장
-        headers:   { 'Content-Type': 'text/plain' },
-        body: JSON.stringify({
-          action: 'saveOrder',
-          data: {
-            주문번호:     orderNo,
-            주문일시:     new Date().toLocaleString('ko-KR'),
-            대리점ID:     dealer,
-            주문자명:     saved.ordNm        || '',
-            연락처:       saved.phone        || '',
-            이메일:       saved.email        || '',
-            받는분:       saved.receiverName  || saved.ordNm || '',
-            받는분연락처: saved.receiverPhone || saved.phone || '',
-            배송주소:     saved.address      || '',
-            우편번호:     saved.zipCode      || '',
-            상품번호:     saved.productCode  || '',
-            주문상품:     saved.goodsName    || '',
-            수량:         saved.qty          || 1,
-            결제금액:     pgResult.amt       || saved.amt || 0,
-            결제방법:     'card',
-            추천인코드:   saved.referralCode || '',
-            회원구분:     (saved.userId && saved.userId !== 'guest') ? '회원' : '비회원',
-            주문상태:     '결제완료',
-            메모:         saved.memo         || '',
-            PG주문번호:   tid,
-            PG거래번호:   pgResult.wTid      || '',
-          }
-        })
-      });
-      console.log('[WinPay] 주문 저장 요청 완료:', orderNo);
-    } catch (e) {
-      console.warn('[WinPay] 주문 저장 실패 (결제는 성공):', e);
-    }
+    const orderNo = saved.orderNo || ('ORD' + Date.now());
+    const dealer  = saved.dealer  || '';
 
     localStorage.removeItem('cart');
     localStorage.removeItem('wp_tid');
     localStorage.removeItem('wp_order');
-
-    // ✅ v3.5: 저장 요청 완료 후 300ms 대기 후 이동
-    await new Promise(resolve => setTimeout(resolve, 300));
 
     const q = `?orderNo=${orderNo}`
       + `&amt=${pgResult.amt || saved.amt || 0}`
