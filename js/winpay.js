@@ -317,3 +317,6 @@ const WinPay = {
     }
   }
 };
+// ✅ 이 2줄을 바로 아래에 추가
+// order.html의 WinPay.pay() 호출 호환용 별칭
+WinPay.pay = function(opts) { return WinPay.startPayment(opts); };
