@@ -164,9 +164,13 @@ function renderProduct(p) {
     if (origEl) { origEl.textContent = p.price.toLocaleString() + '원'; origEl.style.display = 'block'; }
     if (discEl) { discEl.textContent = discount + '% 할인'; discEl.style.display = 'inline-block'; }
   }
-  if (price >= 50000) {
-    var feeEl = document.getElementById('delivery-fee');
-    if (feeEl) feeEl.textContent = '무료배송 🎉';
+  var feeEl = document.getElementById('delivery-fee');
+  if (feeEl) {
+    if (p.shippingMethod === '무료배송' || p.shippingFee === 0 || price >= 50000) {
+      feeEl.textContent = '무료배송 🎉';
+    } else {
+      feeEl.textContent = (p.shippingFee || 3000).toLocaleString() + '원 (50,000원 이상 무료)';
+    }
   }
 
   // ✅ 카테고리별 옵션 라벨 동적 변경
