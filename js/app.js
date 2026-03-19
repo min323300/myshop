@@ -28,8 +28,9 @@ const Cart = {
         image:          product.image,
         qty,
         shippingMethod: product.shippingMethod || '',
-        shippingFee:    product.shippingFee !== undefined ? product.shippingFee : 3000,
+        shippingFee:    product.shippingFee !== undefined ? product.shippingFee : 3000
       });
+    }
     this.save();
     this.showToast(`"${product.name}" 장바구니에 담겼습니다!`);
   },
@@ -88,7 +89,6 @@ const Popup = {
 
   // 팝업 표시
   show(popup) {
-    // 오늘 닫은 팝업 확인
     const closed = JSON.parse(sessionStorage.getItem('closedPopups') || '[]');
     const closedToday = JSON.parse(localStorage.getItem('closedPopupsToday') || '{}');
     const today = new Date().toDateString();
