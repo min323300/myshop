@@ -960,8 +960,13 @@ function applyShippingPolicy(p) {
     var fee = parseInt(p['배송비']);
     feeEl.textContent = fee === 0 ? '무료배송 🎉' : fee.toLocaleString() + '원 (50,000원 이상 무료)';
     var delivFee = document.getElementById('delivery-fee');
-    if (delivFee) delivFee.textContent = fee === 0 ? '무료배송 🎉' : fee.toLocaleString() + '원 (50,000원 이상 무료)';
-  }
+    if (delivFee) {
+      var isProductFree = currentProduct &&
+        (currentProduct.shippingMethod === '무료배송' || currentProduct.shippingFee === 0);
+      if (!isProductFree) {
+        delivFee.textContent = fee === 0 ? '무료배송 🎉' : fee.toLocaleString() + '원 (50,000원 이상 무료)';
+      }
+   }
   var periodEl = document.getElementById('ship-period');
   if (periodEl && p['배송기간']) periodEl.textContent = p['배송기간'];
   var retPeriodEl = document.getElementById('ret-period');
