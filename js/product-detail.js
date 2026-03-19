@@ -55,7 +55,7 @@ function parseOptionItem(raw) {
 
   return {
     name: name,
-    price: isPrice ? val : null,   // 절대 가격 (옵션별 다른 가격)
+    price: isPrice ? val : null,
     stock: isPrice ? 999 : stock,
     soldOut: soldOut
   };
@@ -68,7 +68,6 @@ function initPage() {
   } catch(e){}
   try { Cart.init(); } catch(e){}
 
-  loadShippingPolicy();
   var params = new URLSearchParams(location.search);
   var productId = params.get('id');
   if (!productId) { alert('상품 정보를 찾을 수 없습니다'); location.href = dealerUrl('products.html'); return; }
@@ -164,6 +163,8 @@ function renderProduct(p) {
     if (origEl) { origEl.textContent = p.price.toLocaleString() + '원'; origEl.style.display = 'block'; }
     if (discEl) { discEl.textContent = discount + '% 할인'; discEl.style.display = 'inline-block'; }
   }
+
+  // 배송비 (renderProduct 단계에서 선 표시 — loadShippingPolicy 결과로 덮어씌워짐)
   var feeEl = document.getElementById('delivery-fee');
   if (feeEl) {
     if (p.shippingMethod === '무료배송' || p.shippingFee === 0 || price >= 50000) {
@@ -173,16 +174,15 @@ function renderProduct(p) {
     }
   }
 
-  // ✅ 카테고리별 옵션 라벨 동적 변경
+  // 카테고리별 옵션 라벨 동적 변경
   var catLabels = getCategoryLabels(p.category);
 
-  // 옵션 라벨 텍스트 교체
   var colorLabelEl = document.querySelector('#option-color-section .option-label');
   if (colorLabelEl) colorLabelEl.textContent = catLabels.color;
   var sizeLabelEl = document.querySelector('#option-size-section .option-label');
   if (sizeLabelEl) sizeLabelEl.textContent = catLabels.size;
 
-  // ✅ 옵션1 (colors 필드 → 구성/색상 등)
+  // 옵션1 (colors 필드)
   if (p.colors) {
     var colorItems = p.colors.split('|').map(function(s){ return s.trim(); }).filter(Boolean);
     if (colorItems.length) {
@@ -199,12 +199,12 @@ function renderProduct(p) {
           + 'data-stock="' + opt.stock + '" '
           + (opt.soldOut ? 'disabled ' : '')
           + 'style="' + (opt.soldOut ? 'opacity:0.4;text-decoration:line-through;cursor:not-allowed;' : '') + '">'
-          + opt.name + (opt.price ? '' : '') + (opt.soldOut ? ' (품절)' : '') + priceTag + '</button>';
+          + opt.name + (opt.soldOut ? ' (품절)' : '') + priceTag + '</button>';
       }).join('');
     }
   }
 
-  // ✅ 옵션2 (sizes 필드 → 용량/사이즈 등)
+  // 옵션2 (sizes 필드)
   if (p.sizes) {
     var sizeItems = p.sizes.split('|').map(function(s){ return s.trim(); }).filter(Boolean);
     if (sizeItems.length) {
@@ -247,7 +247,7 @@ function renderProduct(p) {
   // 유튜브 영상
   renderYoutube(p.youtube);
 
-  // ✅ [수정] 배송 예정일: 공동구매 여부 확인 후 분기 표시
+  // 배송 예정일: 공동구매 여부 확인 후 분기 표시
   var dateEl = document.getElementById('delivery-date');
   if (dateEl) dateEl.textContent = '확인 중...';
   updateDeliveryDate(p.id);
@@ -259,16 +259,13 @@ function renderProduct(p) {
 }
 
 // ============================================================
-// ✅ [신규] 공동구매 배송예정일 분기 처리 함수
-// - 공동구매 시트에서 해당 상품번호 조회
-// - 현재 진행 중인 공동구매(사용여부=사용, 종료일 > 현재)면 → 공동구매 배송예정일 표시
-// - 아니면 → 일반 내일 도착 예정 표시
+// 공동구매 배송예정일 분기 처리
 // ============================================================
 function updateDeliveryDate(productId) {
   var dateEl = document.getElementById('delivery-date');
   if (!dateEl) return;
 
-  var SHEET_ID = '1t804fRO8HfQtmOzpDAz2IZfzRDQ7t8LYllFGZr3ftUI';
+  var SHEET_ID = (typeof CONFIG !== 'undefined' && CONFIG.SHEET_ID) ? CONFIG.SHEET_ID : '1t804fRO8HfQtmOzpDAz2IZfzRDQ7t8LYllFGZr3ftUI';
   var url = 'https://docs.google.com/spreadsheets/d/' + SHEET_ID
     + '/gviz/tq?tqx=out:csv&sheet=' + encodeURIComponent('공동구매');
 
@@ -278,12 +275,11 @@ function updateDeliveryDate(productId) {
       var lines = csv.trim().split('\n');
       if (lines.length < 2) { setNormalDeliveryDate(dateEl); return; }
 
-      // 헤더 파싱
       var headers = parseCSVLine(lines[0]).map(function(h) { return h.replace(/^"|"$/g, '').trim(); });
-      var idxProductId   = headers.indexOf('상품번호');
-      var idxStatus      = headers.indexOf('사용여부');
-      var idxEndDate     = headers.indexOf('종료일시');
-      var idxDelivDate   = headers.indexOf('배송예정일');
+      var idxProductId = headers.indexOf('상품번호');
+      var idxStatus    = headers.indexOf('사용여부');
+      var idxEndDate   = headers.indexOf('종료일시');
+      var idxDelivDate = headers.indexOf('배송예정일');
 
       if (idxProductId < 0) { setNormalDeliveryDate(dateEl); return; }
 
@@ -293,18 +289,17 @@ function updateDeliveryDate(productId) {
       for (var i = 1; i < lines.length; i++) {
         var cols = parseCSVLine(lines[i]).map(function(c) { return c.replace(/^"|"$/g, '').trim(); });
         if (!cols[idxProductId]) continue;
-
-        // 상품번호 일치 확인
         if (String(cols[idxProductId]) !== String(productId)) continue;
 
-        // 사용여부 확인 (사용 or TRUE)
         var status = (cols[idxStatus] || '').toLowerCase();
         if (status !== '사용' && status !== 'true') continue;
 
-        // 종료일시 확인 (아직 안 끝났는지)
         if (idxEndDate >= 0 && cols[idxEndDate]) {
-          var endDate = new Date(cols[idxEndDate]);
-          if (!isNaN(endDate) && endDate < now) continue; // 이미 종료
+          var parts = cols[idxEndDate].split('-');
+          var endDate = parts.length === 3
+            ? new Date(parts[0], parts[1] - 1, parts[2])
+            : new Date(cols[idxEndDate]);
+          if (!isNaN(endDate) && endDate < now) continue;
         }
 
         found = cols;
@@ -312,11 +307,12 @@ function updateDeliveryDate(productId) {
       }
 
       if (found) {
-        // ✅ 공동구매 진행 중 → 공동구매 배송예정일 표시
         var delivDate = (idxDelivDate >= 0 && found[idxDelivDate]) ? found[idxDelivDate] : '';
         if (delivDate) {
-          // 날짜 포맷 정리 (2026-03-25 → 3/25)
-          var d = new Date(delivDate);
+          var dp = delivDate.split('-');
+          var d = dp.length === 3
+            ? new Date(dp[0], dp[1] - 1, dp[2])
+            : new Date(delivDate);
           var dateStr = (!isNaN(d))
             ? (d.getMonth() + 1) + '/' + d.getDate()
             : delivDate;
@@ -327,12 +323,10 @@ function updateDeliveryDate(productId) {
             + '<br><small style="color:#888;font-size:12px;">정확한 날짜는 마감 후 안내드립니다</small>';
         }
       } else {
-        // ✅ 일반 상품 → 기존 내일 도착 예정 표시
         setNormalDeliveryDate(dateEl);
       }
     })
     .catch(function() {
-      // 공동구매 시트 조회 실패 시 → 일반 표시로 fallback
       setNormalDeliveryDate(dateEl);
     });
 }
@@ -542,7 +536,7 @@ function openLightboxUrl(url) {
 
 var selectedOptions = {};
 
-// ✅ 옵션 선택 시 가격 자동 변경
+// ✅ [수정] 옵션 선택 시 가격 자동 변경 — 가격 없는 버튼 선택 시 올바르게 복원
 function selectOption(el, group) {
   el.closest('.option-chips').querySelectorAll('.option-chip').forEach(function(c){ c.classList.remove('active'); });
   el.classList.add('active');
@@ -552,38 +546,30 @@ function selectOption(el, group) {
 
   selectedOptions[group] = optName;
 
-  // 옵션에 가격이 있으면 → 표시 금액 업데이트
   if (optPrice >= 1000) {
+    // 옵션에 가격이 있으면 → 해당 가격으로 표시
     optionPriceOverride = optPrice;
 
-    // 가격 표시 업데이트
     var detPrice = document.getElementById('detail-price');
     if (detPrice) detPrice.textContent = optPrice.toLocaleString() + '원';
 
-    // 원가 대비 할인율 숨김 (옵션 가격은 절대값이므로)
     var origEl = document.getElementById('detail-original-price');
     var discEl = document.getElementById('detail-discount');
     if (origEl) origEl.style.display = 'none';
     if (discEl) discEl.style.display = 'none';
   } else {
-    // 가격 옵션 없는 항목 → 기본 상품 가격 복원
-    var hasAnyPrice = el.closest('.option-chips').querySelectorAll('[data-price]');
-    var anyPrice = false;
-    hasAnyPrice.forEach(function(btn){ if(parseInt(btn.dataset.price) >= 1000) anyPrice = true; });
-
-    if (!anyPrice) {
-      optionPriceOverride = null;
-      var basePrice = currentProduct ? (currentProduct.salePrice || currentProduct.price) : 0;
-      var detPriceEl = document.getElementById('detail-price');
-      if (detPriceEl) detPriceEl.textContent = basePrice.toLocaleString() + '원';
-    }
+    // ✅ 가격 없는 버튼 선택 시 → 항상 기본 상품 가격으로 복원
+    optionPriceOverride = null;
+    var basePrice = currentProduct ? (currentProduct.salePrice || currentProduct.price) : 0;
+    var detPriceEl = document.getElementById('detail-price');
+    if (detPriceEl) detPriceEl.textContent = basePrice.toLocaleString() + '원';
   }
 
   updateSelectedSummary();
   updateTotal();
 }
 
-// ✅ 선택 옵션 요약 (가격 포함 표시)
+// 선택 옵션 요약 (가격 포함 표시)
 function updateSelectedSummary() {
   var wrap = document.getElementById('selected-option-summary');
   if (!wrap) return;
@@ -638,7 +624,7 @@ function changeQty(delta) {
   updateTotal();
 }
 
-// ✅ 수량 × (옵션가격 or 상품가격)
+// 수량 × (옵션가격 or 상품가격)
 function updateTotal() {
   var qty = parseInt(document.getElementById('qty-input').value) || 1;
   var basePrice = currentProduct ? (currentProduct.salePrice || currentProduct.price) : 0;
@@ -908,7 +894,7 @@ function updateShippingContact(phone, email) {
 // 배송정책 로드
 // ============================================================
 function loadShippingPolicy() {
-  var SHEET_ID = '1t804fRO8HfQtmOzpDAz2IZfzRDQ7t8LYllFGZr3ftUI';
+  var SHEET_ID = (typeof CONFIG !== 'undefined' && CONFIG.SHEET_ID) ? CONFIG.SHEET_ID : '1t804fRO8HfQtmOzpDAz2IZfzRDQ7t8LYllFGZr3ftUI';
   var url = 'https://docs.google.com/spreadsheets/d/' + SHEET_ID
     + '/gviz/tq?tqx=out:csv&sheet=' + encodeURIComponent('배송정책');
 
@@ -952,25 +938,36 @@ function parseCSVLine(line) {
   return cols;
 }
 
+// ✅ [수정] applyShippingPolicy — 중괄호 오류 수정 + 5만원 이상 무료 조건 추가
 function applyShippingPolicy(p) {
   var methodEl = document.getElementById('ship-method');
   if (methodEl && p['택배사']) methodEl.textContent = p['택배사'];
+
   var feeEl = document.getElementById('ship-fee');
   if (feeEl && p['배송비'] !== undefined) {
     var fee = parseInt(p['배송비']);
     feeEl.textContent = fee === 0 ? '무료배송 🎉' : fee.toLocaleString() + '원 (50,000원 이상 무료)';
+
     var delivFee = document.getElementById('delivery-fee');
     if (delivFee) {
-      var isProductFree = currentProduct &&
-        (currentProduct.shippingMethod === '무료배송' || currentProduct.shippingFee === 0);
+      var price = currentProduct ? (currentProduct.salePrice || currentProduct.price) : 0;
+      var isProductFree = currentProduct && (
+        currentProduct.shippingMethod === '무료배송' ||
+        currentProduct.shippingFee === 0 ||
+        price >= 50000
+      );
       if (!isProductFree) {
         delivFee.textContent = fee === 0 ? '무료배송 🎉' : fee.toLocaleString() + '원 (50,000원 이상 무료)';
       }
-   }
+    }
+  }
+
   var periodEl = document.getElementById('ship-period');
   if (periodEl && p['배송기간']) periodEl.textContent = p['배송기간'];
+
   var retPeriodEl = document.getElementById('ret-period');
   if (retPeriodEl && p['교환반품기간']) retPeriodEl.textContent = '상품 수령 후 ' + p['교환반품기간'] + ' 이내';
+
   var rejectEl = document.getElementById('ret-reject');
   if (rejectEl && p['반품불가사유']) {
     rejectEl.innerHTML = p['반품불가사유'].split('|').map(function(s){ return '• ' + s.trim(); }).join('<br>');
