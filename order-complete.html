@@ -45,13 +45,14 @@
 <script src="js/config.js"></script>
 <script>
 /**
- * order-complete.html v2.0
+ * order-complete.html v2.1
  *
  * [방식 A] order.html 테스트 모드 직접 이동
  *   → ?no=ORD...&method=신용카드
  *
- * [방식 B] winpay.js _saveAndRedirect() 직접 이동
+ * [방식 B] winpay.js _fallbackRedirect() 직접 이동
  *   → ?orderNo=ORD...&amt=...&goodsName=...&ordNm=...
+ *   ✅ v2.1: 상태 업데이트 추가
  *
  * [방식 C] redirectUrl - PG가 GET 파라미터로 결과 전달
  *   → ?paymentData=JSON인코딩
@@ -67,7 +68,7 @@
   var p           = new URLSearchParams(location.search);
   var dealer      = p.get('dealer') || '';
   var shopUrl     = dealer ? 'index.html?dealer=' + dealer : 'index.html';
-  var SCRIPT_URL  = (typeof CONFIG !== 'undefined') ? CONFIG.PG.API_PROXY_URL : '';
+  var SCRIPT_URL  = (typeof CONFIG !== 'undefined') ? CONFIG.APPS_SCRIPT_URL || CONFIG.PG.API_PROXY_URL : '';
 
   // ── 방식 A: order.html 테스트 모드 (?no= 파라미터) ──────
   var noParam = p.get('no');
@@ -86,6 +87,20 @@
   // ── 방식 B: winpay.js 직접 이동 (?orderNo= 파라미터) ────
   var orderNo = p.get('orderNo');
   if (orderNo) {
+    // ✅ v2.1: 결제완료 상태 업데이트 추가
+    if (SCRIPT_URL) {
+      fetch(SCRIPT_URL, {
+        method:  'POST',
+        headers: { 'Content-Type': 'text/plain' },
+        body: JSON.stringify({
+          action: 'updateOrderStatus',
+          data: { 주문번호: orderNo, 주문상태: '결제완료' }
+        })
+      }).then(function(r) { return r.text(); })
+        .then(function(t) { console.log('[complete] 상태 업데이트 성공:', t); })
+        .catch(function(e) { console.warn('[complete] 상태 업데이트 실패:', e); });
+    }
+
     renderSuccess({
       orderNo:   orderNo,
       amt:       p.get('amt') || '0',
