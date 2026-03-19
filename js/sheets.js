@@ -268,7 +268,7 @@ const ProductAPI = {
       specs: row['상세스펙'] || '',
       caution: row['주의사항'] || '',
       shippingMethod: row['배송방법'] || '',      // ✅ 이 줄 추가
-      shippingFee:    parseInt(row['배송비']) || 3000, // ✅ 이 줄 추가
+      shippingFee: row['배송방법'] === '무료배송' ? 0 : (parseInt(row['배송비']) || 3000),
       isDealer: false,
     }))
     .filter(p => p.isActive && p.name);
