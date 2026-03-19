@@ -22,13 +22,14 @@ const Cart = {
       existing.qty += qty;
     } else {
       this._items.push({
-        id: product.id,
-        name: product.name,
-        price: product.salePrice || product.price,
-        image: product.image,
-        qty
+        id:             product.id,
+        name:           product.name,
+        price:          product.salePrice || product.price,
+        image:          product.image,
+        qty,
+        shippingMethod: product.shippingMethod || '',
+        shippingFee:    product.shippingFee !== undefined ? product.shippingFee : 3000,
       });
-    }
     this.save();
     this.showToast(`"${product.name}" 장바구니에 담겼습니다!`);
   },
