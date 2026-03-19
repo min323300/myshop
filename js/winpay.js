@@ -115,7 +115,7 @@ const WinPay = {
     };
 
     // ✅ 팝업 열기 전 주문 먼저 저장 (결제대기)
-    const orderNo = orderInfo.orderNo || ('ORD' + Date.now());
+    const orderNo = orderInfo.orderNo || orderInfo['주문번호'] || ('ORD' + Date.now());
     const dealer  = orderData.dealerId || localStorage.getItem('dealerId') || '';
     try {
       await this._saveToSheets({
