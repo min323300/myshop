@@ -390,16 +390,22 @@ const WinPay = {
   // ✅ v4.0: status 조회 실패해도 완료 페이지로 이동
   // (결제는 됐는데 조회만 실패한 경우 대비)
   // ─────────────────────────────────────────────────
-  _fallbackRedirect(orderNo, amt, goodsName, ordNm, dealer) {
+    async _fallbackRedirect(orderNo, amt, goodsName, ordNm, dealer) {
     console.log('[WinPay] fallback redirect → order-complete');
 
-    this._saveToSheets({
-      action: 'updateOrderStatus',
-      data: {
-        주문번호: orderNo,
-        주문상태: '결제완료',
-      }
-    });
+    try {
+      await this._saveToSheets({
+        action: 'updateOrderStatus',
+        data: {
+          주문번호: orderNo,
+          주문상태: '결제완료',
+        }
+      });
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      console.log('[WinPay] 결제완료 업데이트 성공:', orderNo);
+    } catch(e) {
+      console.warn('[WinPay] 업데이트 실패:', e);
+    }
 
     localStorage.removeItem('cart');
     localStorage.removeItem('wp_tid');
