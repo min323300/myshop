@@ -392,6 +392,15 @@ const WinPay = {
   // ─────────────────────────────────────────────────
   _fallbackRedirect(orderNo, amt, goodsName, ordNm, dealer) {
     console.log('[WinPay] fallback redirect → order-complete');
+
+    this._saveToSheets({
+      action: 'updateOrderStatus',
+      data: {
+        주문번호: orderNo,
+        주문상태: '결제완료',
+      }
+    });
+
     localStorage.removeItem('cart');
     localStorage.removeItem('wp_tid');
     localStorage.removeItem('wp_order');
