@@ -416,10 +416,8 @@ function loadOrderItems() {
  // ✅ 수정 - 상품 배송비 설정 확인
 var delivery = 3000;
 var hasFreeShip = items.some(function(item) {
-  return String(item.배송방법) === '무료배송'
-      || String(item.shippingMethod) === '무료배송'
-      || Number(item.배송비) === 0
-      || Number(item.shippingFee) === 0;
+  return item.shippingMethod === '무료배송'
+      || item.shippingFee === 0;
 });
 if (hasFreeShip || total >= 50000) delivery = 0;
   orderRawAmount = total + delivery;
