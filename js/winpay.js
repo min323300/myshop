@@ -37,18 +37,9 @@ const WinPay = {
   // ─────────────────────────────────────────────────
   // 1. PG설정 시트에서 tmnId / payKey 로드
   // ─────────────────────────────────────────────────
-  async loadConfig() {
-    try {
-      const res  = await fetch(CONFIG.APPS_SCRIPT_URL + '?action=getPGConfig');
-      const data = await res.json();
-      if (!data.tmnId || !data.payKey) throw new Error('PG 설정값 없음');
-      this.tmnId  = data.tmnId;
-      this.payKey = data.payKey;
-      return true;
-    } catch (e) {
-      console.error('[WinPay] loadConfig 실패:', e);
-      return false;
-    }
+   async loadConfig() {
+    if (this.tmnId && this.payKey) return true;
+    return false;
   },
 
   // ─────────────────────────────────────────────────
