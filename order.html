@@ -413,7 +413,15 @@ function loadOrderItems() {
       + '</div>';
   }).join('');
 
-  var delivery   = total >= 50000 ? 0 : 3000;
+ // ✅ 수정 - 상품 배송비 설정 확인
+var delivery = 3000;
+var hasFreeShip = items.some(function(item) {
+  return String(item.배송방법) === '무료배송'
+      || String(item.shippingMethod) === '무료배송'
+      || Number(item.배송비) === 0
+      || Number(item.shippingFee) === 0;
+});
+if (hasFreeShip || total >= 50000) delivery = 0;
   orderRawAmount = total + delivery;
   document.getElementById('sum-products').textContent = total.toLocaleString() + '원';
   document.getElementById('sum-delivery').textContent = delivery === 0 ? '무료' : delivery.toLocaleString() + '원';
