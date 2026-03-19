@@ -258,7 +258,7 @@ function getCurrentDealerId() {
   var u = p.get('dealer');
   if (u) { try { sessionStorage.setItem('currentDealerId', u); } catch(e) {} return u; }
   try { var s = sessionStorage.getItem('currentDealerId'); if (s) return s; } catch(e) {}
-  if (typeof CONFIG !== 'undefined' && CONFIG.IS_FRANCHISE && CONFIG.FRANCHISE_ID) return CONFIG.FRANCHISE_ID;
+  if (typeof CONFIG !== 'undefined' && CONFIG.IS_DEALER && CONFIG.DEALER_ID) return CONFIG.DEALER_ID;
   return '본사';
 }
 
