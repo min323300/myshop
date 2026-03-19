@@ -391,35 +391,36 @@ const WinPay = {
   // (결제는 됐는데 조회만 실패한 경우 대비)
   // ─────────────────────────────────────────────────
     async _fallbackRedirect(orderNo, amt, goodsName, ordNm, dealer) {
-    console.log('[WinPay] fallback redirect → order-complete');
+  console.log('[WinPay] fallback redirect → order-complete');
 
-    try {
-      await this._saveToSheets({
+  try {
+    // ✅ no-cors 대신 일반 fetch 사용
+    await fetch(CONFIG.APPS_SCRIPT_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify({
         action: 'updateOrderStatus',
-        data: {
-          주문번호: orderNo,
-          주문상태: '결제완료',
-        }
-      });
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      console.log('[WinPay] 결제완료 업데이트 성공:', orderNo);
-    } catch(e) {
-      console.warn('[WinPay] 업데이트 실패:', e);
-    }
+        data: { 주문번호: orderNo, 주문상태: '결제완료' }
+      })
+    });
+    await new Promise(resolve => setTimeout(resolve, 500));
+    console.log('[WinPay] 결제완료 업데이트 성공:', orderNo);
+  } catch(e) {
+    console.warn('[WinPay] 업데이트 실패:', e);
+  }
 
-    localStorage.removeItem('cart');
-    localStorage.removeItem('wp_tid');
-    localStorage.removeItem('wp_order');
+  localStorage.removeItem('cart');
+  localStorage.removeItem('wp_tid');
+  localStorage.removeItem('wp_order');
 
-    const q = `?orderNo=${orderNo}`
-      + `&amt=${amt}`
-      + `&goodsName=${encodeURIComponent(goodsName)}`
-      + `&ordNm=${encodeURIComponent(ordNm)}`
-      + (dealer ? `&dealer=${dealer}` : '');
+  const q = `?orderNo=${orderNo}`
+    + `&amt=${amt}`
+    + `&goodsName=${encodeURIComponent(goodsName)}`
+    + `&ordNm=${encodeURIComponent(ordNm)}`
+    + (dealer ? `&dealer=${dealer}` : '');
 
-    window.location.href = `order-complete.html${q}`;
-  },
-
+  window.location.href = `order-complete.html${q}`;
+},
   // ─────────────────────────────────────────────────
   // 전체 결제 시작
   // ─────────────────────────────────────────────────
