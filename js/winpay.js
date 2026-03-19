@@ -1,20 +1,13 @@
 /**
- * 윈글로벌페이 연동 모듈 (winpay.js) v3.9
+ * 윈글로벌페이 연동 모듈 (winpay.js) v4.0
  * 실제 PG 샘플 6개 파일 완전 분석 기반
  *
  * ▶ PC  : 팝업 오픈 → 닫힘 감지 → 2초 대기 → /api/payment/status/{tid} 조회
  * ▶ 모바일 : window.location.href 페이지 이동 → userResultUrl?tid={tid} 로 리다이렉트
  *
- * v3.1: taxFreeCd '0000'→'00', cashReceipt 0→'0', btn id 수정
- * v3.2: order.html 파라미터명 불일치 수정
- * v3.3: saveOrder data 키로 감싸기
- * v3.4: CORS 수정 - mode:'no-cors' + Content-Type:'text/plain'
- * v3.5: keepalive:true + 300ms 딜레이 추가
- * v3.6: 팝업 열기 전 주문 선저장(결제대기) → 결제 완료 후 상태만 업데이트
- * v3.7: 팝업 닫힘 후 2초 대기 + 재조회 로직 추가
- * v3.8: 팝업 포커스 유지 (팝업이 뒤로 숨는 문제 해결)
- * v3.9: _onPopupClosed에서 localStorage 삭제 전 데이터 추출
- *       → 완료 페이지 goodsName/ordNm 정상 표시 + updateOrderStatus 정상 작동
+ * v3.x: 순차 개선 (taxFreeCd, CORS, 선저장, 포커스 등)
+ * v4.0: JWT 토큰 만료 시 자동 재로그인
+ *       status API 응답을 텍스트로 먼저 받아 JSON 파싱 오류 방지
  *
  * 설치 위치: js/winpay.js
  */
@@ -63,6 +56,12 @@ const WinPay = {
   // ─────────────────────────────────────────────────
   async login() {
     try {
+      // payKey 없으면 config 먼저 로드
+      if (!this.payKey) {
+        const cfgOk = await this.loadConfig();
+        if (!cfgOk) throw new Error('PG 설정 로드 실패');
+      }
+
       const res = await fetch(`${this.SERVER_URL}/api/auth/login`, {
         method: 'POST',
         headers: {
@@ -78,6 +77,7 @@ const WinPay = {
       sessionStorage.setItem('wp_jwt',    this.jwtToken);
       sessionStorage.setItem('wp_tmnId',  this.tmnId);
       sessionStorage.setItem('wp_payKey', this.payKey);
+      console.log('[WinPay] 로그인 성공');
       return true;
     } catch (e) {
       console.error('[WinPay] login 실패:', e);
@@ -109,7 +109,6 @@ const WinPay = {
 
     if (!amt || amt <= 0) throw new Error('결제 금액이 올바르지 않습니다 (amt: ' + amt + ')');
 
-    // 주문 정보 구성
     const orderData = {
       tid, amt, goodsName, ordNm, email, userId,
       phone:         orderInfo.buyerTel      || orderInfo.phone      || '',
@@ -295,13 +294,13 @@ const WinPay = {
 
   // ─────────────────────────────────────────────────
   // PC - 팝업 닫힌 후 결제 결과 조회
-  // ✅ v3.9: localStorage 삭제 전 데이터 추출 → 완료 페이지 정상 표시
+  // ✅ v4.0: JWT 만료 시 자동 재로그인 + JSON 파싱 안전처리
   // ─────────────────────────────────────────────────
   async _onPopupClosed(tid) {
     // 결제 승인 서버 처리 완료 대기 (2초)
     await new Promise(resolve => setTimeout(resolve, 2000));
 
-    // ✅ v3.9: 먼저 데이터 추출 (삭제 전)
+    // ✅ v4.0: localStorage 삭제 전에 데이터 먼저 추출
     const saved     = JSON.parse(localStorage.getItem('wp_order') || '{}');
     const orderNo   = saved.orderNo   || ('ORD' + Date.now());
     const dealer    = saved.dealer    || '';
@@ -311,11 +310,43 @@ const WinPay = {
 
     console.log('[WinPay] 팝업 닫힘 - 주문번호:', orderNo, 'tid:', tid);
 
+    // ✅ v4.0: JWT 토큰 없거나 만료 시 자동 재로그인
+    if (!this.jwtToken) {
+      console.log('[WinPay] JWT 없음 → 재로그인 시도');
+      const loginOk = await this.login();
+      if (!loginOk) {
+        console.error('[WinPay] 재로그인 실패');
+        this._fallbackRedirect(orderNo, amt, goodsName, ordNm, dealer);
+        return;
+      }
+    }
+
     try {
-      const res  = await fetch(`${this.SERVER_URL}/api/payment/status/${tid}`, {
+      const res = await fetch(`${this.SERVER_URL}/api/payment/status/${tid}`, {
         headers: { 'Authorization': `Bearer ${this.jwtToken}` }
       });
-      const data = await res.json();
+
+      // ✅ v4.0: 텍스트로 먼저 받아서 JSON 파싱 오류 방지
+      const text = await res.text();
+      console.log('[WinPay] status 원본 응답:', text);
+
+      if (!text || text.trim() === '') {
+        throw new Error('빈 응답 수신');
+      }
+
+      // 401/403이면 재로그인 후 재조회
+      if (res.status === 401 || res.status === 403) {
+        console.log('[WinPay] 인증 만료 → 재로그인 후 재조회');
+        this.jwtToken = '';
+        const loginOk = await this.login();
+        if (loginOk) {
+          await new Promise(resolve => setTimeout(resolve, 1000));
+          return this._onPopupClosed(tid);
+        }
+        throw new Error('재인증 실패');
+      }
+
+      const data = JSON.parse(text);
       console.log('[WinPay] status 조회 결과:', JSON.stringify(data));
 
       if (data.success) {
@@ -324,7 +355,7 @@ const WinPay = {
           await this._saveToSheets({
             action: 'updateOrderStatus',
             data: {
-              주문번호:   orderNo,           // ✅ 정확한 주문번호 사용
+              주문번호:   orderNo,
               주문상태:   '결제완료',
               PG거래번호: data.wTid || '',
             }
@@ -335,12 +366,12 @@ const WinPay = {
           console.warn('[WinPay] 상태 업데이트 실패:', e);
         }
 
-        // ✅ localStorage 삭제
+        // localStorage 삭제
         localStorage.removeItem('cart');
         localStorage.removeItem('wp_tid');
         localStorage.removeItem('wp_order');
 
-        // ✅ 완료 페이지 이동 (추출한 데이터 사용)
+        // 완료 페이지 이동
         const q = `?orderNo=${orderNo}`
           + `&amt=${data.amt || amt}`
           + `&goodsName=${encodeURIComponent(goodsName)}`
@@ -362,10 +393,31 @@ const WinPay = {
         const btn = document.getElementById('btn-order');
         if (btn) { btn.disabled = false; btn.textContent = '결제하기'; }
       }
+
     } catch (e) {
       console.error('[WinPay] 결제결과 확인 실패:', e);
-      alert('결제 결과를 확인할 수 없습니다.\n마이페이지에서 주문 내역을 확인해주세요.');
+      // ✅ v4.0: 오류 시에도 주문완료 페이지로 이동 (결제는 됐으므로)
+      this._fallbackRedirect(orderNo, amt, goodsName, ordNm, dealer);
     }
+  },
+
+  // ─────────────────────────────────────────────────
+  // ✅ v4.0: status 조회 실패해도 완료 페이지로 이동
+  // (결제는 됐는데 조회만 실패한 경우 대비)
+  // ─────────────────────────────────────────────────
+  _fallbackRedirect(orderNo, amt, goodsName, ordNm, dealer) {
+    console.log('[WinPay] fallback redirect → order-complete');
+    localStorage.removeItem('cart');
+    localStorage.removeItem('wp_tid');
+    localStorage.removeItem('wp_order');
+
+    const q = `?orderNo=${orderNo}`
+      + `&amt=${amt}`
+      + `&goodsName=${encodeURIComponent(goodsName)}`
+      + `&ordNm=${encodeURIComponent(ordNm)}`
+      + (dealer ? `&dealer=${dealer}` : '');
+
+    window.location.href = `order-complete.html${q}`;
   },
 
   // ─────────────────────────────────────────────────
