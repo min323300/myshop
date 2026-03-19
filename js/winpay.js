@@ -216,7 +216,7 @@ const WinPay = {
   },
 
   // ─────────────────────────────────────────────────
-  // PC - 키움페이 팝업 (포커스 유지)
+  // PC - 키움페이 팝업
   // ─────────────────────────────────────────────────
   _openPaymentPopup(paymentUrl, tid) {
     const W = 700, H = 1000;
@@ -228,19 +228,16 @@ const WinPay = {
       alert('팝업이 차단되었습니다. 브라우저 팝업 허용 후 다시 시도해주세요.');
       return;
     }
-    setTimeout(() => { try { popup.focus(); } catch(e) {} }, 500);
     const timer = setInterval(() => {
       if (popup.closed) {
         clearInterval(timer);
         this._onPopupClosed(tid);
-      } else {
-        try { popup.focus(); } catch(e) {}
       }
     }, 1000);
   },
 
   // ─────────────────────────────────────────────────
-  // PC - 뱅크페이 팝업 (포커스 유지)
+  // PC - 뱅크페이 팝업
   // ─────────────────────────────────────────────────
   _openBankPayPopup(urlData, tid) {
     const W = 720, H = 600;
@@ -251,13 +248,10 @@ const WinPay = {
       return;
     }
     this._postForm(urlData, 'BankPayPopup');
-    setTimeout(() => { try { popup.focus(); } catch(e) {} }, 500);
     const timer = setInterval(() => {
       if (popup.closed) {
         clearInterval(timer);
         this._onPopupClosed(tid);
-      } else {
-        try { popup.focus(); } catch(e) {}
       }
     }, 1000);
   },
