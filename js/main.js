@@ -256,6 +256,16 @@ function buildNav(products) {
         }
         nav.appendChild(wrap);
       });
+      // 🔴 라이브 메뉴 추가
+      var liveWrap = document.createElement('div');
+      liveWrap.className = 'nav-item-wrap';
+      var liveBtn = document.createElement('button');
+      liveBtn.className = 'nav-item';
+      liveBtn.textContent = '🔴 라이브';
+      liveBtn.style.cssText = 'color:#e85a2b;font-weight:700;';
+      liveBtn.onclick = function(){ location.href = dealerUrl('live.html'); };
+      liveWrap.appendChild(liveBtn);
+      nav.appendChild(liveWrap);
     }).catch(function(e){ console.log('카테고리 nav 로드 실패:',e); });
   } catch(e){ console.log('nav err:',e); }
 }
