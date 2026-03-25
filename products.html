@@ -34,11 +34,83 @@
     .page-btn { width: 36px; height: 36px; border-radius: 8px; border: 1px solid var(--border); background: var(--white); font-size: 13px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: var(--transition); }
     .page-btn:hover, .page-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
     .filter-apply { width: 100%; padding: 10px; background: var(--accent); color: #fff; border: none; border-radius: 8px; font-size: 13px; font-weight: 700; margin-top: 8px; cursor: pointer; }
+
+    /* ===== 풀 푸터 스타일 ===== */
+    .footer-full {
+      background: #1a1a1a;
+      color: #ccc;
+      margin-top: 60px;
+    }
+    .footer-full .footer-top {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 48px 24px 36px;
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1fr;
+      gap: 40px;
+    }
+    .footer-full .footer-brand-name {
+      font-size: 18px;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 10px;
+    }
+    .footer-full .footer-brand-desc {
+      font-size: 13px;
+      line-height: 1.8;
+      color: #999;
+    }
+    .footer-full .footer-col-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 16px;
+    }
+    .footer-full .footer-col-item {
+      font-size: 13px;
+      line-height: 2.2;
+      color: #aaa;
+    }
+    .footer-full .footer-col-item a {
+      color: #aaa;
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .footer-full .footer-col-item a:hover { color: #fff; }
+    .footer-full .footer-divider {
+      border: none;
+      border-top: 1px solid #333;
+      margin: 0;
+    }
+
+    /* ===== 사업자 정보 하단바 (PG 심사 필수) ===== */
+    .footer-biz {
+      background: #111;
+      text-align: center;
+      padding: 18px 20px;
+    }
+    .footer-biz p {
+      font-size: 12px;
+      color: #777;
+      line-height: 2.0;
+      margin: 0;
+    }
+    .footer-biz .biz-copyright {
+      font-size: 12px;
+      color: #555;
+      margin-top: 6px;
+    }
+
     @media (max-width: 768px) {
       .products-layout { grid-template-columns: 1fr; }
       .filter-panel { display: none; position: fixed; inset: 0; z-index: 800; border-radius: 0; overflow-y: auto; }
       .filter-panel.mobile-open { display: block; }
       .filter-btn { display: flex; align-items: center; gap: 6px; border: 1px solid var(--border); border-radius: 8px; padding: 8px 14px; font-size: 13px; background: var(--white); cursor: pointer; }
+      .footer-full .footer-top { grid-template-columns: 1fr 1fr; gap: 28px; padding: 36px 20px 28px; }
+      .footer-biz p { font-size: 11px; }
+    }
+    @media (max-width: 480px) {
+      .footer-full .footer-top { grid-template-columns: 1fr; }
     }
   </style>
 </head>
@@ -148,9 +220,60 @@
   </div>
 </main>
 
-<footer class="footer">
-  <div class="footer-bottom" style="text-align:center; max-width:1280px; margin:0 auto; padding:20px 0;">
-    <p>© 2026 <span id="footer-name">담누리마켓</span>. All rights reserved. &nbsp;|&nbsp; <a href="index.html" style="color:#aaa;">홈으로</a></p>
+<!-- ===== 풀 푸터 (PG 심사 필수 항목 포함) ===== -->
+<footer class="footer-full">
+  <div class="footer-top">
+    <!-- 브랜드 소개 -->
+    <div>
+      <div class="footer-brand-name">🏪 <span id="footer-brand">담누리마켓</span></div>
+      <div class="footer-brand-desc">
+        다양한 상품을 합리적인 가격에<br>고객님께 전달합니다.
+      </div>
+    </div>
+    <!-- 고객센터 -->
+    <div>
+      <div class="footer-col-title">고객센터</div>
+      <div class="footer-col-item">
+        📞 <span id="footer-tel">1588-3507</span><br>
+        평일 9:00 ~ 18:00<br>
+        📧 <span id="footer-email">hypo3300@naver.com</span>
+      </div>
+    </div>
+    <!-- 바로가기 -->
+    <div>
+      <div class="footer-col-title">바로가기</div>
+      <div class="footer-col-item">
+        <a href="index.html">홈</a><br>
+        <a href="products.html">상품 목록</a><br>
+        <a href="cart.html">장바구니</a><br>
+        <a href="mypage.html">마이페이지</a>
+      </div>
+    </div>
+    <!-- SNS -->
+    <div>
+      <div class="footer-col-title">SNS</div>
+      <div class="footer-col-item">
+        📸 인스타그램<br>
+        💛 카카오채널<br>
+        ▶ 유튜브
+      </div>
+    </div>
+  </div>
+
+  <hr class="footer-divider">
+
+  <!-- 사업자 정보 (PG 심사 고정 노출 필수) -->
+  <div class="footer-biz">
+    <p>
+      상호: <span id="biz-name">(주)비에스컴퍼니</span>
+      &nbsp;|&nbsp; 대표자: <span id="biz-ceo">배상민</span>
+      &nbsp;|&nbsp; 사업자등록번호: <span id="biz-regno">761-87-02647</span>
+      &nbsp;|&nbsp; 전화: <span id="biz-tel">1588-3507</span>
+      &nbsp;|&nbsp; 이메일: <span id="biz-email">hypo3300@naver.com</span><br>
+      주소: <span id="biz-addr">경기도 의정부시 호국로 1195-1 4층</span>
+      &nbsp;|&nbsp; 통신판매업신고번호: <span id="biz-mailorder">제2023-의정부흥선-0457호</span>
+    </p>
+    <p class="biz-copyright">© <span id="biz-year">2026</span> <span id="biz-brand">담누리마켓</span>. All rights reserved.</p>
   </div>
 </footer>
 
@@ -158,7 +281,7 @@
 <script src="js/sheets.js"></script>
 <script src="js/app.js"></script>
 <script>
-// ✅ 로그인 상태 헤더 반영
+// ===== 로그인 상태 헤더 반영 =====
 (function() {
   try {
     var userData = sessionStorage.getItem('user');
@@ -170,11 +293,39 @@
   } catch(e) {}
 })();
 
+// ===== 사업자 정보 Google Sheets에서 동적 로드 =====
+async function loadBizInfo() {
+  try {
+    const url = CONFIG.APPS_SCRIPT_URL + '?action=getBizInfo';
+    const res = await fetch(url);
+    const data = await res.json();
+    if (!data || data.error) return; // 실패 시 하드코딩 기본값 유지
+
+    // 시트 컬럼 순서: 상호, 사업자번호, 대표자, 주소, 전화, 이메일, 도메인, 저작권연도, 브랜드명, 통신판매업번호
+    const biz = data.biz || data;
+    if (biz.상호)         { document.getElementById('biz-name').textContent    = biz.상호; }
+    if (biz.대표자)       { document.getElementById('biz-ceo').textContent     = biz.대표자; }
+    if (biz.사업자번호)   { document.getElementById('biz-regno').textContent   = biz.사업자번호; }
+    if (biz.전화)         { document.getElementById('biz-tel').textContent     = biz.전화;
+                            document.getElementById('footer-tel').textContent  = biz.전화; }
+    if (biz.이메일)       { document.getElementById('biz-email').textContent   = biz.이메일;
+                            document.getElementById('footer-email').textContent = biz.이메일; }
+    if (biz.주소)         { document.getElementById('biz-addr').textContent    = biz.주소; }
+    if (biz.통신판매업번호){ document.getElementById('biz-mailorder').textContent = biz.통신판매업번호; }
+    if (biz.저작권연도)   { document.getElementById('biz-year').textContent    = biz.저작권연도; }
+    if (biz.브랜드명)     { document.getElementById('biz-brand').textContent   = biz.브랜드명;
+                            document.getElementById('footer-brand').textContent = biz.브랜드명; }
+  } catch(e) {
+    // 네트워크 실패 시 HTML에 하드코딩된 기본값 그대로 표시
+    console.log('사업자정보 로드 실패 (기본값 사용):', e.message);
+  }
+}
+
+// ===== 상품 목록 로직 =====
 let allProducts = [];
 let filteredProducts = [];
 let currentPage = 1;
 const PER_PAGE = CONFIG.PRODUCTS_PER_PAGE;
-
 let currentCategoryName = 'all';
 
 function createProductCard(p) {
@@ -305,8 +456,10 @@ function filterByNav(categoryName, btn) {
 
 async function initPage() {
   document.getElementById('store-name').textContent = CONFIG.STORE.BRAND || CONFIG.STORE.NAME;
-  document.getElementById('footer-name').textContent = CONFIG.STORE.BRAND || CONFIG.STORE.NAME;
   Cart.init();
+
+  // 사업자 정보 로드 (구글 시트 → 푸터 자동 반영)
+  loadBizInfo();
 
   const params = new URLSearchParams(location.search);
   const filterParam = params.get('filter');
