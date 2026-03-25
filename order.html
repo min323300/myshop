@@ -31,7 +31,6 @@
 
     .dealer-badge { display: none; align-items: center; gap: 6px; background: #e8f5e9; color: #2e7d32; border: 1px solid #a5d6a7; border-radius: 20px; padding: 5px 14px; font-size: 13px; font-weight: 700; margin-bottom: 14px; }
 
-    /* 결제 방법 */
     .pay-methods { display: grid; grid-template-columns: 1fr; gap: 10px; }
     .pay-method { padding: 14px 18px; border: 2px solid var(--border); border-radius: 10px; cursor: pointer; transition: var(--transition); font-size: 14px; font-weight: 600; display: flex; align-items: center; gap: 10px; }
     .pay-method.active { border-color: var(--accent); background: #fff5f2; color: var(--accent); }
@@ -39,7 +38,6 @@
     .pay-method .pay-sub { font-size: 11px; color: var(--gray); font-weight: 400; margin-left: auto; }
     .pay-method.active .pay-sub { color: var(--accent); }
 
-    /* ★ 포인트 섹션 */
     .point-section {
       background: linear-gradient(135deg, #f0f4ff, #e8d5f5);
       border: 1.5px solid #c7d2fe; border-radius: 12px;
@@ -177,7 +175,7 @@
           </div>
         </div>
 
-        <!-- ★ 포인트 사용 -->
+        <!-- 포인트 사용 -->
         <div class="point-section">
           <h3>🎁 포인트 사용</h3>
           <div id="point-login-check"></div>
@@ -241,10 +239,52 @@
   </div>
 </main>
 
+<!-- ===== 풀 푸터 (index.html 동일 구조 / main.js 자동 반영) ===== -->
+<footer class="footer">
+  <div class="footer-inner">
+    <div>
+      <h4 id="footer-store-name">🏪 담누리마켓</h4>
+      <p style="font-size:12px;line-height:1.8;margin-top:8px;color:#aaa;">
+        다양한 상품을 합리적인 가격에<br>고객님께 전달합니다.
+      </p>
+    </div>
+    <div>
+      <h4>고객센터</h4>
+      <ul>
+        <li><a href="#" id="footer-phone">📞 1588-3507</a></li>
+        <li><a href="#">평일 9:00 ~ 18:00</a></li>
+        <li><a href="#" id="footer-email">📧 hypo3300@naver.com</a></li>
+      </ul>
+    </div>
+    <div>
+      <h4>바로가기</h4>
+      <ul>
+        <li><a href="products.html">상품 목록</a></li>
+        <li><a href="cart.html">장바구니</a></li>
+        <li><a href="mypage.html">마이페이지</a></li>
+      </ul>
+    </div>
+    <div>
+      <h4>SNS</h4>
+      <ul>
+        <li><a href="#">📸 인스타그램</a></li>
+        <li><a href="#">💛 카카오채널</a></li>
+        <li><a href="#">▶ 유튜브</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p id="footer-biz">상호: (주)비에스컴퍼니 | 사업자번호: 761-87-02647 | 대표: 배상민 | 통신판매업: 제2023-의정부흥선-0457호</p>
+    <p id="footer-addr" style="margin-top:4px;">주소: 경기도 의정부시 호국로 1195-1 4층 | TEL: 1588-3507 | EMAIL: hypo3300@naver.com</p>
+    <p id="footer-copy" style="margin-top:4px;">© 2026 담누리마켓. All rights reserved.</p>
+  </div>
+</footer>
+
 <script src="js/config.js"></script>
 <script src="js/sheets.js"></script>
 <script src="js/app.js"></script>
 <script src="js/winpay.js"></script>
+<script src="js/main.js"></script>
 <script>
 var selectedPay    = '신용카드';
 var orderRawAmount = 0;
@@ -252,7 +292,6 @@ var usedPoints     = 0;
 var myPoints       = 0;
 var MIN_POINT      = 3000;
 
-// ── 대리점ID ──
 function getCurrentDealerId() {
   var p = new URLSearchParams(window.location.search);
   var u = p.get('dealer');
@@ -272,7 +311,6 @@ function initDealerBadge() {
   }
 }
 
-// ── 결제 방법 선택 ──
 function selectPay(el, type) {
   selectedPay = type;
   document.querySelectorAll('.pay-method').forEach(function(m) { m.classList.remove('active'); });
@@ -300,7 +338,6 @@ function searchAddress() {
   }).open();
 }
 
-// ── 포인트 UI 초기화 ──
 function initPointSection() {
   var user = null;
   try { user = JSON.parse(sessionStorage.getItem('user') || 'null'); } catch(e) {}
@@ -391,7 +428,6 @@ function applyPoint(pts) {
   }
 }
 
-// ── 주문 상품 로드 ──
 function loadOrderItems() {
   var items     = Cart.getItems();
   var container = document.getElementById('order-items');
@@ -413,13 +449,11 @@ function loadOrderItems() {
       + '</div>';
   }).join('');
 
- // ✅ 수정 - 상품 배송비 설정 확인
-var delivery = 3000;
-var hasFreeShip = items.some(function(item) {
-  return item.shippingMethod === '무료배송'
-      || item.shippingFee === 0;
-});
-if (hasFreeShip || total >= 50000) delivery = 0;
+  var delivery = 3000;
+  var hasFreeShip = items.some(function(item) {
+    return item.shippingMethod === '무료배송' || item.shippingFee === 0;
+  });
+  if (hasFreeShip || total >= 50000) delivery = 0;
   orderRawAmount = total + delivery;
   document.getElementById('sum-products').textContent = total.toLocaleString() + '원';
   document.getElementById('sum-delivery').textContent = delivery === 0 ? '무료' : delivery.toLocaleString() + '원';
@@ -430,7 +464,6 @@ if (hasFreeShip || total >= 50000) delivery = 0;
   initPointSection();
 }
 
-// ── 검증 ──
 function validateForm() {
   var fields = [
     { id: 'orderer-name',   msg: '주문자 이름을 입력해주세요' },
@@ -453,7 +486,6 @@ function validateForm() {
   return true;
 }
 
-// ── 주문 데이터 빌드 ──
 function buildOrderData(orderNo) {
   var finalAmt = Math.max(0, orderRawAmount - usedPoints);
   var items    = Cart.getItems();
@@ -481,7 +513,6 @@ function buildOrderData(orderNo) {
   };
 }
 
-// ── 포인트 차감 저장 ──
 function savePointDeduction(orderNo) {
   if (usedPoints <= 0) return;
   var SCRIPT_URL = (typeof CONFIG !== 'undefined') ? CONFIG.PG.API_PROXY_URL : '';
@@ -494,14 +525,10 @@ function savePointDeduction(orderNo) {
     body: JSON.stringify({
       action: 'savePointHistory',
       data: {
-        이름:     user ? user.name  : '',
-        이메일:   user ? user.email : '',
-        연락처:   user ? user.phone : '',
-        구분:     '사용',
-        금액:     usedPoints,
-        설명:     '주문 결제 포인트 사용 (' + orderNo + ')',
-        주문번호: orderNo,
-        일시:     new Date().toLocaleString('ko-KR')
+        이름: user ? user.name : '', 이메일: user ? user.email : '',
+        연락처: user ? user.phone : '', 구분: '사용', 금액: usedPoints,
+        설명: '주문 결제 포인트 사용 (' + orderNo + ')',
+        주문번호: orderNo, 일시: new Date().toLocaleString('ko-KR')
       }
     })
   }).catch(function(e) { console.log('포인트 차감 기록 실패:', e); });
@@ -515,7 +542,6 @@ function savePointDeduction(orderNo) {
   } catch(e) {}
 }
 
-// ── 주문 저장 (Sheets) ──
 function saveOrderToSheets(orderData) {
   var SCRIPT_URL = (typeof CONFIG !== 'undefined') ? CONFIG.PG.API_PROXY_URL : '';
   if (!SCRIPT_URL) { console.log('주문 데이터:', orderData); return; }
@@ -526,11 +552,9 @@ function saveOrderToSheets(orderData) {
   }).catch(function(e) { console.log('Sheets 저장 실패:', e); });
 }
 
-// ── PG 결제 요청 ──
 function requestPG(orderData) {
   var PG_MERCHANT_ID = (typeof CONFIG !== 'undefined') ? CONFIG.PG.MERCHANT_ID : '';
 
-  // ① 포인트 전액 결제 → PG 스킵
   if (usedPoints > 0 && orderData['결제금액'] === 0) {
     saveOrderToSheets(orderData);
     savePointDeduction(orderData['주문번호']);
@@ -539,7 +563,6 @@ function requestPG(orderData) {
     return;
   }
 
-  // ② 윈글로벌페이 실결제 (MID 입력 후 활성화)
   if (PG_MERCHANT_ID && typeof WinPay !== 'undefined') {
     WinPay.pay({
       orderNo:    orderData['주문번호'],
@@ -566,14 +589,12 @@ function requestPG(orderData) {
     return;
   }
 
-  // ③ PG 미연동 (테스트 모드) → 바로 주문완료 이동
   saveOrderToSheets(orderData);
   savePointDeduction(orderData['주문번호']);
   Cart.clear();
   location.href = 'order-complete.html?no=' + orderData['주문번호'] + '&method=' + selectedPay;
 }
 
-// ── 결제하기 버튼 ──
 function submitOrder() {
   if (!validateForm()) return;
   var btn         = document.getElementById('btn-order');
@@ -587,7 +608,6 @@ function submitOrder() {
   }, 5000);
 }
 
-// ── PG 상태 배지 ──
 function updatePGStatusBadge() {
   var badge = document.getElementById('pg-status-badge');
   if (!badge) return;
@@ -597,7 +617,6 @@ function updatePGStatusBadge() {
   }
 }
 
-// ── 초기화 ──
 Cart.init();
 loadOrderItems();
 updatePGStatusBadge();
