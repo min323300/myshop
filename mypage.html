@@ -35,7 +35,6 @@
     .find-links { display:flex; justify-content:center; gap:16px; margin-top:16px; font-size:13px; }
     .find-links a { color:var(--gray); cursor:pointer; }
 
-    /* 찾기 모달 */
     .find-modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:2000; align-items:center; justify-content:center; padding:16px; }
     .find-modal-overlay.open { display:flex; }
     .find-modal-box { background:#fff; border-radius:16px; width:100%; max-width:420px; overflow:hidden; }
@@ -56,7 +55,6 @@
     .find-modal-head h2 { font-size:17px; font-weight:900; }
     .find-modal-close { background:none; border:none; font-size:26px; cursor:pointer; color:var(--gray); line-height:1; }
 
-    /* 마이페이지 */
     .mypage-wrap { max-width: 900px; margin: 32px auto; padding: 0 24px; }
     .mypage-header { display:flex; align-items:center; gap:20px; background:linear-gradient(135deg, var(--accent), #FF8C00); color:#fff; border-radius:16px; padding:28px; margin-bottom:24px; }
     .mypage-avatar { width:72px; height:72px; border-radius:50%; background:rgba(255,255,255,0.3); display:flex; align-items:center; justify-content:center; font-size:36px; }
@@ -68,21 +66,11 @@
     .stat-num { font-size:28px; font-weight:900; color:var(--accent); }
     .stat-label { font-size:12px; color:var(--gray); margin-top:4px; }
 
-    /* ★ 추천인 코드 박스 */
-    .referral-box {
-      background: linear-gradient(135deg, #667eea, #764ba2);
-      color: #fff; border-radius: 16px; padding: 24px; margin-bottom: 16px;
-      display: flex; align-items: center; justify-content: space-between; gap: 16px;
-      flex-wrap: wrap;
-    }
+    .referral-box { background: linear-gradient(135deg, #667eea, #764ba2); color: #fff; border-radius: 16px; padding: 24px; margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
     .referral-left .referral-title { font-size: 15px; font-weight: 800; margin-bottom: 4px; }
     .referral-left .referral-sub { font-size: 12px; opacity: 0.85; line-height: 1.6; }
     .referral-right { display: flex; flex-direction: column; gap: 8px; align-items: flex-end; }
-    .referral-code-display {
-      background: rgba(255,255,255,0.2); border: 1.5px solid rgba(255,255,255,0.4);
-      border-radius: 10px; padding: 10px 18px; font-size: 20px; font-weight: 900;
-      letter-spacing: 3px; font-family: monospace; text-align: center; min-width: 160px;
-    }
+    .referral-code-display { background: rgba(255,255,255,0.2); border: 1.5px solid rgba(255,255,255,0.4); border-radius: 10px; padding: 10px 18px; font-size: 20px; font-weight: 900; letter-spacing: 3px; font-family: monospace; text-align: center; min-width: 160px; }
     .referral-btns { display: flex; gap: 8px; }
     .btn-ref { padding: 8px 14px; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer; border: none; transition: var(--transition); }
     .btn-copy { background: rgba(255,255,255,0.9); color: #764ba2; }
@@ -93,11 +81,7 @@
     .ref-stat-num { font-size: 18px; font-weight: 900; }
     .ref-stat-label { font-size: 11px; opacity: 0.8; }
 
-    /* 혜택 안내 */
-    .benefit-info {
-      background: #f0f4ff; border: 1.5px solid #c7d2fe; border-radius: 12px;
-      padding: 16px 20px; margin-bottom: 16px; font-size: 13px;
-    }
+    .benefit-info { background: #f0f4ff; border: 1.5px solid #c7d2fe; border-radius: 12px; padding: 16px 20px; margin-bottom: 16px; font-size: 13px; }
     .benefit-info .bi-title { font-weight: 800; color: #4338ca; margin-bottom: 8px; font-size: 14px; }
     .benefit-row { display: flex; align-items: center; gap: 8px; padding: 4px 0; color: #374151; }
     .benefit-row .badge { background: #4338ca; color: #fff; border-radius: 20px; padding: 2px 8px; font-size: 11px; font-weight: 700; }
@@ -109,7 +93,6 @@
     .menu-title { font-size:15px; font-weight:700; }
     .menu-desc { font-size:12px; color:var(--gray); margin-top:2px; }
 
-    /* 모달 */
     .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:1000; align-items:center; justify-content:center; padding:16px; }
     .modal-overlay.open { display:flex; }
     .modal-box { background:#fff; border-radius:16px; width:100%; max-width:680px; max-height:85vh; display:flex; flex-direction:column; overflow:hidden; }
@@ -166,7 +149,6 @@
     .info-form .form-group input { padding:12px 14px; font-size:14px; }
     .btn-save { width:100%; padding:14px; background:var(--accent); color:#fff; border:none; border-radius:10px; font-size:15px; font-weight:800; cursor:pointer; margin-top:8px; }
 
-    /* 추천 내역 모달 */
     .ref-history-row { display:flex; justify-content:space-between; align-items:center; padding:12px 0; border-bottom:1px solid var(--border); font-size:14px; }
     .ref-history-row:last-child { border-bottom:none; }
 
@@ -239,7 +221,6 @@
       <button onclick="doLogout()" style="margin-left:auto;padding:8px 16px;background:rgba(255,255,255,0.2);color:#fff;border:1px solid rgba(255,255,255,0.4);border-radius:8px;cursor:pointer;font-size:13px;">로그아웃</button>
     </div>
 
-    <!-- 통계 -->
     <div class="mypage-stats">
       <div class="stat-card" onclick="openModal('orders')"><div class="stat-num" id="stat-orders">0</div><div class="stat-label">주문</div></div>
       <div class="stat-card" onclick="openModal('delivery')"><div class="stat-num" id="stat-shipping">0</div><div class="stat-label">배송중</div></div>
@@ -247,14 +228,10 @@
       <div class="stat-card" onclick="openModal('points')"><div class="stat-num" id="stat-points">0</div><div class="stat-label">적립금</div></div>
     </div>
 
-    <!-- ★ 추천인 코드 박스 -->
     <div class="referral-box">
       <div class="referral-left">
         <div class="referral-title">🎁 내 추천인 코드</div>
-        <div class="referral-sub">
-          친구에게 코드를 공유하세요!<br>
-          친구 가입 시 친구 <strong>+1,000P</strong> · 나 <strong>+2,000P</strong>
-        </div>
+        <div class="referral-sub">친구에게 코드를 공유하세요!<br>친구 가입 시 친구 <strong>+1,000P</strong> · 나 <strong>+2,000P</strong></div>
         <div class="referral-stats" style="margin-top:12px;">
           <div class="ref-stat"><div class="ref-stat-num" id="ref-count">0</div><div class="ref-stat-label">추천 인원</div></div>
           <div class="ref-stat"><div class="ref-stat-num" id="ref-points">0P</div><div class="ref-stat-label">받은 적립금</div></div>
@@ -270,7 +247,6 @@
       </div>
     </div>
 
-    <!-- 혜택 안내 -->
     <div class="benefit-info">
       <div class="bi-title">🎉 추천인 혜택 안내</div>
       <div class="benefit-row"><span class="badge">추천받은 분</span> 회원가입 시 즉시 <strong>+1,000P</strong> 적립</div>
@@ -278,7 +254,6 @@
       <div class="benefit-row" style="color:var(--gray);font-size:12px;margin-top:4px;">※ 적립금은 1,000P 이상 시 결제에 사용 가능합니다</div>
     </div>
 
-    <!-- 메뉴 -->
     <div class="mypage-menu">
       <div class="menu-card" onclick="openModal('orders')"><div class="menu-icon">📋</div><div><div class="menu-title">주문 내역</div><div class="menu-desc">주문 현황을 확인하세요</div></div></div>
       <div class="menu-card" onclick="openModal('delivery')"><div class="menu-icon">🚚</div><div><div class="menu-title">배송 조회</div><div class="menu-desc">배송 현황을 확인하세요</div></div></div>
@@ -301,33 +276,17 @@
       <button class="find-tab active" id="tab-find-id" onclick="switchFindTab('id')">아이디 찾기</button>
       <button class="find-tab" id="tab-find-pw" onclick="switchFindTab('pw')">비밀번호 찾기</button>
     </div>
-
-    <!-- 아이디 찾기 -->
     <div class="find-panel active" id="panel-find-id">
       <p style="font-size:13px;color:var(--gray);margin-bottom:16px;">가입 시 입력한 이름과 연락처로 이메일을 찾습니다.</p>
-      <div class="find-form-group">
-        <label>이름</label>
-        <input type="text" id="find-id-name" placeholder="가입 시 입력한 이름">
-      </div>
-      <div class="find-form-group">
-        <label>연락처</label>
-        <input type="tel" id="find-id-phone" placeholder="010-0000-0000" onkeydown="if(event.key==='Enter')doFindId()">
-      </div>
+      <div class="find-form-group"><label>이름</label><input type="text" id="find-id-name" placeholder="가입 시 입력한 이름"></div>
+      <div class="find-form-group"><label>연락처</label><input type="tel" id="find-id-phone" placeholder="010-0000-0000" onkeydown="if(event.key==='Enter')doFindId()"></div>
       <button class="btn-find" onclick="doFindId()">아이디 찾기</button>
       <div class="find-result" id="result-find-id"></div>
     </div>
-
-    <!-- 비밀번호 찾기 -->
     <div class="find-panel" id="panel-find-pw">
       <p style="font-size:13px;color:var(--gray);margin-bottom:16px;">가입한 이메일로 임시 비밀번호를 발급합니다.</p>
-      <div class="find-form-group">
-        <label>이름</label>
-        <input type="text" id="find-pw-name" placeholder="가입 시 입력한 이름">
-      </div>
-      <div class="find-form-group">
-        <label>이메일</label>
-        <input type="email" id="find-pw-email" placeholder="가입 시 입력한 이메일" onkeydown="if(event.key==='Enter')doFindPw()">
-      </div>
+      <div class="find-form-group"><label>이름</label><input type="text" id="find-pw-name" placeholder="가입 시 입력한 이름"></div>
+      <div class="find-form-group"><label>이메일</label><input type="email" id="find-pw-email" placeholder="가입 시 입력한 이메일" onkeydown="if(event.key==='Enter')doFindPw()"></div>
       <button class="btn-find" onclick="doFindPw()">임시 비밀번호 발급</button>
       <div class="find-result" id="result-find-pw"></div>
     </div>
@@ -335,36 +294,11 @@
 </div>
 
 <!-- 모달들 -->
-<div class="modal-overlay" id="modal-orders">
-  <div class="modal-box">
-    <div class="modal-head"><h2>📋 주문 내역</h2><button class="modal-close" onclick="closeModal('orders')">×</button></div>
-    <div class="modal-body" id="body-orders"><div class="loading-txt">⏳ 불러오는 중...</div></div>
-  </div>
-</div>
-<div class="modal-overlay" id="modal-delivery">
-  <div class="modal-box">
-    <div class="modal-head"><h2>🚚 배송 조회</h2><button class="modal-close" onclick="closeModal('delivery')">×</button></div>
-    <div class="modal-body" id="body-delivery"><div class="loading-txt">⏳ 불러오는 중...</div></div>
-  </div>
-</div>
-<div class="modal-overlay" id="modal-wishlist">
-  <div class="modal-box">
-    <div class="modal-head"><h2>❤️ 찜 목록</h2><button class="modal-close" onclick="closeModal('wishlist')">×</button></div>
-    <div class="modal-body" id="body-wishlist"></div>
-  </div>
-</div>
-<div class="modal-overlay" id="modal-reviews">
-  <div class="modal-box">
-    <div class="modal-head"><h2>⭐ 내 리뷰</h2><button class="modal-close" onclick="closeModal('reviews')">×</button></div>
-    <div class="modal-body" id="body-reviews"><div class="loading-txt">⏳ 불러오는 중...</div></div>
-  </div>
-</div>
-<div class="modal-overlay" id="modal-points">
-  <div class="modal-box">
-    <div class="modal-head"><h2>🎫 쿠폰 / 적립금</h2><button class="modal-close" onclick="closeModal('points')">×</button></div>
-    <div class="modal-body" id="body-points"></div>
-  </div>
-</div>
+<div class="modal-overlay" id="modal-orders"><div class="modal-box"><div class="modal-head"><h2>📋 주문 내역</h2><button class="modal-close" onclick="closeModal('orders')">×</button></div><div class="modal-body" id="body-orders"><div class="loading-txt">⏳ 불러오는 중...</div></div></div></div>
+<div class="modal-overlay" id="modal-delivery"><div class="modal-box"><div class="modal-head"><h2>🚚 배송 조회</h2><button class="modal-close" onclick="closeModal('delivery')">×</button></div><div class="modal-body" id="body-delivery"><div class="loading-txt">⏳ 불러오는 중...</div></div></div></div>
+<div class="modal-overlay" id="modal-wishlist"><div class="modal-box"><div class="modal-head"><h2>❤️ 찜 목록</h2><button class="modal-close" onclick="closeModal('wishlist')">×</button></div><div class="modal-body" id="body-wishlist"></div></div></div>
+<div class="modal-overlay" id="modal-reviews"><div class="modal-box"><div class="modal-head"><h2>⭐ 내 리뷰</h2><button class="modal-close" onclick="closeModal('reviews')">×</button></div><div class="modal-body" id="body-reviews"><div class="loading-txt">⏳ 불러오는 중...</div></div></div></div>
+<div class="modal-overlay" id="modal-points"><div class="modal-box"><div class="modal-head"><h2>🎫 쿠폰 / 적립금</h2><button class="modal-close" onclick="closeModal('points')">×</button></div><div class="modal-body" id="body-points"></div></div></div>
 <div class="modal-overlay" id="modal-profile">
   <div class="modal-box">
     <div class="modal-head"><h2>⚙️ 회원 정보 수정</h2><button class="modal-close" onclick="closeModal('profile')">×</button></div>
@@ -381,11 +315,52 @@
   </div>
 </div>
 
+<!-- ===== 풀 푸터 (index.html 동일 구조 / main.js 자동 반영) ===== -->
+<footer class="footer">
+  <div class="footer-inner">
+    <div>
+      <h4 id="footer-store-name">🏪 담누리마켓</h4>
+      <p style="font-size:12px;line-height:1.8;margin-top:8px;color:#aaa;">
+        다양한 상품을 합리적인 가격에<br>고객님께 전달합니다.
+      </p>
+    </div>
+    <div>
+      <h4>고객센터</h4>
+      <ul>
+        <li><a href="#" id="footer-phone">📞 1588-3507</a></li>
+        <li><a href="#">평일 9:00 ~ 18:00</a></li>
+        <li><a href="#" id="footer-email">📧 hypo3300@naver.com</a></li>
+      </ul>
+    </div>
+    <div>
+      <h4>바로가기</h4>
+      <ul>
+        <li><a href="products.html">상품 목록</a></li>
+        <li><a href="cart.html">장바구니</a></li>
+        <li><a href="mypage.html">마이페이지</a></li>
+      </ul>
+    </div>
+    <div>
+      <h4>SNS</h4>
+      <ul>
+        <li><a href="#">📸 인스타그램</a></li>
+        <li><a href="#">💛 카카오채널</a></li>
+        <li><a href="#">▶ 유튜브</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p id="footer-biz">상호: (주)비에스컴퍼니 | 사업자번호: 761-87-02647 | 대표: 배상민 | 통신판매업: 제2023-의정부흥선-0457호</p>
+    <p id="footer-addr" style="margin-top:4px;">주소: 경기도 의정부시 호국로 1195-1 4층 | TEL: 1588-3507 | EMAIL: hypo3300@naver.com</p>
+    <p id="footer-copy" style="margin-top:4px;">© 2026 담누리마켓. All rights reserved.</p>
+  </div>
+</footer>
+
 <script src="js/config.js"></script>
 <script src="js/sheets.js"></script>
 <script src="js/app.js"></script>
+<script src="js/main.js"></script>
 <script>
-// ── 추천 코드 생성 ──
 function generateRefCode(name) {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
   let code = '';
@@ -393,7 +368,6 @@ function generateRefCode(name) {
   return 'REF' + code;
 }
 
-// ── 인증 ──
 function switchAuth(tab, btn) {
   document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
   document.querySelectorAll('.auth-panel').forEach(p => p.classList.remove('active'));
@@ -401,7 +375,6 @@ function switchAuth(tab, btn) {
   document.getElementById('panel-' + tab).classList.add('active');
 }
 
-// URL에서 추천코드 자동 입력
 window.addEventListener('DOMContentLoaded', () => {
   const params = new URLSearchParams(location.search);
   const refCode = params.get('ref');
@@ -417,7 +390,6 @@ function doLogin() {
   const pw    = document.getElementById('login-pw').value;
   if (!email || !pw) { alert('이메일과 비밀번호를 입력해주세요'); return; }
   const user = { name: email.split('@')[0], email, phone:'', date: new Date().toLocaleDateString('ko-KR') };
-  // 기존 유저의 추천코드 복원
   const storedCode = localStorage.getItem('refCode_' + email);
   user.refCode = storedCode || generateRefCode(user.name);
   if (!storedCode) localStorage.setItem('refCode_' + email, user.refCode);
@@ -461,45 +433,13 @@ function doSignup() {
   }
   try { sessionStorage.setItem('pointHistory', JSON.stringify(history)); } catch(e) {}
 
-  // ✅ Google Sheets 회원 저장 (신규 추가)
   const SCRIPT_URL = (typeof CONFIG !== 'undefined') ? CONFIG.PG.API_PROXY_URL : '';
   if (SCRIPT_URL) {
-    fetch(SCRIPT_URL, {
-      method: 'POST', mode: 'no-cors',
-      headers: { 'Content-Type': 'text/plain' },
-      body: JSON.stringify({
-        action: 'saveMember',
-        data: {
-          이름:         name,
-          연락처:       phone || '',
-          이메일:       email,
-          비밀번호:     pw,
-          추천인코드:   myRefCode,
-          사용추천코드: usedRef || '',
-          회원구분:     '회원',
-          가입일:       new Date().toLocaleDateString('ko-KR'),
-          적립금:       points
-        }
-      })
+    fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify({ action: 'saveMember', data: { 이름: name, 연락처: phone||'', 이메일: email, 비밀번호: pw, 추천인코드: myRefCode, 사용추천코드: usedRef||'', 회원구분: '회원', 가입일: new Date().toLocaleDateString('ko-KR'), 적립금: points } })
     }).catch(e => console.log('회원 저장 실패:', e));
-
-    // ✅ 포인트 내역 Sheets 저장 (신규 추가)
-    fetch(SCRIPT_URL, {
-      method: 'POST', mode: 'no-cors',
-      headers: { 'Content-Type': 'text/plain' },
-      body: JSON.stringify({
-        action: 'savePointHistory',
-        data: {
-          이름:     name,
-          이메일:   email,
-          연락처:   phone || '',
-          구분:     '적립',
-          금액:     points,
-          설명:     '가입 축하 적립금' + (usedRef ? ' + 추천인 코드 보너스' : ''),
-          주문번호: '',
-          일시:     new Date().toLocaleString('ko-KR')
-        }
-      })
+    fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify({ action: 'savePointHistory', data: { 이름: name, 이메일: email, 연락처: phone||'', 구분: '적립', 금액: points, 설명: '가입 축하 적립금' + (usedRef ? ' + 추천인 코드 보너스' : ''), 주문번호: '', 일시: new Date().toLocaleString('ko-KR') } })
     }).catch(e => console.log('포인트 내역 저장 실패:', e));
   }
 
@@ -507,23 +447,11 @@ function doSignup() {
   showMypage(user);
 }
 
-// 추천한 사람에게 적립금 지급 (Apps Script 전송)
 function sendReferralReward(refCode, newName, newEmail) {
   const SCRIPT_URL = (typeof CONFIG !== 'undefined') ? CONFIG.PG.API_PROXY_URL : '';
   if (!SCRIPT_URL) return;
-  fetch(SCRIPT_URL, {
-    method: 'POST', mode: 'no-cors',
-    headers: { 'Content-Type': 'text/plain' },
-    body: JSON.stringify({
-      action: 'saveReferral',
-      data: {
-        추천코드: refCode,
-        피추천인이름: newName,
-        피추천인이메일: newEmail,
-        적립금: 2000,
-        일시: new Date().toLocaleString('ko-KR')
-      }
-    })
+  fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain' },
+    body: JSON.stringify({ action: 'saveReferral', data: { 추천코드: refCode, 피추천인이름: newName, 피추천인이메일: newEmail, 적립금: 2000, 일시: new Date().toLocaleString('ko-KR') } })
   }).catch(e => console.log('추천 저장 실패:', e));
 }
 
@@ -543,25 +471,14 @@ function showMypage(user) {
   loadStats(user);
 }
 
-// ── 추천코드 초기화 ──
 function initRefCode(user) {
-  // 저장된 코드 우선, 없으면 생성
   let code = user.refCode || localStorage.getItem('refCode_' + user.email);
-  if (!code) {
-    code = generateRefCode(user.name);
-    localStorage.setItem('refCode_' + user.email, code);
-    user.refCode = code;
-    sessionStorage.setItem('user', JSON.stringify(user));
-  }
+  if (!code) { code = generateRefCode(user.name); localStorage.setItem('refCode_' + user.email, code); user.refCode = code; sessionStorage.setItem('user', JSON.stringify(user)); }
   document.getElementById('my-ref-code').textContent = code;
-
-  // 링크 미리보기
   const base = location.origin + location.pathname.replace('mypage.html', '');
   const dealerId = (typeof DealerContext !== 'undefined') ? DealerContext.getDealerId() : null;
   const link = base + 'mypage.html?ref=' + code + (dealerId ? '&dealer=' + dealerId : '');
   document.getElementById('ref-link-preview').textContent = link.replace('https://', '');
-
-  // 추천 통계 로드
   loadRefStats(code);
 }
 
@@ -576,11 +493,9 @@ async function loadRefStats(code) {
   } catch(e) {}
 }
 
-// ── 코드 복사 / 링크 공유 ──
 function copyRefCode() {
   const code = document.getElementById('my-ref-code').textContent;
-  navigator.clipboard.writeText(code).then(() => alert('추천 코드가 복사됐습니다!\n' + code))
-    .catch(() => { prompt('아래 코드를 복사하세요:', code); });
+  navigator.clipboard.writeText(code).then(() => alert('추천 코드가 복사됐습니다!\n' + code)).catch(() => { prompt('아래 코드를 복사하세요:', code); });
 }
 function shareRefLink() {
   const user = JSON.parse(sessionStorage.getItem('user') || '{}');
@@ -590,15 +505,10 @@ function shareRefLink() {
   const link = base + 'mypage.html?ref=' + code + (dealerId ? '&dealer=' + dealerId : '');
   const storeName = document.getElementById('store-name')?.textContent || '담누리마켓';
   const text = `${user.name}님이 ${storeName}에 초대했습니다!\n가입 시 적립금 1,000P를 드려요 🎁\n${link}`;
-  if (navigator.share) {
-    navigator.share({ title: '담누리마켓 초대', text, url: link }).catch(()=>{});
-  } else {
-    navigator.clipboard.writeText(text).then(() => alert('공유 링크가 복사됐습니다!'))
-      .catch(() => { prompt('아래 링크를 복사하세요:', link); });
-  }
+  if (navigator.share) { navigator.share({ title: '담누리마켓 초대', text, url: link }).catch(()=>{}); }
+  else { navigator.clipboard.writeText(text).then(() => alert('공유 링크가 복사됐습니다!')).catch(() => { prompt('아래 링크를 복사하세요:', link); }); }
 }
 
-// ── 통계 ──
 async function loadStats(user) {
   const wish = getWishList();
   document.getElementById('stat-wish').textContent = wish.length;
@@ -624,9 +534,7 @@ async function fetchMyOrders(user) {
   });
 }
 
-function getWishList() {
-  try { return JSON.parse(localStorage.getItem('wishlist')||'[]'); } catch(e) { return []; }
-}
+function getWishList() { try { return JSON.parse(localStorage.getItem('wishlist')||'[]'); } catch(e) { return []; } }
 function removeWish(id) {
   const list = getWishList().filter(w => w.id!==id);
   try { localStorage.setItem('wishlist', JSON.stringify(list)); } catch(e) {}
@@ -634,7 +542,6 @@ function removeWish(id) {
   document.getElementById('stat-wish').textContent = list.length;
 }
 
-// ── 모달 ──
 function openModal(type) {
   document.getElementById('modal-'+type).classList.add('open');
   const user = JSON.parse(sessionStorage.getItem('user')||'{}');
@@ -646,9 +553,7 @@ function openModal(type) {
   if (type==='profile')  renderProfile(user);
 }
 function closeModal(type) { document.getElementById('modal-'+type).classList.remove('open'); }
-document.querySelectorAll('.modal-overlay').forEach(el => {
-  el.addEventListener('click', e => { if(e.target===el) el.classList.remove('open'); });
-});
+document.querySelectorAll('.modal-overlay').forEach(el => { el.addEventListener('click', e => { if(e.target===el) el.classList.remove('open'); }); });
 
 async function renderOrders(user) {
   const body = document.getElementById('body-orders');
@@ -656,16 +561,7 @@ async function renderOrders(user) {
   try {
     const orders = await fetchMyOrders(user);
     if (!orders.length) { body.innerHTML = '<div class="empty-state"><div class="empty-icon">📭</div><p>주문 내역이 없습니다</p></div>'; return; }
-    body.innerHTML = [...orders].reverse().map(o => `
-      <div class="order-card">
-        <div class="order-card-head">
-          <span class="order-no">${o['주문번호']||'-'}</span>
-          <span class="order-status s-${o['주문상태']||'결제대기'}">${o['주문상태']||'결제대기'}</span>
-        </div>
-        <div class="order-product">${o['주문상품']||'-'}</div>
-        <div class="order-meta">${o['주문일시']||''} · ${o['결제방법']||''}</div>
-        <div class="order-amount">${parseInt(o['결제금액']||0).toLocaleString()}원</div>
-      </div>`).join('');
+    body.innerHTML = [...orders].reverse().map(o => `<div class="order-card"><div class="order-card-head"><span class="order-no">${o['주문번호']||'-'}</span><span class="order-status s-${o['주문상태']||'결제대기'}">${o['주문상태']||'결제대기'}</span></div><div class="order-product">${o['주문상품']||'-'}</div><div class="order-meta">${o['주문일시']||''} · ${o['결제방법']||''}</div><div class="order-amount">${parseInt(o['결제금액']||0).toLocaleString()}원</div></div>`).join('');
   } catch(e) { body.innerHTML = '<div class="empty-state"><div class="empty-icon">⚠️</div><p>불러오기 실패</p></div>'; }
 }
 
@@ -677,34 +573,10 @@ async function renderDelivery(user) {
     const active = orders.filter(o => !['배송완료','취소'].includes(o['주문상태']));
     if (!active.length) { body.innerHTML = '<div class="empty-state"><div class="empty-icon">🚚</div><p>진행 중인 배송이 없습니다</p></div>'; return; }
     const smap = {'결제대기':0,'결제완료':1,'상품준비':2,'배송중':3,'배송완료':4};
-    const steps = [
-      {label:'주문완료',icon:'✅',desc:'주문이 접수됐습니다'},
-      {label:'결제완료',icon:'💳',desc:'결제가 확인됐습니다'},
-      {label:'상품준비',icon:'📦',desc:'상품을 준비 중입니다'},
-      {label:'배송중',icon:'🚚',desc:'배송이 시작됐습니다'},
-      {label:'배송완료',icon:'🏠',desc:'배송이 완료됐습니다'},
-    ];
+    const steps = [{label:'주문완료',icon:'✅',desc:'주문이 접수됐습니다'},{label:'결제완료',icon:'💳',desc:'결제가 확인됐습니다'},{label:'상품준비',icon:'📦',desc:'상품을 준비 중입니다'},{label:'배송중',icon:'🚚',desc:'배송이 시작됐습니다'},{label:'배송완료',icon:'🏠',desc:'배송이 완료됐습니다'}];
     body.innerHTML = active.map(o => {
       const cur = smap[o['주문상태']] ?? 0;
-      return `<div class="order-card" style="margin-bottom:20px;">
-        <div class="order-card-head">
-          <span class="order-no">${o['주문번호']||'-'}</span>
-          <span class="order-status s-${o['주문상태']||'결제대기'}">${o['주문상태']||'결제대기'}</span>
-        </div>
-        <div class="order-product" style="margin-bottom:16px;">${o['주문상품']||'-'}</div>
-        <div class="delivery-steps">${steps.map((s,i)=>`
-          <div class="d-step">
-            <div class="d-step-left">
-              <div class="d-dot ${i<cur?'done':i===cur?'cur':''}"></div>
-              ${i<steps.length-1?`<div class="d-line ${i<cur?'done':''}"></div>`:''}
-            </div>
-            <div class="d-step-right">
-              <div class="d-title" style="color:${i<=cur?'var(--accent)':'var(--gray)'};font-weight:${i===cur?900:500}">${s.icon} ${s.label}</div>
-              ${i===cur?`<div class="d-desc">${s.desc}</div>`:''}
-            </div>
-          </div>`).join('')}
-        </div>
-      </div>`;
+      return `<div class="order-card" style="margin-bottom:20px;"><div class="order-card-head"><span class="order-no">${o['주문번호']||'-'}</span><span class="order-status s-${o['주문상태']||'결제대기'}">${o['주문상태']||'결제대기'}</span></div><div class="order-product" style="margin-bottom:16px;">${o['주문상품']||'-'}</div><div class="delivery-steps">${steps.map((s,i)=>`<div class="d-step"><div class="d-step-left"><div class="d-dot ${i<cur?'done':i===cur?'cur':''}"></div>${i<steps.length-1?`<div class="d-line ${i<cur?'done':''}"></div>`:''}</div><div class="d-step-right"><div class="d-title" style="color:${i<=cur?'var(--accent)':'var(--gray)'};font-weight:${i===cur?900:500}">${s.icon} ${s.label}</div>${i===cur?`<div class="d-desc">${s.desc}</div>`:''}</div></div>`).join('')}</div></div>`;
     }).join('');
   } catch(e) { body.innerHTML = '<div class="empty-state"><div class="empty-icon">⚠️</div><p>불러오기 실패</p></div>'; }
 }
@@ -712,21 +584,8 @@ async function renderDelivery(user) {
 function renderWishlist() {
   const body = document.getElementById('body-wishlist');
   const list = getWishList();
-  if (!list.length) {
-    body.innerHTML = '<div class="empty-state"><div class="empty-icon">💔</div><p>찜한 상품이 없습니다<br><a href="products.html" style="color:var(--accent);">쇼핑하러 가기 →</a></p></div>';
-    return;
-  }
-  body.innerHTML = `<div class="wish-grid">${list.map(w=>`
-    <div class="wish-card" onclick="location.href='product.html?id=${w.id}'">
-      <img src="${w.image}" alt="${w.name}" onerror="this.src='https://via.placeholder.com/200x120'">
-      <div class="wish-info">
-        <div class="wish-name">${w.name}</div>
-        <div style="display:flex;justify-content:space-between;align-items:center;">
-          <span class="wish-price">${(w.salePrice||w.price||0).toLocaleString()}원</span>
-          <button class="wish-del" onclick="event.stopPropagation();removeWish('${w.id}')">🗑️</button>
-        </div>
-      </div>
-    </div>`).join('')}</div>`;
+  if (!list.length) { body.innerHTML = '<div class="empty-state"><div class="empty-icon">💔</div><p>찜한 상품이 없습니다<br><a href="products.html" style="color:var(--accent);">쇼핑하러 가기 →</a></p></div>'; return; }
+  body.innerHTML = `<div class="wish-grid">${list.map(w=>`<div class="wish-card" onclick="location.href='product.html?id=${w.id}'"><img src="${w.image}" alt="${w.name}" onerror="this.src='https://via.placeholder.com/200x120'"><div class="wish-info"><div class="wish-name">${w.name}</div><div style="display:flex;justify-content:space-between;align-items:center;"><span class="wish-price">${(w.salePrice||w.price||0).toLocaleString()}원</span><button class="wish-del" onclick="event.stopPropagation();removeWish('${w.id}')">🗑️</button></div></div></div>`).join('')}</div>`;
 }
 
 async function renderReviews(user) {
@@ -736,19 +595,9 @@ async function renderReviews(user) {
     const SID = (typeof CONFIG!=='undefined') ? CONFIG.SHEET_ID : '1t804fRO8HfQtmOzpDAz2IZfzRDQ7t8LYllFGZr3ftUI';
     const url = 'https://docs.google.com/spreadsheets/d/'+SID+'/gviz/tq?tqx=out:csv&sheet='+encodeURIComponent('리뷰')+'&t='+Date.now();
     const rows = await SheetAPI.fetch(url);
-    const mine = rows.filter(r => {
-      const a = (r['작성자']||'').trim().toLowerCase();
-      return a===user.name?.toLowerCase() || a===user.email?.toLowerCase();
-    });
+    const mine = rows.filter(r => { const a = (r['작성자']||'').trim().toLowerCase(); return a===user.name?.toLowerCase() || a===user.email?.toLowerCase(); });
     if (!mine.length) { body.innerHTML = '<div class="empty-state"><div class="empty-icon">✍️</div><p>작성한 리뷰가 없습니다</p></div>'; return; }
-    body.innerHTML = mine.map(r=>`
-      <div class="review-card">
-        <div class="review-stars">${'⭐'.repeat(parseInt(r['별점'])||0)}</div>
-        <div style="font-size:12px;color:var(--gray);margin-bottom:6px;">상품번호: ${r['상품번호']||'-'}</div>
-        <div class="review-content">${r['리뷰내용']||''}</div>
-        ${r['답글내용']?`<div style="margin-top:8px;padding:8px;background:#f9f9f9;border-radius:6px;font-size:12px;color:var(--gray);">💬 판매자: ${r['답글내용']}</div>`:''}
-        <div class="review-date">${r['작성일']||''}</div>
-      </div>`).join('');
+    body.innerHTML = mine.map(r=>`<div class="review-card"><div class="review-stars">${'⭐'.repeat(parseInt(r['별점'])||0)}</div><div style="font-size:12px;color:var(--gray);margin-bottom:6px;">상품번호: ${r['상품번호']||'-'}</div><div class="review-content">${r['리뷰내용']||''}</div>${r['답글내용']?`<div style="margin-top:8px;padding:8px;background:#f9f9f9;border-radius:6px;font-size:12px;color:var(--gray);">💬 판매자: ${r['답글내용']}</div>`:''}<div class="review-date">${r['작성일']||''}</div></div>`).join('');
   } catch(e) { body.innerHTML = '<div class="empty-state"><div class="empty-icon">⚠️</div><p>불러오기 실패</p></div>'; }
 }
 
@@ -757,22 +606,7 @@ function renderPoints() {
   let history = [];
   try { history = JSON.parse(sessionStorage.getItem('pointHistory')||'[]'); } catch(e) {}
   if (!history.length) history = [{ type:'plus', desc:'가입 축하 적립금', amount:3000, date: new Date().toLocaleDateString('ko-KR') }];
-  document.getElementById('body-points').innerHTML = `
-    <div class="point-box">
-      <div class="point-num">${pts.toLocaleString()}P</div>
-      <div class="point-label">보유 적립금</div>
-    </div>
-    <div class="point-history">
-      ${history.map(h=>`
-        <div class="point-row">
-          <span>${h.desc}</span>
-          <span class="${h.type==='plus'?'pt-plus':'pt-minus'}">${h.type==='plus'?'+':'−'}${h.amount.toLocaleString()}P</span>
-        </div>`).join('')}
-      <div class="point-row" style="color:var(--gray);font-size:12px;justify-content:center;">적립금은 1,000P 이상 결제 시 사용 가능합니다</div>
-    </div>
-    <div style="margin-top:16px;padding:14px;background:#fff8f0;border-radius:10px;font-size:13px;color:#b85000;">
-      🎫 보유 쿠폰: 없음 · 이벤트 참여 시 쿠폰이 지급됩니다
-    </div>`;
+  document.getElementById('body-points').innerHTML = `<div class="point-box"><div class="point-num">${pts.toLocaleString()}P</div><div class="point-label">보유 적립금</div></div><div class="point-history">${history.map(h=>`<div class="point-row"><span>${h.desc}</span><span class="${h.type==='plus'?'pt-plus':'pt-minus'}">${h.type==='plus'?'+':'−'}${h.amount.toLocaleString()}P</span></div>`).join('')}<div class="point-row" style="color:var(--gray);font-size:12px;justify-content:center;">적립금은 1,000P 이상 결제 시 사용 가능합니다</div></div><div style="margin-top:16px;padding:14px;background:#fff8f0;border-radius:10px;font-size:13px;color:#b85000;">🎫 보유 쿠폰: 없음 · 이벤트 참여 시 쿠폰이 지급됩니다</div>`;
 }
 
 function renderProfile(user) {
@@ -796,24 +630,13 @@ function saveProfile() {
   closeModal('profile');
 }
 
-// ── 아이디/비밀번호 찾기 ──
-function openFindModal(tab) {
-  document.getElementById('find-modal').classList.add('open');
-  switchFindTab(tab);
-}
+function openFindModal(tab) { document.getElementById('find-modal').classList.add('open'); switchFindTab(tab); }
 function closeFindModal() {
   document.getElementById('find-modal').classList.remove('open');
-  // 입력값 초기화
-  ['find-id-name','find-id-phone','find-pw-name','find-pw-email'].forEach(id => {
-    var el = document.getElementById(id); if (el) el.value = '';
-  });
-  ['result-find-id','result-find-pw'].forEach(id => {
-    var el = document.getElementById(id); if (el) el.style.display = 'none';
-  });
+  ['find-id-name','find-id-phone','find-pw-name','find-pw-email'].forEach(id => { var el = document.getElementById(id); if (el) el.value = ''; });
+  ['result-find-id','result-find-pw'].forEach(id => { var el = document.getElementById(id); if (el) el.style.display = 'none'; });
 }
-document.getElementById('find-modal').addEventListener('click', function(e) {
-  if (e.target === this) closeFindModal();
-});
+document.getElementById('find-modal').addEventListener('click', function(e) { if (e.target === this) closeFindModal(); });
 function switchFindTab(tab) {
   document.querySelectorAll('.find-tab').forEach(t => t.classList.remove('active'));
   document.querySelectorAll('.find-panel').forEach(p => p.classList.remove('active'));
@@ -821,32 +644,25 @@ function switchFindTab(tab) {
   document.getElementById('panel-find-' + tab).classList.add('active');
 }
 
-// 구글시트 회원 시트에서 검색
 async function searchMember(conditions) {
   try {
     const SID = (typeof CONFIG !== 'undefined') ? CONFIG.SHEET_ID : '1t804fRO8HfQtmOzpDAz2IZfzRDQ7t8LYllFGZr3ftUI';
-    const url = 'https://docs.google.com/spreadsheets/d/' + SID
-      + '/gviz/tq?tqx=out:csv&sheet=' + encodeURIComponent('회원') + '&t=' + Date.now();
+    const url = 'https://docs.google.com/spreadsheets/d/' + SID + '/gviz/tq?tqx=out:csv&sheet=' + encodeURIComponent('회원') + '&t=' + Date.now();
     const rows = await SheetAPI.fetch(url);
-    return rows.filter(r => {
-      return Object.entries(conditions).every(([key, val]) => {
-        const cell = (r[key] || '').toString().trim().toLowerCase().replace(/[^a-z0-9ㄱ-ㅎ가-힣@.]/g, '');
-        const target = val.toLowerCase().replace(/[^a-z0-9ㄱ-ㅎ가-힣@.]/g, '');
-        return cell === target;
-      });
-    });
+    return rows.filter(r => Object.entries(conditions).every(([key, val]) => {
+      const cell = (r[key] || '').toString().trim().toLowerCase().replace(/[^a-z0-9ㄱ-ㅎ가-힣@.]/g, '');
+      const target = val.toLowerCase().replace(/[^a-z0-9ㄱ-ㅎ가-힣@.]/g, '');
+      return cell === target;
+    }));
   } catch(e) { return []; }
 }
 
-// 이메일 마스킹: hong****@gmail.com
 function maskEmail(email) {
   if (!email || !email.includes('@')) return email;
   const [local, domain] = email.split('@');
   const visible = local.length > 3 ? local.slice(0, 3) : local.slice(0, 1);
   return visible + '****@' + domain;
 }
-
-// 임시 비밀번호 생성
 function genTempPw() {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789!@#';
   let pw = '';
@@ -854,88 +670,46 @@ function genTempPw() {
   return pw;
 }
 
-// 아이디 찾기
 async function doFindId() {
   const name  = document.getElementById('find-id-name').value.trim();
   const phone = document.getElementById('find-id-phone').value.trim();
   const res   = document.getElementById('result-find-id');
   if (!name || !phone) { showFindResult(res, 'error', '이름과 연락처를 모두 입력해주세요'); return; }
-
   const btn = res.previousElementSibling;
   btn.textContent = '조회 중...'; btn.disabled = true;
-
   const found = await searchMember({ '이름': name, '연락처': phone });
   btn.textContent = '아이디 찾기'; btn.disabled = false;
-
   if (found.length > 0) {
-    const email = found[0]['이메일'] || '';
-    showFindResult(res, 'success',
-      `✅ 가입된 이메일을 찾았습니다<br><br>`
-      + `<strong style="font-size:16px;letter-spacing:1px;">${maskEmail(email)}</strong><br><br>`
-      + `<span style="font-size:12px;">보안을 위해 일부 글자를 가렸습니다.</span>`
-    );
+    showFindResult(res, 'success', `✅ 가입된 이메일을 찾았습니다<br><br><strong style="font-size:16px;letter-spacing:1px;">${maskEmail(found[0]['이메일']||'')}</strong><br><br><span style="font-size:12px;">보안을 위해 일부 글자를 가렸습니다.</span>`);
   } else {
-    showFindResult(res, 'error',
-      '❌ 일치하는 회원 정보를 찾을 수 없습니다<br>'
-      + '<span style="font-size:12px;">이름 또는 연락처를 확인해주세요</span>'
-    );
+    showFindResult(res, 'error', '❌ 일치하는 회원 정보를 찾을 수 없습니다<br><span style="font-size:12px;">이름 또는 연락처를 확인해주세요</span>');
   }
 }
 
-// 비밀번호 찾기
 async function doFindPw() {
   const name  = document.getElementById('find-pw-name').value.trim();
   const email = document.getElementById('find-pw-email').value.trim();
   const res   = document.getElementById('result-find-pw');
   if (!name || !email) { showFindResult(res, 'error', '이름과 이메일을 모두 입력해주세요'); return; }
-
   const btn = res.previousElementSibling;
   btn.textContent = '처리 중...'; btn.disabled = true;
-
   const found = await searchMember({ '이름': name, '이메일': email });
   btn.textContent = '임시 비밀번호 발급'; btn.disabled = false;
-
   if (found.length > 0) {
     const tempPw = genTempPw();
-    // Apps Script로 임시 비밀번호 저장 요청
     saveTempPassword(email, tempPw);
-    showFindResult(res, 'success',
-      `✅ 임시 비밀번호가 발급됐습니다<br><br>`
-      + `<strong style="font-size:18px;letter-spacing:2px;font-family:monospace;">${tempPw}</strong><br><br>`
-      + `<span style="font-size:12px;">로그인 후 반드시 비밀번호를 변경해주세요!</span><br>`
-      + `<button onclick="prefillLogin('${email}','${tempPw}')" `
-      + `style="margin-top:10px;padding:8px 16px;background:#065f46;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:13px;font-weight:700;">`
-      + `바로 로그인하기</button>`
-    );
+    showFindResult(res, 'success', `✅ 임시 비밀번호가 발급됐습니다<br><br><strong style="font-size:18px;letter-spacing:2px;font-family:monospace;">${tempPw}</strong><br><br><span style="font-size:12px;">로그인 후 반드시 비밀번호를 변경해주세요!</span><br><button onclick="prefillLogin('${email}','${tempPw}')" style="margin-top:10px;padding:8px 16px;background:#065f46;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:13px;font-weight:700;">바로 로그인하기</button>`);
   } else {
-    showFindResult(res, 'error',
-      '❌ 일치하는 회원 정보를 찾을 수 없습니다<br>'
-      + '<span style="font-size:12px;">이름 또는 이메일을 확인해주세요</span>'
-    );
+    showFindResult(res, 'error', '❌ 일치하는 회원 정보를 찾을 수 없습니다<br><span style="font-size:12px;">이름 또는 이메일을 확인해주세요</span>');
   }
 }
 
-function showFindResult(el, type, html) {
-  el.className   = 'find-result ' + type;
-  el.innerHTML   = html;
-  el.style.display = 'block';
-}
-
-// 임시 비밀번호 Apps Script 저장
+function showFindResult(el, type, html) { el.className = 'find-result ' + type; el.innerHTML = html; el.style.display = 'block'; }
 function saveTempPassword(email, tempPw) {
   const SCRIPT_URL = (typeof CONFIG !== 'undefined') ? CONFIG.PG.API_PROXY_URL : '';
   if (!SCRIPT_URL) return;
-  fetch(SCRIPT_URL, {
-    method: 'POST', mode: 'no-cors',
-    headers: { 'Content-Type': 'text/plain' },
-    body: JSON.stringify({
-      action: 'saveTempPassword',
-      data: { 이메일: email, 임시비밀번호: tempPw, 발급일시: new Date().toLocaleString('ko-KR') }
-    })
-  }).catch(e => console.log('임시비밀번호 저장 실패:', e));
+  fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify({ action: 'saveTempPassword', data: { 이메일: email, 임시비밀번호: tempPw, 발급일시: new Date().toLocaleString('ko-KR') } }) }).catch(e => console.log('임시비밀번호 저장 실패:', e));
 }
-
-// 로그인창 자동 입력
 function prefillLogin(email, pw) {
   closeFindModal();
   switchAuth('login', document.querySelectorAll('.auth-tab')[0]);
@@ -948,9 +722,7 @@ const savedUser = sessionStorage.getItem('user');
 if (savedUser) showMypage(JSON.parse(savedUser));
 Cart.init();
 
-// auth 로고도 대리점 브랜딩 동기화
 (function syncAuthLogo() {
-  // sheets.js의 applyBranding이 store-name을 바꾼 후 동기화
   var syncInterval = setInterval(function() {
     var storeName = document.getElementById('store-name');
     var authName  = document.getElementById('auth-store-name');
@@ -959,7 +731,6 @@ Cart.init();
       clearInterval(syncInterval);
     }
   }, 300);
-  // 3초 후 강제 종료
   setTimeout(function() { clearInterval(syncInterval); }, 3000);
 })();
 </script>
