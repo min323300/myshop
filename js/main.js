@@ -381,7 +381,7 @@ function applyBizInfo(biz) {
     if (biz.regNo) parts.push('사업자번호: '+biz.regNo);
     if (biz.ceo) parts.push('대표: '+biz.ceo);
     if (biz.mailOrder) parts.push('통신판매업: '+biz.mailOrder);
-    fb.textContent = parts.join(' | ');
+    if (parts.length) fb.textContent = parts.join(' \u00a0|\u00a0 ');
   }
   var fa = document.getElementById('footer-addr');
   if (fa) {
@@ -389,7 +389,7 @@ function applyBizInfo(biz) {
     if (biz.address) ap.push('주소: '+biz.address);
     if (biz.phone) ap.push('TEL: '+biz.phone);
     if (biz.email) ap.push('EMAIL: '+biz.email);
-    fa.textContent = ap.join(' | ');
+    if (ap.length) fa.textContent = ap.join(' \u00a0|\u00a0 ');
   }
   var fp = document.getElementById('footer-phone'); if (fp) fp.textContent = '📞 '+biz.phone;
   var fe = document.getElementById('footer-email'); if (fe&&biz.email) fe.textContent = '📧 '+biz.email;
